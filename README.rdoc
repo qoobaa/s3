@@ -1,0 +1,7 @@
+= s3
+
+Description goes here.
+
+== Copyright
+
+Copyright (c) 2009 Jakub Kuźma. See LICENSE for details.
