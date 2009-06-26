@@ -27,10 +27,6 @@ module S3
       string_to_sign << canonicalized_amz_headers
       string_to_sign << canonicalized_resource
 
-      puts "***"
-      puts string_to_sign
-      puts "***"
-
       digest = OpenSSL::Digest::Digest.new('sha1')
       hmac = OpenSSL::HMAC.digest(digest, secret_access_key, string_to_sign)
       base64 = Base64.encode64(hmac)
@@ -84,7 +80,7 @@ module S3
       # become 'x-amz-meta-username:fred,barney'
       joined_headers = unfolded_headers.map do |header|
         key = header.first.strip
-        value = headers.last.strip
+        value = header.last.strip
         "#{key}:#{value}"
       end
 
@@ -108,19 +104,16 @@ module S3
       # Hosting of Buckets.
       bucket_name = host.sub(/\.?s3\.amazonaws\.com\Z/, "")
       string << "/#{bucket_name}" unless bucket_name.empty?
-      puts "string: #{string}"
 
       # 3. Append the path part of the un-decoded HTTP Request-URI,
       # up-to but not including the query string.
       uri = URI.parse(request.path)
       string << uri.path
-      puts "string: #{string}"
 
       # 4. If the request addresses a sub-resource, like ?location,
       # ?acl, or ?torrent, append the sub-resource including question
       # mark.
-      string << "?#{$1}" if uri.query =~ /[&?](acl|torrent|logging|location)(?:&|=|\Z)/
-      puts "string: #{string}"
+      string << "?#{$1}" if uri.query =~ /&?(acl|torrent|logging|location)(?:&|=|\Z)/
       string
     end
   end

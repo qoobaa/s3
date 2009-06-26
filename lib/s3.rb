@@ -1,9 +1,15 @@
 require "time"
 require "openssl"
 require "net/http"
+require "net/https"
 require "base64"
+require "forwardable"
+require "digest/md5"
 
-require "s3/authentication"
+require "xmlsimple"
+
+require "s3/base"
+require "s3/signature"
 require "s3/service"
 require "s3/bucket"
 require "s3/object"

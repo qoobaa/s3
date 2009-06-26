@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 require 'rubygems'
 require 'rake'
 
@@ -6,9 +8,9 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "s3"
     gem.summary = %Q{TODO}
-    gem.email = "kuba@synergypeople.net"
+    gem.email = "qoobaa@gmail.com"
     gem.homepage = "http://github.com/qoobaa/s3"
-    gem.authors = ["Jakub Kuźma"]
+    gem.authors = ["Jakub Kuźma", "Mirosław Boruta"]
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 
