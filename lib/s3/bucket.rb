@@ -4,7 +4,7 @@ module S3
 
     def initialize(options)
       @name = options[:name]
-      options[:host], @path_prefix = self.class.parse_name(options[:name], options[:host] || HOST)
+      options[:host], options[:path_prefix] = self.class.parse_name(options[:name], options[:host] || HOST)
       super
     end
 
@@ -21,64 +21,29 @@ module S3
     end
 
     def location
-      path = @path_prefix
-      path << "/?location"
-
-      request = Net::HTTP::Get.new(path)
-      response = send_request(request)
+      response = get("/", { :location => nil })
       parse_location(response.body)
     end
 
     def exists?
-      path = @path_prefix
-      path << "/"
-
-      request = Net::HTTP::Head.new(path)
-      send_request(request)
-      true
+      response = head("/")
     end
 
-    def delete(options = {})
-      path = @path_prefix
-      path << "/"
-
-      request = Net::HTTP::Delete.new(path)
-      send_request(request)
+    def destroy(options = {})
+      response = delete("/")
     end
 
     def save(options = {})
-      location = options[:location]
-
-      path = @path_prefix
-      path << "/"
-
-      request = Net::HTTP::Put.new(path)
-
-      if location
-        xml = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
-        request["content-type"] = "application/xml"
-        request.body = xml
+      headers = {}
+      if options[:location]
+        body = "<CreateBucketConfiguration><LocationConstraint>#{options[:location]}</LocationConstraint></CreateBucketConfiguration>"
+        headers[:content_type] = "application/xml"
       end
-
-      send_request(request)
+      put("/", body, headers)
     end
 
     def objects(options = {})
-      path = @path_prefix
-      path << "/"
-
-      params = {}
-      params["max-keys"] = options[:limit] if options.has_key?(:limit)
-      params["prefix"] = options[:prefix] if options.has_key?(:prefix)
-      params["marker"] = options[:marker] if options.has_key?(:marker)
-      params["delimiter"] = options[:delimiter] if options.has_key?(:delimiter)
-
-      joined_params = params.map { |key, value| "#{key}=#{value}" }.join("&")
-
-      path << "?#{joined_params}" unless joined_params.empty?
-
-      request = Net::HTTP::Get.new(path)
-      response = send_request(request)
+      response = get("/", options)
       parse_objects(response.body)
     end
 
@@ -89,45 +54,26 @@ module S3
     end
 
     def save_object(object)
-      content_type = object.content_type
-      content = object.content
-      content_type ||= "application/octet-stream"
-      acl = object.acl || "public-read"
-      content = content.read if content.kind_of?(IO)
+      headers = {}
+      headers[:content_type] = object.content_type
+      headers[:x_amz_acl] = object.acl
 
-      path = @path_prefix
-      path << "/"
-      path << object.key
+      body = object.content
+      body = body.read if body.kind_of?(IO)
 
-      request = Net::HTTP::Put.new(path)
-
-      request["content-type"] = content_type
-      request["x-amz-acl"] = acl
-      request["content-md5"] = Base64.encode64(Digest::MD5.digest(content)).chomp
-
-      request.body = content
-
-      response = send_request(request)
+      response = put("/#{object.key}", body, headers)
     end
 
-    def delete_object(object)
-      path = @path_prefix
-      path << "/"
-      path << object.key
-
-      request = Net::HTTP::Delete.new(path)
-
-      response = send_request(request)
+    def destroy_object(object)
+      response = delete("/#{object.key}")
     end
 
     def get_object(object, options = {})
-      path = @path_prefix
-      path << "/"
-      path << object.key
+      response = get("/#{object.key}", options)
+    end
 
-      request = Net::HTTP::Get.new(path)
-
-      response = send_request(request)
+    def get_object_info(object)
+      response = head("#{object.key}")
     end
 
     private
