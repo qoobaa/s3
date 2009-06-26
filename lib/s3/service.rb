@@ -1,8 +1,11 @@
 module S3
   class Service < Base
+    def initialize(options)
+      super
+    end
+
     def buckets
-      request = Net::HTTP::Get.new("/")
-      response = send_request(request)
+      response = get("/")
       parse_buckets(response.body)
     end
 
