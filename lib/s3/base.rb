@@ -127,7 +127,13 @@ module S3
         http.request(request)
       end
 
-      # TODO: handle 40x responses
+      if (300..599).include?(response.code.to_i)
+        xml = XmlSimple.xml_in(response.body)
+        case xml["Code"].first
+        when "NoSuchBucket"
+          raise NoSuchBucket.new(xml["Message"].first, response)
+        end
+      end
 
       response
     end
