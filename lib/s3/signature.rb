@@ -11,7 +11,7 @@ module S3
       http_verb = request.method
       content_md5 = request["content-md5"] || ""
       content_type = request["content-type"] || ""
-      date = request["date"]
+      date = request["x-amz-date"].nil? ? request["date"] : ""
       canonicalized_resource = canonicalized_resource(host, request)
       canonicalized_amz_headers = canonicalized_amz_headers(request)
 
