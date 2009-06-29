@@ -29,6 +29,19 @@ module S3
 
     private
 
+    def request_class(method)
+      case method
+      when :get
+        request_class = Net::HTTP::Get
+      when :head
+        request_class = Net::HTTP::Head
+      when :put
+        request_class = Net::HTTP::Put
+      when :delete
+        request_class = Net::HTTP::Delete
+      end
+    end
+
     def request(method, options)
       # todo options validation
       host = options[:host] or raise ArgumentError.new("no host given")
@@ -42,18 +55,7 @@ module S3
         path << "?#{params}"
       end
 
-      case method
-      when :get
-        request_class = Net::HTTP::Get
-      when :head
-        request_class = Net::HTTP::Head
-      when :put
-        request_class = Net::HTTP::Put
-      when :delete
-        request_class = Net::HTTP::Delete
-      end
-
-      request = request_class.new(full_path)
+      request = request_class(method).new(full_path)
 
       parsed_headers = self.class.parse_headers(headers)
       parsed_headers.each do |key, value|
