@@ -8,6 +8,9 @@ require "digest/md5"
 
 require "xmlsimple"
 
+require "s3/roxy/proxy"
+require "s3/roxy/moxie"
+
 require "s3/bucket"
 require "s3/connection"
 require "s3/exceptions"

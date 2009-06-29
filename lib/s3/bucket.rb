@@ -1,21 +1,22 @@
 module S3
   class Bucket
+    extend Roxy::Moxie
     extend Forwardable
 
     attr_reader :name
 
     def location
-      response = connection.get(:path => "/", :params => { :location => nil }, :host => host)
+      response = connection.request(:get, :path => "/", :params => { :location => nil })
       parse_location(response.body)
     end
 
     def exists?
-      response = head("/")
+      response = connection.request(:head, :path => "/")
     end
 
-    def destroy(options = {})
-      response = delete("/")
-    end
+    # def destroy(options = {})
+    #   response = delete("/")
+    # end
 
     # def save(options = {})
     #   headers = {}
@@ -26,14 +27,24 @@ module S3
     #   put("/", body, headers)
     # end
 
-    def objects(options = {})
-      response = get("/", options)
-      parse_objects(response.body)
+    # def objects(options = {})
+    #   response = get("/", options)
+    #   parse_objects(response.body)
+    # end
+
+    def host
+      vhost? ? "#@name.#{HOST}" : "#{HOST}"
     end
 
     protected
 
     def_instance_delegators :@service, :connection
+
+    proxy :connection do
+      def request(method, options)
+        proxy_target.request(method, options.merge(:host => proxy_owner.host))
+      end
+    end
 
     def initialize(service, name)
       @service = service
@@ -48,10 +59,6 @@ module S3
 
     def path_prefix
       vhost? ? "/#@name" : ""
-    end
-
-    def host
-      vhost? ? "#@name.#{HOST}" : "#{HOST}"
     end
 
     # def build_object(options = {})

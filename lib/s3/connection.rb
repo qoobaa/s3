@@ -10,37 +10,6 @@ module S3
       @timeout = options[:timeout]
     end
 
-    def get(options)
-      request(:get, options)
-    end
-
-    def head(options)
-      request(:head, options)
-    end
-
-    def put(host, path, body, headers = {})
-      request(:put, options)
-    end
-
-    def delete(options)
-      request(:delete, options)
-    end
-
-    private
-
-    def request_class(method)
-      case method
-      when :get
-        request_class = Net::HTTP::Get
-      when :head
-        request_class = Net::HTTP::Head
-      when :put
-        request_class = Net::HTTP::Put
-      when :delete
-        request_class = Net::HTTP::Delete
-      end
-    end
-
     def request(method, options)
       host = options[:host] || HOST
       path = options[:path] or raise ArgumentError.new("no path given")
@@ -63,6 +32,21 @@ module S3
       request.body = body
 
       send_request(host, request)
+    end
+
+    private
+
+    def request_class(method)
+      case method
+      when :get
+        request_class = Net::HTTP::Get
+      when :head
+        request_class = Net::HTTP::Head
+      when :put
+        request_class = Net::HTTP::Put
+      when :delete
+        request_class = Net::HTTP::Delete
+      end
     end
 
     def port
