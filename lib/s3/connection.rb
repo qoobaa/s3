@@ -42,7 +42,7 @@ module S3
         path << "?#{params}"
       end
 
-      case verb
+      case method
       when :get
         request_class = Net::HTTP::Get
       when :head
