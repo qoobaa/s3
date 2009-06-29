@@ -1,5 +1,5 @@
 module S3
-  class Bucket < Base
+  class Bucket
     attr_accessor :name
 
     def initialize(options)
@@ -15,7 +15,7 @@ module S3
         host = "#{bucket_name}.#{host}"
       else
         # PATH BASED
-        path_prefix = "/#{bucket_name}"
+        path_prefix = "/#{bucket_name}" unless bucket_name.empty?
       end
       [host, path_prefix]
     end

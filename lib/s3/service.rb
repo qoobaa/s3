@@ -1,7 +1,7 @@
 module S3
-  class Service < Base
+  class Service
     def initialize(options)
-      super
+
     end
 
     def buckets
