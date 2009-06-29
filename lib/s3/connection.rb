@@ -1,14 +1,13 @@
 module S3
   class Connection
-    HOST = "s3.amazonaws.com"
-
-    attr_accessor :access_key_id, :secret_access_key, :use_ssl
+    attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout
     alias :use_ssl? :use_ssl
 
-    def initialize(options)
+    def initialize(options = {})
       @access_key_id = options[:access_key_id]
       @secret_access_key = options[:secret_access_key]
       @use_ssl = options[:use_ssl] || false
+      @timeout = options[:timeout]
     end
 
     def get(options)
@@ -43,22 +42,21 @@ module S3
     end
 
     def request(method, options)
-      # todo options validation
-      host = options[:host] or raise ArgumentError.new("no host given")
+      host = options[:host] || HOST
       path = options[:path] or raise ArgumentError.new("no path given")
       body = options[:body]
       params = options[:params]
       headers = options[:headers]
 
       if params
-        params = params.is_a?(String) ? params : parse_params(params)
+        params = params.is_a?(String) ? params : self.class.parse_params(params)
         path << "?#{params}"
       end
 
-      request = request_class(method).new(full_path)
+      request = request_class(method).new(path)
 
-      parsed_headers = self.class.parse_headers(headers)
-      parsed_headers.each do |key, value|
+      headers = self.class.parse_headers(headers)
+      headers.each do |key, value|
         request[key] = value
       end
 
@@ -109,6 +107,7 @@ module S3
           raise NoSuchBucket.new(xml["Message"].first, response)
         end
       end
+      response
     end
 
     def self.parse_params(params)
@@ -132,15 +131,17 @@ module S3
     def self.parse_headers(headers)
       interesting_keys = [:content_type, :x_amz_acl, :range, :if_modified_since, :if_unmodified_since, :if_match, :if_none_match]
       parsed_headers = {}
-      headers.each do |key, value|
-        if interesting_keys.include?(key)
-          parsed_key = key.to_s.gsub("_", "-")
-          parsed_value = value
-          case value
-          when Range
-            parsed_value = "#{value.first}-#{value.last}"
+      if headers
+        headers.each do |key, value|
+          if interesting_keys.include?(key)
+            parsed_key = key.to_s.gsub("_", "-")
+            parsed_value = value
+            case value
+            when Range
+              parsed_value = "#{value.first}-#{value.last}"
+            end
+            parsed_headers[parsed_key] = parsed_value
           end
-          parsed_headers[parsed_key] = parsed_value
         end
       end
       parsed_headers
