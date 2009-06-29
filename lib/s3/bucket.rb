@@ -32,6 +32,10 @@ module S3
       vhost? ? "#@name.#{HOST}" : "#{HOST}"
     end
 
+    def path_prefix
+      vhost? ? "/#@name" : ""
+    end
+
     def new_bucket?
       @new_bucket
     end
@@ -47,7 +51,9 @@ module S3
 
     proxy :connection do
       def request(method, options)
-        proxy_target.request(method, options.merge(:host => proxy_owner.host))
+        path = "#{proxy_owner.path_prefix}#{options[:path]}"
+        host = proxy_owner.host
+        proxy_target.request(method, options.merge(:host => host))
       end
     end
 
@@ -61,10 +67,6 @@ module S3
 
     def vhost?
       "#@name.#{HOST}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
-    end
-
-    def path_prefix
-      vhost? ? "/#@name" : ""
     end
 
     # def build_object(options = {})
