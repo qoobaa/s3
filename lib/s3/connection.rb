@@ -84,12 +84,16 @@ module S3
     end
 
     def handle_response(response)
-      if (300..599).include?(response.code.to_i)
+      case response.code.to_i
+      when 200...300
+        response
+      when 300...600
         xml = XmlSimple.xml_in(response.body)
-        case xml["Code"].first
-        when "NoSuchBucket"
-          raise NoSuchBucket.new(xml["Message"].first, response)
-        end
+        message = xml["Message"].first
+        code = xml["Code"].first
+        raise S3::Error.exception(code).new(message, response)
+      else
+        raise(ConnectionError.new(response, "Unknown response code: #{response.code}"))
       end
       response
     end
