@@ -2,47 +2,45 @@ module S3
   class Connection
     HOST = "s3.amazonaws.com"
 
-    attr_accessor :access_key_id, :secret_access_key, :host, :use_ssl, :path_prefix
+    attr_accessor :access_key_id, :secret_access_key, :use_ssl
     alias :use_ssl? :use_ssl
 
     def initialize(options)
       @access_key_id = options[:access_key_id]
       @secret_access_key = options[:secret_access_key]
       @use_ssl = options[:use_ssl] || false
-      @host, @path_prefix = self.class.parse_host(options[:bucket_name] || "", options[:host] || HOST)
     end
 
-    def get(path, params = {})
-      request = prepare_request(:get, path, nil, params)
-      send_request(request)
+    def get(options)
+      request(:get, options)
     end
 
-    def head(path)
-      request = prepare_request(:get, path)
-      send_request(request)
+    def head(options)
+      request(:head, options)
     end
 
-    def put(path, body, headers = {})
-      request = prepare_request(:put, path, body, {}, headers)
-      send_request(request)
+    def put(host, path, body, headers = {})
+      request(:put, options)
     end
 
-    def delete(path)
-      request = prepare_request(:delete, path)
-      send_request(request)
+    def delete(options)
+      request(:delete, options)
     end
 
     private
 
-    def port
-      use_ssl? ? 443 : 80
-    end
+    def request(method, options)
+      # todo options validation
+      host = options[:host] or raise ArgumentError.new("no host given")
+      path = options[:path] or raise ArgumentError.new("no path given")
+      body = options[:body]
+      params = options[:params]
+      headers = options[:headers]
 
-    def prepare_request(verb, path, body = nil, params = {}, headers = {})
-      full_path = path_prefix
-      full_path << path
-      parsed_params = self.class.parse_params(params)
-      full_path << "?#{parsed_params}" unless parsed_params.empty?
+      if params
+        params = params.is_a?(String) ? params : parse_params(params)
+        path << "?#{params}"
+      end
 
       case verb
       when :get
@@ -64,14 +62,24 @@ module S3
 
       request.body = body
 
-      request
+      send_request(host, request)
     end
 
-    def send_request(request)
+    def port
+      use_ssl? ? 443 : 80
+    end
+
+    def http(host)
       http = Net::HTTP.new(host, port)
       http.set_debug_output(STDOUT)
-      http.use_ssl = use_ssl?
-      response = http.start do |http|
+      http.use_ssl = @use_ssl
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE if @use_ssl
+      http.read_timeout = @timeout if @timeout
+      http
+    end
+
+    def send_request(host, request)
+      response = http(host).start do |http|
         host = http.address
 
         request['Date'] ||= Time.now.httpdate
@@ -88,6 +96,10 @@ module S3
         http.request(request)
       end
 
+      handle_response(response)
+    end
+
+    def handle_response(response)
       if (300..599).include?(response.code.to_i)
         xml = XmlSimple.xml_in(response.body)
         case xml["Code"].first
@@ -95,25 +107,10 @@ module S3
           raise NoSuchBucket.new(xml["Message"].first, response)
         end
       end
-
-      response
-    end
-
-    def self.parse_host(bucket_name, host)
-      path_prefix = ""
-      if "#{bucket_name}.#{host}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
-        # VHOST
-        host = "#{bucket_name}.#{host}"
-      else
-        # PATH BASED
-        path_prefix = "/#{bucket_name}" unless bucket_name.empty?
-      end
-      [host, path_prefix]
     end
 
     def self.parse_params(params)
-      interesting_keys = [:max_keys, :prefix, :marker, :delimiter,
-                          :location]
+      interesting_keys = [:max_keys, :prefix, :marker, :delimiter, :location]
 
       result = []
       params.each do |key, value|
@@ -131,9 +128,7 @@ module S3
     end
 
     def self.parse_headers(headers)
-      interesting_keys = [:content_type, :x_amz_acl, :range,
-                          :if_modified_since, :if_unmodified_since,
-                          :if_match, :if_none_match]
+      interesting_keys = [:content_type, :x_amz_acl, :range, :if_modified_since, :if_unmodified_since, :if_match, :if_none_match]
       parsed_headers = {}
       headers.each do |key, value|
         if interesting_keys.include?(key)

@@ -5,7 +5,6 @@ module S3
     def initialize(options)
       @name = options[:name]
       options[:host], options[:path_prefix] = self.class.parse_name(options[:name], options[:host] || HOST)
-      super
     end
 
     def self.parse_name(bucket_name, host)

@@ -1,7 +1,7 @@
 module S3
   class Service
     def initialize(options)
-
+      @connection = Connection.new(options)
     end
 
     def buckets
