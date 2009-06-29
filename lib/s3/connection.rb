@@ -1,22 +1,15 @@
 module S3
-  class Base
+  class Connection
     HOST = "s3.amazonaws.com"
 
     attr_accessor :access_key_id, :secret_access_key, :host, :use_ssl, :path_prefix
     alias :use_ssl? :use_ssl
 
-    protected
-
     def initialize(options)
       @access_key_id = options[:access_key_id]
       @secret_access_key = options[:secret_access_key]
       @use_ssl = options[:use_ssl] || false
-      @host = options[:host] || HOST
-      @path_prefix = options[:path_prefix] || ""
-    end
-
-    def port
-      use_ssl? ? 443 : 80
+      @host, @path_prefix = self.class.parse_host(options[:bucket_name] || "", options[:host] || HOST)
     end
 
     def get(path, params = {})
@@ -39,42 +32,10 @@ module S3
       send_request(request)
     end
 
-    def self.parse_params(params)
-      interesting_keys = [:max_keys, :prefix, :marker, :delimiter,
-                          :location]
+    private
 
-      result = []
-      params.each do |key, value|
-        if interesting_keys.include?(key)
-          parsed_key = key.to_s.gsub("_", "-")
-          case value
-          when nil
-            result << parsed_key
-          else
-            result << "#{parsed_key}=#{value}"
-          end
-        end
-      end
-      result.join("&")
-    end
-
-    def self.parse_headers(headers)
-      interesting_keys = [:content_type, :x_amz_acl, :range,
-                          :if_modified_since, :if_unmodified_since,
-                          :if_match, :if_none_match]
-      parsed_headers = {}
-      headers.each do |key, value|
-        if interesting_keys.include?(key)
-          parsed_key = key.to_s.gsub("_", "-")
-          parsed_value = value
-          case value
-          when Range
-            parsed_value = "#{value.first}-#{value.last}"
-          end
-          parsed_headers[parsed_key] = parsed_value
-        end
-      end
-      parsed_headers
+    def port
+      use_ssl? ? 443 : 80
     end
 
     def prepare_request(verb, path, body = nil, params = {}, headers = {})
@@ -136,6 +97,56 @@ module S3
       end
 
       response
+    end
+
+    def self.parse_host(bucket_name, host)
+      path_prefix = ""
+      if "#{bucket_name}.#{host}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
+        # VHOST
+        host = "#{bucket_name}.#{host}"
+      else
+        # PATH BASED
+        path_prefix = "/#{bucket_name}" unless bucket_name.empty?
+      end
+      [host, path_prefix]
+    end
+
+    def self.parse_params(params)
+      interesting_keys = [:max_keys, :prefix, :marker, :delimiter,
+                          :location]
+
+      result = []
+      params.each do |key, value|
+        if interesting_keys.include?(key)
+          parsed_key = key.to_s.gsub("_", "-")
+          case value
+          when nil
+            result << parsed_key
+          else
+            result << "#{parsed_key}=#{value}"
+          end
+        end
+      end
+      result.join("&")
+    end
+
+    def self.parse_headers(headers)
+      interesting_keys = [:content_type, :x_amz_acl, :range,
+                          :if_modified_since, :if_unmodified_since,
+                          :if_match, :if_none_match]
+      parsed_headers = {}
+      headers.each do |key, value|
+        if interesting_keys.include?(key)
+          parsed_key = key.to_s.gsub("_", "-")
+          parsed_value = value
+          case value
+          when Range
+            parsed_value = "#{value.first}-#{value.last}"
+          end
+          parsed_headers[parsed_key] = parsed_value
+        end
+      end
+      parsed_headers
     end
   end
 end
