@@ -11,29 +11,34 @@ module S3
     end
 
     def exists?
+      # TODO: exists should set new_bucket attribute
       response = connection.request(:head, :path => "/")
     end
 
-    # def destroy(options = {})
-    #   response = delete("/")
-    # end
+    def destroy
+      response = connection.request(:delete, :path => "/")
+    end
 
-    # def save(options = {})
-    #   headers = {}
-    #   if options[:location]
-    #     body = "<CreateBucketConfiguration><LocationConstraint>#{options[:location]}</LocationConstraint></CreateBucketConfiguration>"
-    #     headers[:content_type] = "application/xml"
-    #   end
-    #   put("/", body, headers)
-    # end
-
-    # def objects(options = {})
-    #   response = get("/", options)
-    #   parse_objects(response.body)
-    # end
+    def save(location = nil)
+      options = { :path => "/", :headers => {} }
+      if location
+        options[:body] = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
+        options[:headers][:content_type] = "application/xml"
+      end
+      response = connection.request(:put, options)
+    end
 
     def host
       vhost? ? "#@name.#{HOST}" : "#{HOST}"
+    end
+
+    def new_bucket?
+      @new_bucket
+    end
+
+    def objects(options = {})
+      response = connection.request(:get, :path => "/", :params => options)
+      # parse_objects(response.body)
     end
 
     protected
@@ -49,6 +54,7 @@ module S3
     def initialize(service, name)
       @service = service
       @name = name
+      @new_bucket = true
     end
 
     private
