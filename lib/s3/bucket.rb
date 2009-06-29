@@ -47,7 +47,7 @@ module S3
       parse_objects(response.body)
     end
 
-    # OBJECT methods
+    protected
 
     def build_object(options = {})
       Object.new(options.merge(:bucket => self))
@@ -73,7 +73,7 @@ module S3
     end
 
     def get_object_info(object)
-      response = head("#{object.key}")
+      response = head("/#{object.key}")
     end
 
     private
