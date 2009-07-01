@@ -65,7 +65,7 @@ module S3
 
     proxy :connection do
       def request(method, options = {})
-        path = "#{proxy_owner.path_prefix}/"
+        path = "#{proxy_owner.path_prefix}/#{options[:path]}"
         host = proxy_owner.host
         proxy_target.request(method, options.merge(:host => host, :path => path))
       end

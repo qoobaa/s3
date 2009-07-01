@@ -41,8 +41,8 @@ module S3
       case method
       when :get
         request_class = Net::HTTP::Get
-      when :head
-        request_class = Net::HTTP::Head
+      # when :head
+      #   request_class = Net::HTTP::Head
       when :put
         request_class = Net::HTTP::Put
       when :delete
@@ -127,7 +127,7 @@ module S3
             parsed_value = value
             case value
             when Range
-              parsed_value = "#{value.first}-#{value.last}"
+              parsed_value = "bytes=#{value.first}-#{value.last}"
             end
             parsed_headers[parsed_key] = parsed_value
           end

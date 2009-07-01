@@ -8,19 +8,20 @@ module S3
     attr_writer :content
 
     def exists?
-      connection.request(:get, :params => { :range => 0..0 })
+      response = connection.request(:get, :headers => { :range => 0..0 })
+      parse_headers(response)
+      true
+    rescue Error::NoSuchKey
+      false
     end
 
     def content(reload = false)
-      if reload or not defined?(@content)
+      if reload or @content.nil?
         response = connection.request(:get)
-        self.etag = response["etag"]
-        self.content_type = response["content-type"]
-        self.size = response["content-length"]
-        @content = response.body
-      else
-        @content
+        parse_headers(response)
+        self.content = response.body
       end
+      @content
     end
 
     def save
@@ -46,7 +47,7 @@ module S3
 
     proxy :connection do
       def request(method, options = {})
-        path = "/#{proxy_owner.key}"
+        path = "#{proxy_owner.key}"
         proxy_target.request(method, options.merge(:path => path))
       end
     end
@@ -67,6 +68,16 @@ module S3
       self.last_modified = options[:last_modified]
       self.etag = options[:etag]
       self.size = options[:size]
+    end
+
+    def parse_headers(response)
+      self.etag = response["etag"]
+      self.content_type = response["content-type"]
+      self.last_modified = response["last-modified"]
+      self.size = response["content-length"]
+      if response["content-range"]
+        self.size = response["content-range"].sub(/[^\/]+\//, "").to_i
+      end
     end
   end
 end
