@@ -91,7 +91,7 @@ module S3
         xml = XmlSimple.xml_in(response.body)
         message = xml["Message"].first
         code = xml["Code"].first
-        raise S3::Error.exception(code).new(message, response)
+        raise Error::ResponseError.exception(code).new(message, response)
       else
         raise(ConnectionError.new(response, "Unknown response code: #{response.code}"))
       end

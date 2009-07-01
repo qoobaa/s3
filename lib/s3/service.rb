@@ -11,9 +11,13 @@ module S3
       @timeout = options[:timeout]
     end
 
-    def buckets
-      response = connection.request(:get, :path => "/")
-      parse_buckets(response.body)
+    def buckets(reload = false)
+      if reload or not defined?(@buckets)
+        response = connection.request(:get, :path => "/")
+        @buckets = parse_buckets(response.body)
+      else
+        @buckets
+      end
     end
 
     proxy :buckets do
@@ -22,10 +26,16 @@ module S3
       end
 
       def find(name)
-        bucket = Bucket.new(proxy_owner, name)
-        bucket.exists?
-        bucket
+        Bucket.new(proxy_owner, name)
       end
+
+      def reload
+        proxy_owner.buckets(true)
+      end
+    end
+
+    def inspect
+      "#<#{self.class}:#@access_key_id>"
     end
 
     protected

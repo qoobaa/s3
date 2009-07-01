@@ -59,9 +59,9 @@ module S3
         end
       end
 
-      def inspect
-        "#<S3::Roxy::Proxy:0x#{object_id.to_s(16)}>"
-      end
+      # def inspect
+      #   "#<S3::Roxy::Proxy:0x#{object_id.to_s(16)}>"
+      # end
 
       # Delegate all method calls we don't know about to target object
       def method_missing(sym, *args, &block)

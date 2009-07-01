@@ -3,7 +3,7 @@ module S3
     extend Roxy::Moxie
     extend Forwardable
 
-    attr_reader :name
+    attr_reader :name, :service
 
     def location
       response = connection.request(:get, :path => "/", :params => { :location => nil })
@@ -11,12 +11,15 @@ module S3
     end
 
     def exists?
-      # TODO: exists should set new_bucket attribute
-      response = connection.request(:head, :path => "/")
+      connection.request(:get, :path => "/", :params => { :max_keys => 0 })
+      true
+    rescue Error::NoSuchBucket
+      false
     end
 
     def destroy
-      response = connection.request(:delete, :path => "/")
+      connection.request(:delete, :path => "/")
+      true
     end
 
     def save(location = nil)
@@ -33,16 +36,26 @@ module S3
     end
 
     def path_prefix
-      vhost? ? "/#@name" : ""
-    end
-
-    def new_bucket?
-      @new_bucket
+      vhost? ? "" : "/#@name"
     end
 
     def objects(options = {})
       response = connection.request(:get, :path => "/", :params => options)
-      # parse_objects(response.body)
+      parse_objects(response.body)
+    end
+
+    proxy :objects do
+      def build(key)
+        Object.new(proxy_owner, key)
+      end
+
+      def find(key)
+
+      end
+    end
+
+    def inspect
+      "#<#{self.class}:#{name}>"
     end
 
     protected
@@ -51,16 +64,15 @@ module S3
 
     proxy :connection do
       def request(method, options)
-        path = "#{proxy_owner.path_prefix}/#{options[:path]}"
+        path = "#{proxy_owner.path_prefix}#{options[:path]}"
         host = proxy_owner.host
-        proxy_target.request(method, options.merge(:host => host))
+        proxy_target.request(method, options.merge(:host => host, :path => path))
       end
     end
 
     def initialize(service, name)
       @service = service
       @name = name
-      @new_bucket = true
     end
 
     private
@@ -69,44 +81,21 @@ module S3
       "#@name.#{HOST}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
     end
 
-    # def build_object(options = {})
-    #   Object.new(options.merge(:bucket => self))
-    # end
-
-    # def save_object(object)
-    #   headers = {}
-    #   headers[:content_type] = object.content_type
-    #   headers[:x_amz_acl] = object.acl
-
-    #   body = object.content
-    #   body = body.read if body.kind_of?(IO)
-
-    #   response = put("/#{object.key}", body, headers)
-    # end
-
-    # def destroy_object(object)
-    #   response = delete("/#{object.key}")
-    # end
-
-    # def get_object(object, options = {})
-    #   response = get("/#{object.key}", options)
-    # end
-
-    # def get_object_info(object)
-    #   response = head("/#{object.key}")
-    # end
-
-    # def parse_objects(xml_body)
-    #   xml = XmlSimple.xml_in(xml_body)
-    #   objects_attributes = xml["Contents"]
-    #   objects_attributes.map do |object|
-    #     Object.new(:key => object["Key"],
-    #                :etag => object["ETag"],
-    #                :last_modified => object["LastModified"],
-    #                :size => object["Size"],
-    #                :bucket => self)
-    #   end
-    # end
+    def parse_objects(xml_body)
+      xml = XmlSimple.xml_in(xml_body)
+      objects_attributes = xml["Contents"]
+      if objects_attributes
+        objects_attributes.map do |object_attributes|
+          Object.new(self,
+                     object_attributes["Key"].first,
+                     :etag => object_attributes["ETag"].first,
+                     :last_modified => object_attributes["LastModified"].first,
+                     :size => object_attributes["Size"].first)
+        end
+      else
+        []
+      end
+    end
 
     def parse_location(xml_body)
       xml = XmlSimple.xml_in(xml_body)
