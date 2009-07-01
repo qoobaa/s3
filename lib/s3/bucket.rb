@@ -23,7 +23,7 @@ module S3
     end
 
     def save(location = nil)
-      options = { :path => "/", :headers => {} }
+      options = { :headers => {} }
       if location and location != "US"
         options[:body] = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
         options[:headers][:content_type] = "application/xml"
