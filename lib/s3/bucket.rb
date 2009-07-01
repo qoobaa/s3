@@ -6,25 +6,25 @@ module S3
     attr_reader :name, :service
 
     def location
-      response = connection.request(:get, :path => "/", :params => { :location => nil })
+      response = connection.request(:get, :params => { :location => nil })
       parse_location(response.body)
     end
 
     def exists?
-      connection.request(:get, :path => "/", :params => { :max_keys => 0 })
+      connection.request(:get, :params => { :max_keys => 0 })
       true
     rescue Error::NoSuchBucket
       false
     end
 
     def destroy
-      connection.request(:delete, :path => "/")
+      connection.request(:delete)
       true
     end
 
     def save(location = nil)
       options = { :path => "/", :headers => {} }
-      if location
+      if location and location != "US"
         options[:body] = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
         options[:headers][:content_type] = "application/xml"
       end
@@ -41,7 +41,7 @@ module S3
     end
 
     def objects(options = {})
-      response = connection.request(:get, :path => "/", :params => options)
+      response = connection.request(:get, :params => options)
       parse_objects(response.body)
     end
 
@@ -64,8 +64,8 @@ module S3
     def_instance_delegators :@service, :connection
 
     proxy :connection do
-      def request(method, options)
-        path = "#{proxy_owner.path_prefix}#{options[:path]}"
+      def request(method, options = {})
+        path = "#{proxy_owner.path_prefix}/"
         host = proxy_owner.host
         proxy_target.request(method, options.merge(:host => host, :path => path))
       end

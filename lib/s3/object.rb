@@ -1,5 +1,6 @@
 module S3
   class Object
+    extend Roxy::Moxie
     extend Forwardable
 
     attr_accessor :content_type, :acl, :key
@@ -12,7 +13,7 @@ module S3
 
     def content(reload = false)
       if reload or not defined?(@content)
-        response = connection.request(:get, :path => "/#{key}")
+        response = connection.request(:get)
         self.etag = response["etag"]
         self.content_type = response["content-type"]
         self.size = response["content-length"]
@@ -27,18 +28,24 @@ module S3
       content_type = @content_type || "application/octet-stream"
       body = content.is_a?(IO) ? content.read : content
       response = connection.request(:put,
-                                    :path => "/#{key}",
                                     :body => body,
                                     :headers => { :x_amz_acl => acl, :content_type => content_type })
     end
 
     def destroy
-      response = connection.request(:delete, :path => "/#{key}")
+      response = connection.request(:delete)
     end
 
     protected
 
     def_instance_delegators :@bucket, :connection, :name, :service
+
+    proxy :connection do
+      def request(method, options = {})
+        path = "/#{proxy_owner.key}"
+        proxy_target.request(method, options.merge(:path => path))
+      end
+    end
 
     attr_writer :key, :last_modified, :etag, :size
 

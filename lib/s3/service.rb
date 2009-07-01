@@ -9,6 +9,7 @@ module S3
       @secret_access_key = options[:secret_access_key] or raise ArgumentError.new("no secret access key given")
       @use_ssl = options[:use_ssl]
       @timeout = options[:timeout]
+      @debug = options[:debug]
     end
 
     def buckets(reload = false)
@@ -47,6 +48,7 @@ module S3
         @connection.secret_access_key = @secret_access_key
         @connection.use_ssl = @use_ssl
         @connection.timeout = @timeout
+        @connection.debug = @debug
       end
       @connection
     end
@@ -55,6 +57,7 @@ module S3
 
     def parse_buckets(xml_body)
       xml = XmlSimple.xml_in(xml_body)
+      # TODO: empty bucket list handling
       buckets_names = xml["Buckets"].first["Bucket"].map { |bucket| bucket["Name"].first }
       buckets_names.map do |bucket_name|
         Bucket.new(self, bucket_name)

@@ -1,6 +1,6 @@
 module S3
   class Connection
-    attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout
+    attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug
     alias :use_ssl? :use_ssl
 
     def initialize(options = {})
