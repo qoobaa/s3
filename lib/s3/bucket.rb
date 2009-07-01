@@ -49,8 +49,8 @@ module S3
         Object.new(proxy_owner, key)
       end
 
-      def find(key)
-
+      def find(options = {})
+        proxy_owner.objects(options)
       end
     end
 

@@ -13,6 +13,9 @@ module S3
     def content(reload = false)
       if reload or not defined?(@content)
         response = connection.request(:get, :path => "/#{key}")
+        self.etag = response["etag"]
+        self.content_type = response["content-type"]
+        self.size = response["content-length"]
         @content = response.body
       else
         @content
@@ -40,11 +43,11 @@ module S3
     attr_writer :key, :last_modified, :etag, :size
 
     def last_modified=(last_modified)
-      @last_modified = Time.parse(last_modified)
+      @last_modified = Time.parse(last_modified) if last_modified
     end
 
     def etag=(etag)
-      @etag = etag[1..-2]
+      @etag = etag[1..-2] if etag
     end
 
     def initialize(bucket, key, options = {})
