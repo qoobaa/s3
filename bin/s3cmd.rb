@@ -69,16 +69,21 @@ begin
     case subcommand
     when "add"
       subcommand_options = Trollop::options do
+        banner "add bucket"
         opt :location, "Location of the bucket - EU or US", :default => "US", :type => String
       end
       name = ARGV.shift
       Trollop::die "Bucket has not been added because of unknown error" unless create_bucket(service, name, subcommand_options[:location])
     when "remove"
+      subcommand_options = Trollop::options do
+        banner "remove bucket"
+      end
       name = ARGV.shift
       Trollop::die "Bucket name must be given" if name.nil? or name.empty?
       Trollop::die "Bucket has not been removed because of unknown error" unless destroy_bucket(service, name)
     when "show"
       subcommand_options = Trollop::options do
+        banner "show bucket"
         opt :prefix, "Limits the response to keys which begin with the indicated prefix", :type => String
         opt :marker, "Indicates where in the bucket to begin listing", :type => String
         opt :max_keys, "The maximum number of keys you'd like to see", :type => Integer
