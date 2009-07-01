@@ -41,8 +41,6 @@ module S3
       case method
       when :get
         request_class = Net::HTTP::Get
-      # when :head
-      #   request_class = Net::HTTP::Head
       when :put
         request_class = Net::HTTP::Put
       when :delete
