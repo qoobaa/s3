@@ -76,7 +76,7 @@ module S3
                                                           :request => request,
                                                           :access_key_id => access_key_id,
                                                           :secret_access_key => secret_access_key)
-        http.request(request)
+        http.request(request) # { |response| puts response; response.read_body { |body| puts body; puts body.size } }
       end
 
       handle_response(response)
