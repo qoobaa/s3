@@ -7,6 +7,7 @@ module S3
       @access_key_id = options[:access_key_id]
       @secret_access_key = options[:secret_access_key]
       @use_ssl = options[:use_ssl] || false
+      @debug = options[:debug]
       @timeout = options[:timeout]
     end
 
@@ -55,7 +56,7 @@ module S3
 
     def http(host)
       http = Net::HTTP.new(host, port)
-      http.set_debug_output(STDOUT)
+      http.set_debug_output(STDOUT) if @debug
       http.use_ssl = @use_ssl
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE if @use_ssl
       http.read_timeout = @timeout if @timeout

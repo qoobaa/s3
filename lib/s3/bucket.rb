@@ -28,7 +28,8 @@ module S3
         options[:body] = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
         options[:headers][:content_type] = "application/xml"
       end
-      response = connection.request(:put, options)
+      connection.request(:put, options)
+      true
     end
 
     def host
