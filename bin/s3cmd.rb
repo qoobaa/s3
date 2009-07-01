@@ -108,6 +108,8 @@ begin
     else
       Trollop::die "Unknown subcommand: #{subcommand.inspect}"
     end
+  when nil
+    Trollop::die "No command given"
   else
     Trollop::die "Unknown command #{command.inspect}"
   end
