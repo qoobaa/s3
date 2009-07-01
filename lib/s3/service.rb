@@ -57,10 +57,14 @@ module S3
 
     def parse_buckets(xml_body)
       xml = XmlSimple.xml_in(xml_body)
-      # TODO: empty bucket list handling
-      buckets_names = xml["Buckets"].first["Bucket"].map { |bucket| bucket["Name"].first }
-      buckets_names.map do |bucket_name|
-        Bucket.new(self, bucket_name)
+      buckets = xml["Buckets"].first["Bucket"]
+      if buckets
+        buckets_names = buckets.map { |bucket| bucket["Name"].first }
+        buckets_names.map do |bucket_name|
+          Bucket.new(self, bucket_name)
+        end
+      else
+        []
       end
     end
   end

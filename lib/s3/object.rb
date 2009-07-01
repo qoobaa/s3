@@ -7,8 +7,8 @@ module S3
     attr_reader :last_modified, :etag, :size, :bucket
     attr_writer :content
 
-    def inspect
-      "#<#{self.class}:/#{name}/#{key}>"
+    def exists?
+      connection.request(:get, :params => { :range => 0..0 })
     end
 
     def content(reload = false)
@@ -34,6 +34,10 @@ module S3
 
     def destroy
       response = connection.request(:delete)
+    end
+
+    def inspect
+      "#<#{self.class}:/#{name}/#{key}>"
     end
 
     protected
