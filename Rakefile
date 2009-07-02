@@ -7,7 +7,7 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "s3"
-    gem.summary = %Q{TODO}
+    gem.summary = %Q{Library for accessing S3 objects and buckets, with command line tool}
     gem.email = "qoobaa@gmail.com"
     gem.homepage = "http://github.com/qoobaa/s3"
     gem.authors = ["Jakub Kuźma", "Mirosław Boruta"]
