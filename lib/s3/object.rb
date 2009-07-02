@@ -7,9 +7,14 @@ module S3
     attr_reader :last_modified, :etag, :size, :bucket
     attr_writer :content
 
-    def exists?
+    def retreive
       response = connection.request(:get, :headers => { :range => 0..0 })
       parse_headers(response)
+      self
+    end
+
+    def exists?
+      retreive
       true
     rescue Error::NoSuchKey
       false

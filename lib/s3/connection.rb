@@ -35,6 +35,24 @@ module S3
       send_request(host, request)
     end
 
+    def self.parse_params(params)
+      interesting_keys = [:max_keys, :prefix, :marker, :delimiter, :location]
+
+      result = []
+      params.each do |key, value|
+        if interesting_keys.include?(key)
+          parsed_key = key.to_s.gsub("_", "-")
+          case value
+          when nil
+            result << parsed_key
+          else
+            result << "#{parsed_key}=#{value}"
+          end
+        end
+      end
+      result.join("&")
+    end
+
     def self.parse_headers(headers)
       interesting_keys = [:content_type, :x_amz_acl, :range,
                           :if_modified_since, :if_unmodified_since,
@@ -55,24 +73,6 @@ module S3
         end
       end
       parsed_headers
-    end
-
-    def self.parse_params(params)
-      interesting_keys = [:max_keys, :prefix, :marker, :delimiter, :location]
-
-      result = []
-      params.each do |key, value|
-        if interesting_keys.include?(key)
-          parsed_key = key.to_s.gsub("_", "-")
-          case value
-          when nil
-            result << parsed_key
-          else
-            result << "#{parsed_key}=#{value}"
-          end
-        end
-      end
-      result.join("&")
     end
 
     private

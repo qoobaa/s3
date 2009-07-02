@@ -41,7 +41,7 @@ module S3
     end
 
     def objects(options = {})
-      response = connection.request(:get, :params => options)
+      response = connection.request(:get)
       parse_objects(response.body)
     end
 
@@ -50,8 +50,14 @@ module S3
         Object.new(proxy_owner, key)
       end
 
-      def find(name)
-        proxy_owner.objects(:prefix => name).first
+      def find_first(name)
+        object = build(name)
+        object.retreive
+      end
+      alias :find :find_first
+
+      def find_all(options = {})
+        proxy_owner.objects(options)
       end
     end
 
