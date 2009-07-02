@@ -2,7 +2,7 @@ module S3
   class Service
     extend Roxy::Moxie
 
-    attr_reader :access_key_id, :secret_access_key
+    attr_reader :access_key_id, :secret_access_key, :use_ssl
 
     def ==(other)
       self.access_key_id == other.access_key_id and self.secret_access_key == other.secret_access_key

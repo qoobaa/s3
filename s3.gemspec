@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3}
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jakub Kuźma", "Mirosław Boruta"]
@@ -31,7 +31,9 @@ Gem::Specification.new do |s|
      "lib/s3/roxy/proxy.rb",
      "lib/s3/service.rb",
      "lib/s3/signature.rb",
+     "s3.gemspec",
      "test/bucket_test.rb",
+     "test/connection_test.rb",
      "test/s3_test.rb",
      "test/signature_test.rb",
      "test/test_helper.rb"
@@ -45,6 +47,7 @@ Gem::Specification.new do |s|
     "test/s3_test.rb",
      "test/bucket_test.rb",
      "test/signature_test.rb",
+     "test/connection_test.rb",
      "test/test_helper.rb"
   ]
 
