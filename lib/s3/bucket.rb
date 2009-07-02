@@ -50,8 +50,8 @@ module S3
         Object.new(proxy_owner, key)
       end
 
-      def find(options = {})
-        proxy_owner.objects(options).first
+      def find(name)
+        proxy_owner.objects(:prefix => name).first
       end
     end
 

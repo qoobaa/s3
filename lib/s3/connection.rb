@@ -112,6 +112,17 @@ module S3
           end
         end
       end
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "#{result.inspect}"
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "***"
       result.join("&")
     end
 
