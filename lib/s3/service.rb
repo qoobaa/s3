@@ -2,7 +2,7 @@ module S3
   class Service
     extend Roxy::Moxie
 
-    attr_reader :access_key_id, :secret_access_key
+    attr_reader :access_key_id, :secret_access_key, :use_ssl
 
     def initialize(options)
       @access_key_id = options[:access_key_id] or raise ArgumentError.new("no access key id given")
