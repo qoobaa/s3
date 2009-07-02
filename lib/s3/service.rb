@@ -51,6 +51,21 @@ module S3
       def reload
         proxy_owner.buckets(true)
       end
+
+      def destroy_all(force = false)
+        proxy_target.each do |bucket|
+          begin
+            bucket.destroy
+          rescue Error::BucketNotEmpty
+            if force
+              bucket.objects.destroy_all
+              retry
+            else
+              raise
+            end
+          end
+        end
+      end
     end
 
     def inspect

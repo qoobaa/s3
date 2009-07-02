@@ -2,12 +2,12 @@ module S3
   class Object
     extend Forwardable
 
-    def_instance_delegators :@bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
-    def_instance_delegators :service, :protocol, :port
-
     attr_accessor :content_type, :key, :content_disposition, :content_encoding
     attr_reader :last_modified, :etag, :size, :bucket
     attr_writer :content
+
+    def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
+    def_instance_delegators :service, :protocol, :port
 
     def acl=(acl)
       @acl = acl.to_s.gsub("_", "-")
@@ -80,6 +80,7 @@ module S3
     def initialize(bucket, key, options = {})
       @bucket = bucket
       self.key = key
+      raise ArgumentError.new("Given key is not valid key name: #{@key}") unless key_valid?
       self.last_modified = options[:last_modified]
       self.etag = options[:etag]
       self.size = options[:size]
@@ -98,16 +99,16 @@ module S3
     end
 
     def dump_headers
-      acl = @acl || "public-read"
-      content_type = @content_type || "application/octet-stream"
-      content_encoding = @content_encoding
-      content_disposition = @content_disposition
-      {
-        :x_amz_acl => acl,
-        :content_type => content_type,
-        :content_encoding => content_encoding,
-        :content_disposition => content_disposition
-      }
+      headers = {}
+      headers[:x_amz_acl] = @acl || "public-read"
+      headers[:content_type] = @content_type || "application/octet-stream"
+      headers[:content_encoding] = @content_encoding if @content_encoding
+      headers[:content_disposition] = @content_disposition if @content_disposition
+      headers
+    end
+
+    def key_valid?
+      @key !~ /\/\//
     end
   end
 end

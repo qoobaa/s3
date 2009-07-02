@@ -3,9 +3,9 @@ module S3
     extend Roxy::Moxie
     extend Forwardable
 
-    def_instance_delegators :@service, :service_request
-
     attr_reader :name, :service
+
+    def_instance_delegators :service, :service_request
 
     def retrieve
       bucket_request(:get, :params => { :max_keys => 0 })
@@ -89,6 +89,12 @@ module S3
 
       def reload
         proxy_owner.objects(true)
+      end
+
+      def destroy_all
+        proxy_target.each do |object|
+          object.destroy
+        end
       end
     end
 
