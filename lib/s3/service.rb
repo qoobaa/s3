@@ -5,20 +5,28 @@ module S3
     attr_reader :access_key_id, :secret_access_key, :use_ssl
 
     def initialize(options)
-      @access_key_id = options[:access_key_id] or raise ArgumentError.new("no access key id given")
-      @secret_access_key = options[:secret_access_key] or raise ArgumentError.new("no secret access key given")
+      @access_key_id = options[:access_key_id] or raise ArgumentError.new("No access key id given")
+      @secret_access_key = options[:secret_access_key] or raise ArgumentError.new("No secret access key given")
       @use_ssl = options[:use_ssl]
       @timeout = options[:timeout]
       @debug = options[:debug]
     end
 
     def buckets(reload = false)
-      if reload or not defined?(@buckets)
-        response = connection.request(:get, :path => "/")
+      if reload or @buckets.nil?
+        response = service_request(:get)
         @buckets = parse_buckets(response.body)
       else
         @buckets
       end
+    end
+
+    def protocol
+      use_ssl ? "https://" : "http://"
+    end
+
+    def port
+      use_ssl ? 443 : 80
     end
 
     proxy :buckets do
@@ -27,7 +35,8 @@ module S3
       end
 
       def find_first(name)
-        Bucket.new(proxy_owner, name)
+        bucket = build(name)
+        bucket.retrieve
       end
       alias :find :find_first
 
@@ -46,8 +55,12 @@ module S3
 
     protected
 
+    def service_request(method, options = {})
+      connection.request(method, options.merge(:path => "/#{options[:path]}"))
+    end
+
     def connection
-      unless defined?(@connection)
+      if @connection.nil?
         @connection = Connection.new
         @connection.access_key_id = @access_key_id
         @connection.secret_access_key = @secret_access_key

@@ -23,6 +23,7 @@ module S3
         path << "?#{params}"
       end
 
+      path = URI.escape(path)
       request = request_class(method).new(path)
 
       headers = self.class.parse_headers(headers)
@@ -116,7 +117,7 @@ module S3
                                                           :request => request,
                                                           :access_key_id => access_key_id,
                                                           :secret_access_key => secret_access_key)
-        http.request(request) # { |response| puts response; response.read_body { |body| puts body; puts body.size } }
+        http.request(request)
       end
 
       handle_response(response)

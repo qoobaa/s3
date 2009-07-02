@@ -1,20 +1,26 @@
 module S3
   class Object
-    extend Roxy::Moxie
     extend Forwardable
 
-    attr_accessor :content_type, :acl, :key, :content_disposition, :content_encoding
+    def_instance_delegators :@bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
+    def_instance_delegators :service, :protocol, :port
+
+    attr_accessor :content_type, :key, :content_disposition, :content_encoding
     attr_reader :last_modified, :etag, :size, :bucket
     attr_writer :content
 
-    def retreive
-      response = connection.request(:get, :headers => { :range => 0..0 })
+    def acl=(acl)
+      @acl = acl.to_s.gsub("_", "-")
+    end
+
+    def retrieve
+      response = object_request(:get, :headers => { :range => 0..0 })
       parse_headers(response)
       self
     end
 
     def exists?
-      retreive
+      retrieve
       true
     rescue Error::NoSuchKey
       false
@@ -22,7 +28,7 @@ module S3
 
     def content(reload = false)
       if reload or @content.nil?
-        response = connection.request(:get)
+        response = object_request(:get)
         parse_headers(response)
         self.content = response.body
       end
@@ -30,24 +36,23 @@ module S3
     end
 
     def save
-      acl = @acl || "public-read"
-      content_type = @content_type || "application/octet-stream"
-      content_encoding = @content_encoding
-      content_disposition = @content_disposition
       body = content.is_a?(IO) ? content.read : content
-      response = connection.request(:put,
-                                    :body => body,
-                                    :headers => {
-                                      :x_amz_acl => acl,
-                                      :content_type => content_type,
-                                      :content_encoding => content_encoding,
-                                      :content_disposition => content_disposition
-                                    })
+      response = object_request(:put, :body => body, :headers => dump_headers)
+      parse_headers(response)
+      true
     end
 
     def destroy
-      connection.request(:delete)
+      object_request(:delete)
       true
+    end
+
+    def url
+      "#{protocol}#{host}/#{path_prefix}#{key}"
+    end
+
+    def cname_url
+      "#{protocol}#{name}/#{key}" if bucket.vhost?
     end
 
     def inspect
@@ -56,14 +61,11 @@ module S3
 
     protected
 
-    def_instance_delegators :@bucket, :connection, :name, :service
-
-    proxy :connection do
-      def request(method, options = {})
-        path = "#{proxy_owner.key}"
-        proxy_target.request(method, options.merge(:path => path))
-      end
+    def object_request(method, options = {})
+      bucket_request(method, options.merge(:path => key))
     end
+
+    private
 
     attr_writer :key, :last_modified, :etag, :size
 
@@ -86,11 +88,26 @@ module S3
     def parse_headers(response)
       self.etag = response["etag"]
       self.content_type = response["content-type"]
+      self.content_disposition = response["content-disposition"]
+      self.content_encoding = response["content-encoding"]
       self.last_modified = response["last-modified"]
       self.size = response["content-length"]
       if response["content-range"]
         self.size = response["content-range"].sub(/[^\/]+\//, "").to_i
       end
+    end
+
+    def dump_headers
+      acl = @acl || "public-read"
+      content_type = @content_type || "application/octet-stream"
+      content_encoding = @content_encoding
+      content_disposition = @content_disposition
+      {
+        :x_amz_acl => acl,
+        :content_type => content_type,
+        :content_encoding => content_encoding,
+        :content_disposition => content_disposition
+      }
     end
   end
 end

@@ -3,33 +3,49 @@ module S3
     extend Roxy::Moxie
     extend Forwardable
 
+    def_instance_delegators :@service, :service_request
+
     attr_reader :name, :service
 
-    def location
-      response = connection.request(:get, :params => { :location => nil })
-      parse_location(response.body)
+    def retrieve
+      bucket_request(:get, :params => { :max_keys => 0 })
+      self
+    end
+
+    def location(reload = false)
+      if reload or @location.nil?
+        response = bucket_request(:get, :params => { :location => nil })
+        @location = parse_location(response.body)
+      else
+        @location
+      end
     end
 
     def exists?
-      connection.request(:get, :params => { :max_keys => 0 })
+      retrieve
       true
     rescue Error::NoSuchBucket
       false
     end
 
     def destroy
-      connection.request(:delete)
+      bucket_request(:delete)
       true
     end
 
     def save(location = nil)
+      location = location.to_s.upcase if location
       options = { :headers => {} }
       if location and location != "US"
         options[:body] = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
         options[:headers][:content_type] = "application/xml"
       end
-      connection.request(:put, options)
+      bucket_request(:put, options)
       true
+    end
+
+    def vhost?
+      "#@name.#{HOST}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
     end
 
     def host
@@ -37,12 +53,19 @@ module S3
     end
 
     def path_prefix
-      vhost? ? "" : "/#@name"
+      vhost? ? "" : "#@name/"
     end
 
-    def objects(options = {})
-      response = connection.request(:get)
-      parse_objects(response.body)
+    def objects(reload = false, options = {})
+      if options.empty?
+        if reload or @objects.nil?
+          @objects = fetch_objects
+        else
+          @objects
+        end
+      else
+        fetch_objects(options)
+      end
     end
 
     proxy :objects do
@@ -52,12 +75,16 @@ module S3
 
       def find_first(name)
         object = build(name)
-        object.retreive
+        object.retrieve
       end
       alias :find :find_first
 
       def find_all(options = {})
-        proxy_owner.objects(options)
+        proxy_owner.objects(true, options)
+      end
+
+      def reload
+        proxy_owner.objects(true)
       end
     end
 
@@ -67,14 +94,9 @@ module S3
 
     protected
 
-    def_instance_delegators :@service, :connection
-
-    proxy :connection do
-      def request(method, options = {})
-        path = "#{proxy_owner.path_prefix}/#{options[:path]}"
-        host = proxy_owner.host
-        proxy_target.request(method, options.merge(:host => host, :path => path))
-      end
+    def bucket_request(method, options = {})
+      path = "#{path_prefix}#{options[:path]}"
+      service_request(method, options.merge(:host => host, :path => path))
     end
 
     def initialize(service, name)
@@ -85,8 +107,9 @@ module S3
 
     private
 
-    def vhost?
-      "#@name.#{HOST}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
+    def fetch_objects(options = {})
+      response = bucket_request(:get, options)
+      parse_objects(response.body)
     end
 
     def parse_objects(xml_body)
