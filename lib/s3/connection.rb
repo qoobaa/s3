@@ -89,10 +89,14 @@ module S3
       when 200...300
         response
       when 300...600
-        xml = XmlSimple.xml_in(response.body)
-        message = xml["Message"].first
-        code = xml["Code"].first
-        raise Error::ResponseError.exception(code).new(message, response)
+        if response.body.nil?
+          raise S3::Error::ResponseError.new(nil, response)
+        else
+          xml = XmlSimple.xml_in(response.body)
+          message = xml["Message"].first
+          code = xml["Code"].first
+          raise S3::Error.exception(code).new(message, response)
+        end
       else
         raise(ConnectionError.new(response, "Unknown response code: #{response.code}"))
       end
