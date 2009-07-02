@@ -116,7 +116,10 @@ module S3
     end
 
     def self.parse_headers(headers)
-      interesting_keys = [:content_type, :x_amz_acl, :range, :if_modified_since, :if_unmodified_since, :if_match, :if_none_match]
+      interesting_keys = [:content_type, :x_amz_acl, :range,
+                          :if_modified_since, :if_unmodified_since,
+                          :if_match, :if_none_match,
+                          :content_disposition, :content_encoding]
       parsed_headers = {}
       if headers
         headers.each do |key, value|

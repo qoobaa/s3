@@ -5,6 +5,8 @@ $: << File.expand_path(File.dirname(__FILE__) + "/../lib")
 require "trollop"
 require "s3"
 
+# HELPER METHODS
+
 include S3
 
 def list_buckets(service)
@@ -22,8 +24,8 @@ def destroy_bucket(service, name)
 end
 
 def show_bucket(service, name, options = {})
-  service.buckets.find(name).objects.find(options).each do |object|
-    puts object.key
+  service.buckets.find(name).objects(options).each do |object|
+    puts "#{name}/#{object.key}"
   end
 end
 
@@ -35,16 +37,41 @@ def list_objects(service)
   end
 end
 
+def create_object(service, name, file_name, options = {})
+  bucket_name, object_name = name.split("/", 2)
+  object = service.buckets.find(bucket_name).objects.build(object_name)
+  object.content_type = options[:type]
+  object.content_encoding = options[:encoding]
+  object.content_disposition = options[:disposition]
+  object.acl = options[:acl]
+  object.content = File.new(file_name)
+  object.save
+end
+
+def destroy_object(service, name)
+  bucket_name, object_name = name.split("/", 2)
+  object = service.buckets.find(bucket_name).objects.find(object_name)
+  object.destroy
+end
+
+def show_object(service, name)
+  bucket_name, object_name = name.split("/", 2)
+  object = service.buckets.find(bucket_name).objects.find(object_name)
+  puts object.content
+end
+
+# COMMAND LINE PARSER
+
 ACCESS_KEY_ID = ENV["ACCESS_KEY_ID"]
 SECRET_ACCESS_KEY = ENV["SECRET_ACCESS_KEY"]
 COMMANDS = %w(bucket object)
 BUCKET_SUBCOMMANDS = %w(add remove show)
-OBJECT_SUBCOMMANDS = %w(add remove)
+OBJECT_SUBCOMMANDS = %w(add remove show)
 
 global_options = Trollop::options do
   banner "s3.rb"
-  opt :access_key_id, "Your access key id to AWS", :type => String, :default => ACCESS_KEY_ID
-  opt :secret_access_key, "Your secret access key to AWS", :type => String, :default => SECRET_ACCESS_KEY
+  opt :access_key_id, "Your access key id to AWS", :type => :string, :default => ACCESS_KEY_ID
+  opt :secret_access_key, "Your secret access key to AWS", :type => :string, :default => SECRET_ACCESS_KEY
   opt :debug, "Debug mode", :type => :flag, :default => false
   stop_on COMMANDS
 end
@@ -70,7 +97,7 @@ begin
     when "add"
       subcommand_options = Trollop::options do
         banner "add bucket"
-        opt :location, "Location of the bucket - EU or US", :default => "US", :type => String
+        opt :location, "Location of the bucket - EU or US", :default => "US", :type => :string
       end
       name = ARGV.shift
       Trollop::die "Bucket has not been added because of unknown error" unless create_bucket(service, name, subcommand_options[:location])
@@ -84,10 +111,10 @@ begin
     when "show"
       subcommand_options = Trollop::options do
         banner "show bucket"
-        opt :prefix, "Limits the response to keys which begin with the indicated prefix", :type => String
-        opt :marker, "Indicates where in the bucket to begin listing", :type => String
-        opt :max_keys, "The maximum number of keys you'd like to see", :type => Integer
-        opt :delimiter, "Causes keys that contain the same string between the prefix and the first occurrence of the delimiter to be rolled up into a single result element", :type => String
+        opt :prefix, "Limits the response to keys which begin with the indicated prefix", :type => :string
+        opt :marker, "Indicates where in the bucket to begin listing", :type => :string
+        opt :max_keys, "The maximum number of keys you'd like to see", :type => :integer
+        opt :delimiter, "Causes keys that contain the same string between the prefix and the first occurrence of the delimiter to be rolled up into a single result element", :type => :string
       end
       name = ARGV.shift
       Trollop::die "Bucket name must be given" if name.nil? or name.empty?
@@ -105,9 +132,32 @@ begin
     subcommand = ARGV.shift
     case subcommand
     when "add"
-
+      subcommand_options = Trollop::options do
+        banner "object add s3_object_name local_file_name"
+        opt :type, "A standard MIME type describing the format of the contents", :default => "binary/octet-stream"
+        opt :disposition, "Specifies presentational information for the object", :type => :string
+        opt :encoding, "Specifies what content encodings have been applied to the object and thus what decoding mechanisms must be applied in order to obtain the media-type referenced by the Content-Type header field", :type => :string
+        opt :acl, "The canned ACL to apply to the object. Options include private, public-read, public-read-write, and authenticated-read", :type => :string
+      end
+      name = ARGV.shift
+      Trollop::die "No object name given" if name.nil? or name.empty?
+      file_name = ARGV.shift
+      Trollop::die "No file name given" if file_name.nil? or file_name.empty?
+      Trollop::die "Object has not been added because of unknown error" unless create_object(service, name, file_name, subcommand_options)
     when "remove"
-
+      subcommand_options = Trollop::options do
+        banner "object remove s3_object_name"
+      end
+      name = ARGV.shift
+      Trollop::die "No object name given" if name.nil? or name.empty?
+      Trollop::die "Object has not been removed because of unknown error" unless destroy_object(service, name)
+    when "show"
+      subcommand_options = Trollop::options do
+        banner "object show s3_object_name"
+      end
+      name = ARGV.shift
+      Trollop::die "No object name given" if name.nil? or name.empty?
+      show_object(service, name)
     when nil
       list_objects(service)
     else

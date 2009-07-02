@@ -3,7 +3,7 @@ module S3
     extend Roxy::Moxie
     extend Forwardable
 
-    attr_accessor :content_type, :acl, :key
+    attr_accessor :content_type, :acl, :key, :content_disposition, :content_encoding
     attr_reader :last_modified, :etag, :size, :bucket
     attr_writer :content
 
@@ -27,14 +27,22 @@ module S3
     def save
       acl = @acl || "public-read"
       content_type = @content_type || "application/octet-stream"
+      content_encoding = @content_encoding
+      content_disposition = @content_disposition
       body = content.is_a?(IO) ? content.read : content
       response = connection.request(:put,
                                     :body => body,
-                                    :headers => { :x_amz_acl => acl, :content_type => content_type })
+                                    :headers => {
+                                      :x_amz_acl => acl,
+                                      :content_type => content_type,
+                                      :content_encoding => content_encoding,
+                                      :content_disposition => content_disposition
+                                    })
     end
 
     def destroy
-      response = connection.request(:delete)
+      connection.request(:delete)
+      true
     end
 
     def inspect

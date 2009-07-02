@@ -51,7 +51,7 @@ module S3
       end
 
       def find(options = {})
-        proxy_owner.objects(options)
+        proxy_owner.objects(options).first
       end
     end
 
@@ -74,6 +74,7 @@ module S3
     def initialize(service, name)
       @service = service
       @name = name
+      raise ArgumentError.new("Given name is not valid bucket name: #{@name}") unless name_valid?
     end
 
     private
@@ -101,6 +102,10 @@ module S3
     def parse_location(xml_body)
       xml = XmlSimple.xml_in(xml_body)
       xml["content"]
+    end
+
+    def name_valid?
+      @name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/ and @name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
     end
   end
 end
