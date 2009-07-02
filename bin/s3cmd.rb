@@ -24,7 +24,7 @@ def destroy_bucket(service, name)
 end
 
 def show_bucket(service, name, options = {})
-  service.buckets.find(name).objects(options).each do |object|
+  service.buckets.find(name).objects.find_all.each do |object|
     puts "#{name}/#{object.key}"
   end
 end
@@ -54,10 +54,24 @@ def destroy_object(service, name)
   object.destroy
 end
 
-def show_object(service, name)
+def show_object(service, name, file_name = nil)
   bucket_name, object_name = name.split("/", 2)
-  object = service.buckets.find(bucket_name).objects.find(object_name)
-  puts object.content
+  object = service.buckets.find(bucket_name).objects.find_first(object_name)
+  puts "         object:   #{object.name}/#{object.key}"
+  puts "   content type:   #{object.content_type}"
+  puts "           size:   #{object.size}"
+  puts "           etag:   #{object.etag}"
+  puts "  last modified:   #{object.last_modified}"
+  # puts "content disposition: #{object.content_disposition}"
+  if file_name
+    if file_name == "-"
+      puts object.content
+    else
+      File.open(file_name, "wb") do |file|
+        file.write(object.content)
+      end
+    end
+  end
 end
 
 # COMMAND LINE PARSER
@@ -153,11 +167,12 @@ begin
       Trollop::die "Object has not been removed because of unknown error" unless destroy_object(service, name)
     when "show"
       subcommand_options = Trollop::options do
-        banner "object show s3_object_name"
+        banner "object show s3_object_name optional_file_name"
       end
       name = ARGV.shift
       Trollop::die "No object name given" if name.nil? or name.empty?
-      show_object(service, name)
+      file_name = ARGV.shift
+      show_object(service, name, file_name)
     when nil
       list_objects(service)
     else

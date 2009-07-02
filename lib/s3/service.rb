@@ -26,8 +26,13 @@ module S3
         Bucket.new(proxy_owner, name)
       end
 
-      def find(name)
+      def find_first(name)
         Bucket.new(proxy_owner, name)
+      end
+      alias :find :find_first
+
+      def find_all
+        proxy_target
       end
 
       def reload
