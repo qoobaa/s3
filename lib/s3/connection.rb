@@ -127,7 +127,7 @@ module S3
       when 200...300
         response
       when 300...600
-        if response.body.nil?
+        if response.body.nil? || response.body.empty?
           raise S3::Error::ResponseError.new(nil, response)
         else
           xml = XmlSimple.xml_in(response.body)
