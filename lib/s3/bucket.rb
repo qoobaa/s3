@@ -5,6 +5,10 @@ module S3
 
     attr_reader :name, :service
 
+    def ==(other)
+      self.name == other.name and self.service == other.service
+    end
+
     def location
       response = connection.request(:get, :params => { :location => nil })
       parse_location(response.body)

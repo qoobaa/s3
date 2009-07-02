@@ -4,6 +4,10 @@ module S3
 
     attr_reader :access_key_id, :secret_access_key
 
+    def ==(other)
+      self.access_key_id == other.access_key_id and self.secret_access_key == other.secret_access_key
+    end
+
     def initialize(options)
       @access_key_id = options[:access_key_id] or raise ArgumentError.new("no access key id given")
       @secret_access_key = options[:secret_access_key] or raise ArgumentError.new("no secret access key given")

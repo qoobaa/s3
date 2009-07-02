@@ -64,11 +64,7 @@ class ServiceTest < Test::Unit::TestCase
     expected = @buckets_list
     # ugly hack
     actual = @service_ok.buckets(true).map { |obj| obj }
-    assert_equal expected.length, actual.length
-    # ugly hack
-    expected.zip(actual).each do |a|
-      assert_equal a[0].name, a[1].name
-    end
+    assert_equal expected, actual
   end
 
   def test_buckets_reload
@@ -131,10 +127,7 @@ class ServiceTest < Test::Unit::TestCase
     assert_nothing_raised do
       expected = @buckets_list
       actual = @service_ok.buckets.find_all
-      assert_equal expected.length, actual.length
-      expected.zip(actual).each do |a|
-        assert_equal a[0].name, a[1].name
-      end
+      assert_equal expected, actual
     end
   end
 end
