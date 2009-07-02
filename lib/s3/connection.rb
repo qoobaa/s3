@@ -41,8 +41,6 @@ module S3
       case method
       when :get
         request_class = Net::HTTP::Get
-      # when :head
-      #   request_class = Net::HTTP::Head
       when :put
         request_class = Net::HTTP::Put
       when :delete
@@ -78,7 +76,7 @@ module S3
                                                           :request => request,
                                                           :access_key_id => access_key_id,
                                                           :secret_access_key => secret_access_key)
-        http.request(request)
+        http.request(request) # { |response| puts response; response.read_body { |body| puts body; puts body.size } }
       end
 
       handle_response(response)
@@ -118,11 +116,25 @@ module S3
           end
         end
       end
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "#{result.inspect}"
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "***"
+      puts "***"
       result.join("&")
     end
 
     def self.parse_headers(headers)
-      interesting_keys = [:content_type, :x_amz_acl, :range, :if_modified_since, :if_unmodified_since, :if_match, :if_none_match]
+      interesting_keys = [:content_type, :x_amz_acl, :range,
+                          :if_modified_since, :if_unmodified_since,
+                          :if_match, :if_none_match,
+                          :content_disposition, :content_encoding]
       parsed_headers = {}
       if headers
         headers.each do |key, value|
