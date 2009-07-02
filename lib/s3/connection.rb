@@ -35,6 +35,46 @@ module S3
       send_request(host, request)
     end
 
+    def self.parse_headers(headers)
+      interesting_keys = [:content_type, :x_amz_acl, :range,
+                          :if_modified_since, :if_unmodified_since,
+                          :if_match, :if_none_match,
+                          :content_disposition, :content_encoding]
+      parsed_headers = {}
+      if headers
+        headers.each do |key, value|
+          if interesting_keys.include?(key)
+            parsed_key = key.to_s.gsub("_", "-")
+            parsed_value = value
+            case value
+            when Range
+              parsed_value = "bytes=#{value.first}-#{value.last}"
+            end
+            parsed_headers[parsed_key] = parsed_value
+          end
+        end
+      end
+      parsed_headers
+    end
+
+    def self.parse_params(params)
+      interesting_keys = [:max_keys, :prefix, :marker, :delimiter, :location]
+
+      result = []
+      params.each do |key, value|
+        if interesting_keys.include?(key)
+          parsed_key = key.to_s.gsub("_", "-")
+          case value
+          when nil
+            result << parsed_key
+          else
+            result << "#{parsed_key}=#{value}"
+          end
+        end
+      end
+      result.join("&")
+    end
+
     private
 
     def request_class(method)
@@ -93,7 +133,7 @@ module S3
           xml = XmlSimple.xml_in(response.body)
           message = xml["Message"].first
           code = xml["Code"].first
-          raise S3::Error::ResponseError.exception(code)
+          raise S3::Error::ResponseError.exception(code).new(message, response)
         end
       else
         raise(ConnectionError.new(response, "Unknown response code: #{response.code}"))
@@ -101,55 +141,5 @@ module S3
       response
     end
 
-    def self.parse_params(params)
-      interesting_keys = [:max_keys, :prefix, :marker, :delimiter, :location]
-
-      result = []
-      params.each do |key, value|
-        if interesting_keys.include?(key)
-          parsed_key = key.to_s.gsub("_", "-")
-          case value
-          when nil
-            result << parsed_key
-          else
-            result << "#{parsed_key}=#{value}"
-          end
-        end
-      end
-      puts "***"
-      puts "***"
-      puts "***"
-      puts "***"
-      puts "***"
-      puts "#{result.inspect}"
-      puts "***"
-      puts "***"
-      puts "***"
-      puts "***"
-      puts "***"
-      result.join("&")
-    end
-
-    def self.parse_headers(headers)
-      interesting_keys = [:content_type, :x_amz_acl, :range,
-                          :if_modified_since, :if_unmodified_since,
-                          :if_match, :if_none_match,
-                          :content_disposition, :content_encoding]
-      parsed_headers = {}
-      if headers
-        headers.each do |key, value|
-          if interesting_keys.include?(key)
-            parsed_key = key.to_s.gsub("_", "-")
-            parsed_value = value
-            case value
-            when Range
-              parsed_value = "bytes=#{value.first}-#{value.last}"
-            end
-            parsed_headers[parsed_key] = parsed_value
-          end
-        end
-      end
-      parsed_headers
-    end
   end
 end
