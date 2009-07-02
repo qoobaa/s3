@@ -7,34 +7,33 @@ class ConnectionTest < Test::Unit::TestCase
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
     )
     @http_request = Net::HTTP.new("")
+    @response_ok = Net::HTTPOK.new("1.1", "200", "OK")
+    @response_not_found = Net::HTTPNotFound.new("1.1", "404", "Not Found")
     stub(@connection).http { @http_request }
+    stub(@http_request).start { @response_ok }
   end
 
   def test_handle_response_not_modify_response_when_ok
-    fake_response = Net::HTTPOK.new("1.1", "200", "OK")
-    stub(@http_request).start { fake_response }
-
     assert_nothing_raised do
       response = @connection.request(
         :get,
         :host => "s3.amazonaws.com",
         :path => "/"
       )
-      assert_equal fake_response, response
+      assert_equal @response_ok, response
     end
   end
 
   def test_handle_response_throws_exception_when_not_ok
-    fake_body = <<-EOFakeBody
+    response_body = <<-EOFakeBody
     <?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <SomeResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">
       <Code>NoSuchBucket</Code>
       <Message>The specified bucket does not exist</Message>
     </SomeResult>
     EOFakeBody
-    fake_response = Net::HTTPNotFound.new("1.1", "404", "Not Found")
-    stub(@http_request).start { fake_response }
-    stub(fake_response).body { fake_body }
+    stub(@http_request).start { @response_not_found }
+    stub(@response_not_found).body { response_body }
 
     assert_raise S3::Error::NoSuchBucket do
       response = @connection.request(
@@ -46,10 +45,17 @@ class ConnectionTest < Test::Unit::TestCase
   end
 
   def test_handle_response_throws_standard_exception_when_not_ok
-    fake_response = Net::HTTPNotFound.new("1.1", "404", "Not Found")
-    stub(@http_request).start { fake_response }
-    stub(fake_response).body { nil }
+    stub(@http_request).start { @response_not_found }
+    stub(@response_not_found).body { nil }
+    assert_raise S3::Error::ResponseError do
+      response = @connection.request(
+        :get,
+        :host => "data.example.com.s3.amazonaws.com",
+        :path => "/"
+      )
+    end
 
+    stub(@response_not_found).body { "" }
     assert_raise S3::Error::ResponseError do
       response = @connection.request(
         :get,

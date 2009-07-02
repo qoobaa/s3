@@ -21,6 +21,10 @@ module S3
       end
     end
 
+    def ==(other)
+      self.name == other.name and self.service == other.service
+    end
+
     def exists?
       retrieve
       true
