@@ -10,7 +10,7 @@ module S3
     def_instance_delegators :service, :protocol, :port
 
     def ==(other)
-      self.name == other.name and self.bucket == other.bucket
+      self.key == other.key and self.bucket == other.bucket
     end
 
     def acl=(acl)

@@ -156,4 +156,81 @@ class BucketTest < Test::Unit::TestCase
     mock(@bucket).bucket_request(:delete) { }
     assert @bucket.destroy
   end
+
+  def test_objects_build
+    stub(@bucket).bucket_request { flunk "should not connect to server" }
+
+    expected = "object_name"
+    actual = @bucket.objects.build("object_name")
+    assert_kind_of S3::Object, actual
+    assert_equal expected, actual.key
+  end
+
+  def test_objects_find_first
+  end
+
+  def test_objects_find_all_on_empty_list
+    stub(@bucket).fetch_objects { @objects_list_empty }
+    assert_nothing_raised do
+      expected = @objects_list_empty
+      actual = @bucket.objects.find_all
+      assert_equal expected, actual
+    end
+  end
+
+  def test_objects_find_all
+    stub(@bucket).fetch_objects { @objects_list }
+    assert_nothing_raised do
+      expected = @objects_list
+      actual = @bucket.objects.find_all
+      assert_equal expected, actual
+    end
+  end
+
+  def test_objects_reload
+    stub(@bucket).fetch_objects { @objects_list_empty }
+    expected = @objects_list_empty
+    actual = @bucket.objects
+    assert_equal expected, actual
+
+    stub(@bucket).fetch_objects { @objects_list }
+    expected = @objects_list_empty
+    actual = @bucket.objects
+    assert_equal expected, actual
+
+    assert @bucket.objects.reload
+
+    expected = @objects_list
+    actual = @bucket.objects.map { |obj| obj }
+    assert_equal expected, actual
+  end
+
+  def test_objects_reload_without_checking_result
+    stub(@bucket).fetch_objects { @objects_list_empty }
+    expected = @objects_list_empty
+    actual = @bucket.objects
+    assert_equal expected, actual
+
+    stub(@bucket).fetch_objects { @objects_list }
+    expected = @objects_list_empty
+    actual = @bucket.objects
+    assert_equal expected, actual
+
+    @bucket.objects.reload
+
+    expected = @objects_list
+    actual = @bucket.objects.map { |obj| obj }
+    assert_equal expected, actual
+  end
+
+  def test_objects_destroy_all
+    @counter = 0
+    stub(@bucket).fetch_objects { @objects_list }
+    @bucket.objects.each do |obj|
+      mock(obj).destroy { @counter += 1 }
+    end
+
+    @bucket.objects.destroy_all
+    assert_equal @objects_list.length, @counter
+  end
 end
