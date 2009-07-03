@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3}
-  s.version = "0.0.2"
+  s.version = "0.0.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jakub Kuźma", "Mirosław Boruta"]
-  s.date = %q{2009-07-02}
+  s.date = %q{2009-07-03}
   s.default_executable = %q{s3cmd.rb}
   s.email = %q{qoobaa@gmail.com}
   s.executables = ["s3cmd.rb"]
@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "bin/s3cmd.rb",
+     "extras/s3_backend.rb",
      "lib/s3.rb",
      "lib/s3/bucket.rb",
      "lib/s3/connection.rb",
@@ -35,6 +36,7 @@ Gem::Specification.new do |s|
      "test/bucket_test.rb",
      "test/connection_test.rb",
      "test/s3_test.rb",
+     "test/service_test.rb",
      "test/signature_test.rb",
      "test/test_helper.rb"
   ]
@@ -46,6 +48,7 @@ Gem::Specification.new do |s|
   s.test_files = [
     "test/s3_test.rb",
      "test/bucket_test.rb",
+     "test/service_test.rb",
      "test/signature_test.rb",
      "test/connection_test.rb",
      "test/test_helper.rb"

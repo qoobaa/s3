@@ -54,16 +54,7 @@ module S3
 
       def destroy_all(force = false)
         proxy_target.each do |bucket|
-          begin
-            bucket.destroy
-          rescue Error::BucketNotEmpty
-            if force
-              bucket.objects.destroy_all
-              retry
-            else
-              raise
-            end
-          end
+          bucket.destroy(force)
         end
       end
     end
@@ -72,7 +63,7 @@ module S3
       "#<#{self.class}:#@access_key_id>"
     end
 
-    protected
+    private
 
     def service_request(method, options = {})
       connection.request(method, options.merge(:path => "/#{options[:path]}"))
@@ -89,8 +80,6 @@ module S3
       end
       @connection
     end
-
-    private
 
     def parse_buckets(xml_body)
       xml = XmlSimple.xml_in(xml_body)
