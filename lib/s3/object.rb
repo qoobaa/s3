@@ -9,6 +9,10 @@ module S3
     def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
     def_instance_delegators :service, :protocol, :port
 
+    def ==(other)
+      self.name == other.name and self.bucket == other.bucket
+    end
+
     def acl=(acl)
       @acl = acl.to_s.gsub("_", "-")
     end

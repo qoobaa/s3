@@ -141,8 +141,15 @@ class BucketTest < Test::Unit::TestCase
   end
 
   def test_fetch_objects_and_parse_objects
-    mock(@bucket).fetch_objects(:test=>true) { true }
-    assert @bucket.objects(true, :test=>true)
+    mock(@bucket).bucket_request(:get, :test=>true) { @response_objects_list_empty }
+    expected = @objects_list_empty
+    actual = @bucket.objects(true, :test=>true).map { |obj| obj }
+    assert_equal expected, actual
+
+    mock(@bucket).bucket_request(:get, :test=>true) { @response_objects_list }
+    expected = @objects_list
+    actual = @bucket.objects(true, :test=>true).map { |obj| obj }
+    assert_equal expected, actual
   end
 
   def test_destroy
