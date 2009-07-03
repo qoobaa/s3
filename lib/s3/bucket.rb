@@ -32,9 +32,16 @@ module S3
       false
     end
 
-    def destroy
+    def destroy(force = false)
       bucket_request(:delete)
       true
+    rescue Error::BucketNotEmpty
+      if force
+        objects.destroy_all
+        retry
+      else
+        raise
+      end
     end
 
     def save(location = nil)

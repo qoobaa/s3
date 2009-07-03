@@ -95,7 +95,7 @@ module Technoweenie
         protected
 
         def destroy_file
-          object = self.class.bucket.find(full_filename)
+          object = self.class.bucket.objects.find(full_filename)
           object.destroy
         end
 
@@ -104,7 +104,7 @@ module Technoweenie
 
           old_full_filename = [base_path, filename_was].join("/")
 
-          object = self.class.bucket.find(old_full_filename)
+          object = self.class.bucket.objects.find(old_full_filename)
           new_object = object.copy(:key => full_filename, :acl => attachment_options[:acl])
           object.destroy
           true
