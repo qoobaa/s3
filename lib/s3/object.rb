@@ -19,7 +19,7 @@ module S3
     end
 
     def acl=(acl)
-      @acl = acl.to_s.gsub("_", "-")
+      @acl = acl.to_s.gsub("_", "-") if acl
     end
 
     def retrieve
