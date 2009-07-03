@@ -30,7 +30,7 @@ module Technoweenie
           bucket_name = base.attachment_options[:bucket_name] || configuration.bucket_name
 
           base.cattr_accessor :bucket
-          base.bucket = service.buckets.find(bucket_name)
+          base.bucket = service.buckets.build(bucket_name) # don't connect
 
           base.before_update :rename_file
         end
