@@ -67,8 +67,8 @@ module S3
       vhost? ? "" : "#@name/"
     end
 
-    def name_valid?
-      @name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/ and @name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
+    def name_valid?(name)
+      name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/ and name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
     end
 
     def objects(reload = false, options = {})
