@@ -106,7 +106,7 @@ class ServiceTest < Test::Unit::TestCase
   def test_buckets_find_first_fail
     stub(@response_ok).body { @buckets_list_body }
 
-    assert_raises S3::Error::NoSuchBucket do
+    assert_raise S3::Error::NoSuchBucket do
       @service_ok.buckets.find_first("data2.example.com")
     end
   end
