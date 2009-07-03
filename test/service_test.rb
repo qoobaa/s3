@@ -18,21 +18,21 @@ class ServiceTest < Test::Unit::TestCase
     stub(@service_buckets_list).service_request { @response_buckets_list }
     stub(@response_buckets_list).body { @buckets_list_body }
 
-    @service_bucket_exist = S3::Service.new(
+    @service_bucket_exists = S3::Service.new(
       :access_key_id =>  "12345678901234567890",
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
     )
-    @response_bucket_exist = Net::HTTPNotFound.new("1.1", "200", "OK")
-    stub(@service_bucket_exist).service_request { @response_bucket_exist }
-    stub(@response_bucket_exist).body { @bucket_exist }
+    @response_bucket_exists = Net::HTTPNotFound.new("1.1", "200", "OK")
+    stub(@service_bucket_exists).service_request { @response_bucket_exists }
+    stub(@response_bucket_exists).body { @bucket_exists }
 
-    @service_bucket_not_exist = S3::Service.new(
+    @service_bucket_not_exists = S3::Service.new(
       :access_key_id =>  "12345678901234567890",
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
     )
-    @response_bucket_not_exist = Net::HTTPNotFound.new("1.1", "404", "Not Found")
-    stub(@service_bucket_not_exist).service_request { raise S3::Error::NoSuchBucket.new(404, @response_bucket_not_exist) }
-    stub(@response_bucket_not_exist).body { @bucket_not_exist }
+    @response_bucket_not_exists = Net::HTTPNotFound.new("1.1", "404", "Not Found")
+    stub(@service_bucket_not_exists).service_request { raise S3::Error::NoSuchBucket.new(404, @response_bucket_not_exists) }
+    stub(@response_bucket_not_exists).body { @bucket_not_exists }
 
     @buckets_empty_list = []
     @buckets_empty_list_body = <<-EOEmptyBuckets
@@ -47,13 +47,13 @@ class ServiceTest < Test::Unit::TestCase
     <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListAllMyBucketsResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"> <Owner> <ID>123u1odhkhfoadf</ID> <DisplayName>JohnDoe</DisplayName> </Owner> <Buckets> <Bucket> <Name>data.example.com</Name> <CreationDate>2009-07-02T11:56:58.000Z</CreationDate> </Bucket> <Bucket> <Name>images</Name> <CreationDate>2009-06-05T12:26:33.000Z</CreationDate> </Bucket> </Buckets> </ListAllMyBucketsResult>
     EOBuckets
 
-    @bucket_not_exist = <<-EOBucketNoExist
-    <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error> <Code>NoSuchBucket</Code> <Message>The specified bucket does not exist</Message> <BucketName>data2.example.com</BucketName> <RequestId>8D7519AAE74E9E99</RequestId> <HostId>DvKnnNSMnPHd1oXukyRaFNv8Lg/bpwhuUtY8Kj7eDLbaIrIT8JebSnHwi89AK1P+</HostId> </Error>
-    EOBucketNoExist
+    @bucket_not_exists = <<-EOBucketNoexists
+    <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Error> <Code>NoSuchBucket</Code> <Message>The specified bucket does not exists</Message> <BucketName>data2.example.com</BucketName> <RequestId>8D7519AAE74E9E99</RequestId> <HostId>DvKnnNSMnPHd1oXukyRaFNv8Lg/bpwhuUtY8Kj7eDLbaIrIT8JebSnHwi89AK1P+</HostId> </Error>
+    EOBucketNoexists
 
-    @bucket_exist = <<-EOBucketExist
+    @bucket_exists = <<-EOBucketexists
     <?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListBucketResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"> <Name>data.synergypeople.net</Name> <Prefix></Prefix> <Marker></Marker> <MaxKeys>1000</MaxKeys> <IsTruncated>false</IsTruncated> </ListBucketResult>
-    EOBucketExist
+    EOBucketexists
   end
 
   def test_buckets_and_parse_buckets_empty
@@ -106,7 +106,7 @@ class ServiceTest < Test::Unit::TestCase
 
   def test_buckets_find_first_fail
     assert_raise S3::Error::NoSuchBucket do
-      @service_bucket_not_exist.buckets.find_first("data2.example.com")
+      @service_bucket_not_exists.buckets.find_first("data2.example.com")
     end
   end
 
