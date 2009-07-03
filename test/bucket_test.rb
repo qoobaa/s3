@@ -167,6 +167,19 @@ class BucketTest < Test::Unit::TestCase
   end
 
   def test_objects_find_first
+    assert_nothing_raised do
+      stub.instance_of(S3::Object).retrieve { S3::Object.new(nil, "obj2") }
+      expected = "obj2"
+      actual = @bucket.objects.find_first("obj2")
+      assert_equal "obj2", actual.key
+    end
+  end
+
+  def test_objects_find_first_fail
+    assert_raise S3::Error::NoSuchKey do
+      stub.instance_of(S3::Object).retrieve { raise S3::Error::NoSuchKey.new(404, nil) }
+      @bucket.objects.find_first("obj3")
+    end
   end
 
   def test_objects_find_all_on_empty_list
