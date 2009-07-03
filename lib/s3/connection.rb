@@ -58,7 +58,13 @@ module S3
       interesting_keys = [:content_type, :x_amz_acl, :range,
                           :if_modified_since, :if_unmodified_since,
                           :if_match, :if_none_match,
-                          :content_disposition, :content_encoding]
+                          :content_disposition, :content_encoding,
+                          :x_amz_copy_source, :x_amz_metadata_directive,
+                          :x_amz_copy_source_if_match,
+                          :x_amz_copy_source_if_none_match,
+                          :x_amz_copy_source_if_unmodified_since,
+                          :x_amz_copy_source_if_modified_since]
+
       parsed_headers = {}
       if headers
         headers.each do |key, value|
@@ -90,7 +96,7 @@ module S3
     end
 
     def port
-      use_ssl? ? 443 : 80
+      use_ssl ? 443 : 80
     end
 
     def http(host)

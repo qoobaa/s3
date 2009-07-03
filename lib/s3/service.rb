@@ -72,7 +72,7 @@ module S3
       "#<#{self.class}:#@access_key_id>"
     end
 
-    protected
+    private
 
     def service_request(method, options = {})
       connection.request(method, options.merge(:path => "/#{options[:path]}"))
@@ -89,8 +89,6 @@ module S3
       end
       @connection
     end
-
-    private
 
     def parse_buckets(xml_body)
       xml = XmlSimple.xml_in(xml_body)

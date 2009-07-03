@@ -102,20 +102,24 @@ module S3
       "#<#{self.class}:#{name}>"
     end
 
-    protected
+    def initialize(service, name)
+      self.service = service
+      self.name = name
+    end
+
+    private
+
+    attr_writer :service
+
+    def name=(name)
+      raise ArgumentError.new("Invalid bucket name: #{name}") unless name_valid?(name)
+      @name = name
+    end
 
     def bucket_request(method, options = {})
       path = "#{path_prefix}#{options[:path]}"
       service_request(method, options.merge(:host => host, :path => path))
     end
-
-    def initialize(service, name)
-      @service = service
-      @name = name
-      raise ArgumentError.new("Given name is not valid bucket name: #{@name}") unless name_valid?
-    end
-
-    private
 
     def fetch_objects(options = {})
       response = bucket_request(:get, options)
@@ -143,8 +147,8 @@ module S3
       xml["content"]
     end
 
-    def name_valid?
-      @name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/ and @name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
+    def name_valid?(name)
+      name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/ and @name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
     end
   end
 end
