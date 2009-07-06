@@ -1,4 +1,7 @@
 module S3
+
+  # Class responsible for handling objects stored in S3 buckets
+
   class Object
     extend Forwardable
 
@@ -9,29 +12,46 @@ module S3
     def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
     def_instance_delegators :service, :protocol, :port
 
+    # Compares the object with +other+ object. Returns true if the key
+    # of the objects are the same, and both have the same buckets (see
+    # bucket equality)
     def ==(other)
       self.key == other.key and self.bucket == other.bucket
     end
 
+    # Returns full key of the object: e.g. +bucket-name/object/key.ext+
     def full_key
       [name, key].join("/")
     end
 
+    # Assigns a new +key+ to the object, raises ArgumentError if given
+    # key is not valid key name
     def key=(key)
       raise ArgumentError.new("Invalid key name: #{key}") unless key_valid?(key)
       @key ||= key
     end
 
+    # Assigns a new ACL to the object. Please note that ACL is not
+    # retrieved from the server and set to "public-read" by default.
+    # ==== Example
+    #   object.acl = :public_read
     def acl=(acl)
       @acl = acl.to_s.gsub("_", "-") if acl
     end
 
+    # Retrieves the object from the server. Method is used to download
+    # object information only (content-type, size and so on). It does
+    # NOT download the content of the object (use the content method
+    # to do it).
     def retrieve
       response = object_request(:get, :headers => { :range => 0..0 })
       parse_headers(response)
       self
     end
 
+    # Retrieves the object from the server, returns +true+ if the
+    # object exists or +false+ otherwise. Uses +retrieve+ method, but
+    # catches +NoSuchKey+ exception and returns false when it happens
     def exists?
       retrieve
       true
@@ -39,6 +59,8 @@ module S3
       false
     end
 
+    # Download the content of the object, and caches it. Pass +true+
+    # to clear the cache and download the object again.
     def content(reload = false)
       if reload or @content.nil?
         response = object_request(:get)
@@ -48,6 +70,7 @@ module S3
       @content
     end
 
+    # Saves the object, returns +true+ if successfull.
     def save
       body = content.is_a?(IO) ? content.read : content
       response = object_request(:put, :body => body, :headers => dump_headers)
@@ -55,6 +78,9 @@ module S3
       true
     end
 
+    # Copies the file to another key and/or bucket.
+    # ==== Options
+    # :key:
     def copy(options = {})
       key = options[:key] || self.key
       bucket = options[:bucket] || self.bucket

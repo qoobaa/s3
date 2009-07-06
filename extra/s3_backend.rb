@@ -1,10 +1,26 @@
 require "singleton"
 require "s3"
 
+# S3 Backend for attachment-fu plugin. After installing attachment-fu
+# plugin, copy the file to:
+# +vendor/plugins/attachment-fu/lib/technoweenie/attachment_fu/backends+
+#
+# To configure S3Backend create initializer file in your Rails
+# application, e.g. +config/initializers/s3_backend.rb+.
+#
+#   Technoweenie::AttachmentFu::Backends::S3Backend.configuration do |config|
+#     config.access_key_id = "..." # your access key id
+#     config.secret_access_key = "..." # your secret access key
+#     config.bucket_name = "..." # default bucket name to store attachments
+#     config.use_ssl = false # pass true if you want to communicate via SSL
+#   end
+
 module Technoweenie
   module AttachmentFu
     module Backends
       module S3Backend
+
+        # S3Backend configuration class
         class Configuration
           include Singleton
 
@@ -13,6 +29,7 @@ module Technoweenie
           attr_accessor *ATTRIBUTES
         end
 
+        # Method used to configure S3Backend, see the example above
         def self.configuration
           if block_given?
             yield Configuration.instance
@@ -20,6 +37,7 @@ module Technoweenie
           Configuration.instance
         end
 
+        # :nodoc:
         def self.included(base)
           include S3
 
@@ -72,33 +90,44 @@ module Technoweenie
         alias :public_url :s3_url
         alias :public_filename :s3_url
 
+        # Name of the bucket used to store attachments
         def bucket_name
           self.class.bucket.name
         end
 
+        # :nodoc:
         def create_temp_file
           write_to_temp_file current_data
         end
 
+        # :nodoc:
         def current_data
           S3Object.value full_filename, bucket_name
         end
 
+        # Returns http:// or https:// depending on use_ssl setting
         def s3_protocol
           attachment_options[:use_ssl] ?  "https://" : "http://"
         end
 
+        # Returns hostname of the bucket
+        # e.g. +bucketname.com.s3.amazonaws.com+. Additionally you can
+        # pass :cname => true option in has_attachment method to
+        # return CNAME only, e.g. +bucketname.com+
         def s3_hostname
           attachment_options[:cname] ? self.class.bucket.name : self.class.bucket.host
         end
 
         protected
 
+        # Frees the space in S3 bucket, used by after_destroy callback
         def destroy_file
           object = self.class.bucket.objects.find(full_filename)
           object.destroy
         end
 
+        # Renames file if filename has been changed - copy the file to
+        # new key and delete old one
         def rename_file
           return unless filename_changed?
 
@@ -110,6 +139,7 @@ module Technoweenie
           true
         end
 
+        # Saves the file to storage
         def save_to_storage
           if save_attachment?
             object = self.class.bucket.objects.build(full_filename)
