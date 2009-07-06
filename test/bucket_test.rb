@@ -218,24 +218,6 @@ class BucketTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_objects_reload_without_checking_result
-    stub(@bucket).fetch_objects { @objects_list_empty }
-    expected = @objects_list_empty
-    actual = @bucket.objects
-    assert_equal expected, actual
-
-    stub(@bucket).fetch_objects { @objects_list }
-    expected = @objects_list_empty
-    actual = @bucket.objects
-    assert_equal expected, actual
-
-    @bucket.objects.reload
-
-    expected = @objects_list
-    actual = @bucket.objects
-    assert_equal expected, actual
-  end
-
   def test_objects_destroy_all
     @counter = 0
     stub(@bucket).fetch_objects { @objects_list }

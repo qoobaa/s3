@@ -91,7 +91,7 @@ module S3
       end
 
       def reload
-        Array(proxy_owner.objects(true))
+        proxy_owner.objects(true)
       end
 
       def destroy_all
