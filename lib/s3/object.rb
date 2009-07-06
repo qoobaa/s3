@@ -81,11 +81,11 @@ module S3
     end
 
     def url
-      "#{protocol}#{host}/#{path_prefix}#{key}"
+      URI.escape("#{protocol}#{host}/#{path_prefix}#{key}")
     end
 
     def cname_url
-      "#{protocol}#{name}/#{key}" if bucket.vhost?
+      URI.escape("#{protocol}#{name}/#{key}") if bucket.vhost?
     end
 
     def inspect
