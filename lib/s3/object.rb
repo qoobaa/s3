@@ -9,6 +9,10 @@ module S3
     def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
     def_instance_delegators :service, :protocol, :port
 
+    def ==(other)
+      self.key == other.key and self.bucket == other.bucket
+    end
+
     def full_key
       [name, key].join("/")
     end
