@@ -84,9 +84,21 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   def test_save
-    flunk "not implemented yet"
-    object = S3::Object(nil, "Lena.png")
-    mock(object).object_request() {}
+    object = S3::Object.new(nil, "Lena.png")
+    object.content = "test"
+
+    @response = Net::HTTPOK.new("1.1", "200", "OK")
+    stub(@response).body { "test".force_encoding(Encoding::BINARY) }
+    @response["etag"] = ""
+    @response["content-type"] = "image/png"
+    @response["content-disposition"] = "inline"
+    @response["content-encoding"] = nil
+    @response["last-modified"] = Time.now.httpdate
+    @response["content-length"] = 20
+
+    mock(object).object_request(:put, {:body=>"test", :headers=>{:x_amz_acl=>"public-read", :content_type=>"application/octet-stream"}}) { @response }
+
+    assert object.save
   end
 
   def test_content_and_parse_headers
@@ -130,4 +142,17 @@ class ObjectTest < Test::Unit::TestCase
 
     assert object.retrieve
   end
+
+  def test_exists
+    object_ex = S3::Object.new(nil, "Lena.png")
+    mock(object_ex).retrieve { true }
+
+    assert object_ex.exists?
+
+    object_nonex = S3::Object.new(nil, "Carmen.png")
+    mock(object_nonex).retrieve { raise S3::Error::NoSuchKey.new(nil, nil) }
+
+    assert ! object_nonex.exists?
+  end
+
 end
