@@ -5,22 +5,28 @@ module S3
   # Implements algorithm defined by Amazon Web Services to sign
   # request with secret private credentials
   #
-  # Authors:: Jakub Kuźma, Mirosław Boruta
-  # See:: http://docs.amazonwebservices.com/AmazonS3/latest/index.html?RESTAuthentication.html
+  # === Authors:
+  # * Jakub Kuźma,
+  # * Mirosław Boruta
+  #
+  # === See:
+  # http://docs.amazonwebservices.com/AmazonS3/latest/index.html?RESTAuthentication.html
 
   class Signature
 
     # Generates signature for given parameters
     #
-    # Parameters::
-    #   * +options+ -- Hash of options
-    #     * +:host+ -- hostname
-    #     * +:request+ -- Net::HTTPRequest object with correct headers
-    #     * +:access_key_id+ -- access key id
-    #     * +:secret_access_key+ -- secret access key
+    # ==== Parameters:
+    # +options+:: a hash that contains options listed below
     #
-    # Returns::
-    #   * String -- generated signature for given hostname and request
+    # ==== Options:
+    # +:host+:: hostname
+    # +:request+:: Net::HTTPRequest object with correct headers
+    # +:access_key_id+:: access key id
+    # +:secret_access_key+:: secret access key
+    #
+    # ==== Returns:
+    # Generated signature for given hostname and request
     def self.generate(options)
       request = options[:request]
       host = options[:host]
@@ -59,11 +65,11 @@ module S3
     # Helper method for extracting header fields from Net::HTTPRequest and
     # preparing them for singing in #generate method
     #
-    # Parameters::
-    #   * +request+ -- Net::HTTPRequest object with header fields filled in
+    # ==== Parameters:
+    # +request+:: Net::HTTPRequest object with header fields filled in
     #
-    # Returns::
-    #   * String -- string containing interesting header fields in suitable order and form
+    # ==== Returns:
+    # String containing interesting header fields in suitable order and form
     def self.canonicalized_amz_headers(request)
       headers = []
 
@@ -121,12 +127,12 @@ module S3
 
     # Helper methods for extracting caninocalized resource address
     #
-    # Parameters::
-    #   * +host+ -- hostname
-    #   * +request+ -- Net::HTTPRequest object with headers filealds filled in
+    # ==== Parameters:
+    # +host+:: hostname
+    # +request+:: Net::HTTPRequest object with headers filealds filled in
     #
-    # Returns::
-    #   * String -- string containing extracted canonicalized resource
+    # ==== Returns:
+    # String containing extracted canonicalized resource
     def self.canonicalized_resource(host, request)
       # 1. Start with the empty string ("").
       string = ""
