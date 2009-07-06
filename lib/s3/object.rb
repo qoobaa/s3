@@ -79,8 +79,12 @@ module S3
     end
 
     # Copies the file to another key and/or bucket.
-    # ==== Options
-    # :key:
+    # ==== Options:
+    # +:key+:: new key to store object in
+    # +:bucket+:: new bucket to store object in (instance of S3::Bucket)
+    # +:acl+:: acl of the copied object (default: +public-read+)
+    # +:content_type+:: content type of the copied object (default: +application/octet-stream+)
+    # TODO
     def copy(options = {})
       key = options[:key] || self.key
       bucket = options[:bucket] || self.bucket

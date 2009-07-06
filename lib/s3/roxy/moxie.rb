@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 module S3
-  module Roxy
+  module Roxy # :nodoc:all
     module Moxie
       # Set up this class to proxy on the given name
       def proxy(name, options = {}, &block)
