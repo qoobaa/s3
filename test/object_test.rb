@@ -75,4 +75,59 @@ class ObjectTest < Test::Unit::TestCase
     actual = object21.cname_url
     assert_equal expected, actual
   end
+
+  def test_destroy
+    object = S3::Object.new(nil, "Lena.png")
+    mock(object).object_request(:delete) {}
+
+    assert object.destroy
+  end
+
+  def test_save
+    flunk "not implemented yet"
+    object = S3::Object(nil, "Lena.png")
+    mock(object).object_request() {}
+  end
+
+  def test_content_and_parse_headers
+    object = S3::Object.new(nil, "Lena.png")
+    @response = Net::HTTPOK.new("1.1", "200", "OK")
+    stub(@response).body { "\x89PNG\x0d\x1a\x00\x00\x00\x0dIHDR\x00\x00\x00\x96\x00\x00".force_encoding(Encoding::BINARY) }
+    @response["etag"] = ""
+    @response["content-type"] = "image/png"
+    @response["content-disposition"] = "inline"
+    @response["content-encoding"] = nil
+    @response["last-modified"] = Time.now.httpdate
+    @response["content-length"] = 20
+
+    mock(object).object_request(:get) { @response }
+
+    expected = /\x89PNG/n
+    actual = object.content
+    assert_match expected, actual
+    assert_equal "image/png", object.content_type
+
+    stub(object).object_request(:get) { flunk "should not use connection" }
+
+    assert object.content
+
+    mock(object).object_request(:get) { @response }
+    assert object.content(true)
+  end
+
+  def test_retrieve
+    object = S3::Object.new(nil, "Lena.png")
+    @response = Net::HTTPOK.new("1.1", "200", "OK")
+    stub(@response).body { "\x89PNG\x0d\x1a\x00\x00\x00\x0dIHDR\x00\x00\x00\x96\x00\x00".force_encoding(Encoding::BINARY) }
+    @response["etag"] = ""
+    @response["content-type"] = "image/png"
+    @response["content-disposition"] = "inline"
+    @response["content-encoding"] = nil
+    @response["last-modified"] = Time.now.httpdate
+    @response["content-length"] = 20
+
+    mock(object).object_request(:get, :headers=>{:range=>0..0}) { @response }
+
+    assert object.retrieve
+  end
 end
