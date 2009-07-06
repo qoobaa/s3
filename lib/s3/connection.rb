@@ -8,13 +8,15 @@ module S3
     attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug
     alias :use_ssl? :use_ssl
 
-    # Parameters::
-    #   * +options+ -- Hash of options
-    #     * +:access_key_id+ -- access key id
-    #     * +:secret_access_key+ -- secret access key
-    #     * +:use_ssl+ -- optional, defaults to +false+
-    #     * +:debug+ -- optional, defaults to +false+
-    #     * +:timeout+ -- optional, for Net::HTTP
+    # ==== Parameters:
+    # +options+:: Hash of options
+    #
+    # ==== Options:
+    # +:access_key_id+:: access key id
+    # +:secret_access_key+:: secret access key
+    # +:use_ssl+:: optional, defaults to +false+
+    # +:debug+:: optional, defaults to +false+
+    # +:timeout+:: optional, for Net::HTTP
     def initialize(options = {})
       @access_key_id = options[:access_key_id]
       @secret_access_key = options[:secret_access_key]
@@ -26,17 +28,19 @@ module S3
     # Makes request with given method (HTTP Method), sets missing parameters,
     # adds signature to request header and returns response object (Net::HTTPResponse)
     #
-    # Parameters::
-    #   * +method+ -- HTTP Method symbol, can be +:get+, +:put+, +:delete+
-    #   * +options+ -- hash of options
-    #     * +:host+ -- hostname to connecto to, optional, defaults to s3.amazonaws.com[s3.amazonaws.com]
-    #     * +:path+ -- path to send request to, required, throws ArgumentError if not given
-    #     * +:body+ -- request body, only meaningful for :put request
-    #     * +:params+ -- parameters to add to query string for request, can be String or Hash
-    #     * +:headers+ -- Hash of headers fields to add to request header
+    # ==== Parameters:
+    # +method+:: HTTP Method symbol, can be +:get+, +:put+, +:delete+
+    # +options+:: hash of options
     #
-    # Returns::
-    #   * Net::HTTPResponse object -- response from remote server
+    # ==== Options:
+    # +:host+:: hostname to connecto to, optional, defaults to s3.amazonaws.com[s3.amazonaws.com]
+    # +:path+:: path to send request to, required, throws ArgumentError if not given
+    # +:body+:: request body, only meaningful for :put request
+    # +:params+:: parameters to add to query string for request, can be String or Hash
+    # +:headers+:: Hash of headers fields to add to request header
+    #
+    # ==== Returns:
+    # Net::HTTPResponse object -- response from remote server
     def request(method, options)
       host = options[:host] || HOST
       path = options[:path] or raise ArgumentError.new("no path given")
@@ -65,12 +69,12 @@ module S3
     # Helper function to parser parameters and create single string of params
     # added to questy string
     #
-    # Parameters::
-    #   * +params+ -- Hash of parameters if form <tt>key => value|nil</tt>
+    # ==== Parameters:
+    # +params+:: Hash of parameters if form <tt>key => value|nil</tt>
     #
-    # Returns::
-    #   * String -- containing all parameters joined in one params string,
-    #     i.e. <tt>param1=val&param2&param3=0</tt>
+    # ==== Returns:
+    # String -- containing all parameters joined in one params string,
+    # i.e. <tt>param1=val&param2&param3=0</tt>
     def self.parse_params(params)
       interesting_keys = [:max_keys, :prefix, :marker, :delimiter, :location]
 
@@ -92,14 +96,14 @@ module S3
     # Helper function to change headers from symbols, to in correct
     # form (i.e. with '-' instead of '_')
     #
-    # Parameters::
-    #   * +headers+ -- Hash of pairs <tt>headername => value</tt>,
-    #     where value can be Range (for Range header) or any other
-    #     value which can be translated to string
+    # ==== Parameters:
+    # +headers+:: Hash of pairs <tt>headername => value</tt>,
+    #             where value can be Range (for Range header) or any other
+    #             value which can be translated to string
     #
-    # Returns::
-    #   * +String+ -- Hash of headers translated from symbol to string,
-    #     containing only interesting headers
+    # ==== Returns:
+    # Hash of headers translated from symbol to string,
+    # containing only interesting headers
     def self.parse_headers(headers)
       interesting_keys = [:content_type, :x_amz_acl, :range,
                           :if_modified_since, :if_unmodified_since,

@@ -4,10 +4,20 @@ module S3
 
     attr_reader :access_key_id, :secret_access_key, :use_ssl
 
+    # Compares service to other, by access_key_id and secret_access_key
     def ==(other)
       self.access_key_id == other.access_key_id and self.secret_access_key == other.secret_access_key
     end
 
+    # ==== Parameters:
+    # +options+:: a hash of options described below
+    #
+    # ==== Options:
+    # +:access_key_id+:: Amazon access key id, required
+    # +:secret_access_key+:: Amazon secret access key, required
+    # +:use_ssl+:: true if use ssl in connection, otherwise false
+    # +:timeout+:: parameter for Net::HTTP module
+    # +:debug+:: if debuging informations are needed
     def initialize(options)
       @access_key_id = options[:access_key_id] or raise ArgumentError.new("No access key id given")
       @secret_access_key = options[:secret_access_key] or raise ArgumentError.new("No secret access key given")
@@ -25,10 +35,12 @@ module S3
       end
     end
 
+    # Returns "http://" or "https://", depends on use_ssl value from initializer
     def protocol
       use_ssl ? "https://" : "http://"
     end
 
+    # Return 443 or 80, depends on use_ssl value from initializer
     def port
       use_ssl ? 443 : 80
     end
