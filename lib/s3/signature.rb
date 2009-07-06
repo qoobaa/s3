@@ -1,7 +1,26 @@
 module S3
+
+  # Class responsible for generating signatures to requests.
+  #
+  # Implements algorithm defined by Amazon Web Services to sign
+  # request with secret private credentials
+  #
+  # Authors:: Jakub Kuźma, Mirosław Boruta
+  # See:: http://docs.amazonwebservices.com/AmazonS3/latest/index.html?RESTAuthentication.html
+
   class Signature
 
-    # Required options: host, request, access_key_id, secret_access_key
+    # Generates signature for given parameters
+    #
+    # Parameters::
+    #   * +options+ -- Hash of options
+    #     * +:host+ -- hostname
+    #     * +:request+ -- Net::HTTPRequest object with correct headers
+    #     * +:access_key_id+ -- access key id
+    #     * +:secret_access_key+ -- secret access key
+    #
+    # Returns::
+    #   * String -- generated signature for given hostname and request
     def self.generate(options)
       request = options[:request]
       host = options[:host]
@@ -37,6 +56,14 @@ module S3
 
     private
 
+    # Helper method for extracting header fields from Net::HTTPRequest and
+    # preparing them for singing in #generate method
+    #
+    # Parameters::
+    #   * +request+ -- Net::HTTPRequest object with header fields filled in
+    #
+    # Returns::
+    #   * String -- string containing interesting header fields in suitable order and form
     def self.canonicalized_amz_headers(request)
       headers = []
 
@@ -92,6 +119,14 @@ module S3
       joined_headers.join("\n")
     end
 
+    # Helper methods for extracting caninocalized resource address
+    #
+    # Parameters::
+    #   * +host+ -- hostname
+    #   * +request+ -- Net::HTTPRequest object with headers filealds filled in
+    #
+    # Returns::
+    #   * String -- string containing extracted canonicalized resource
     def self.canonicalized_resource(host, request)
       # 1. Start with the empty string ("").
       string = ""
