@@ -155,4 +155,44 @@ class ObjectTest < Test::Unit::TestCase
     assert ! object_nonex.exists?
   end
 
+  def test_acl_writer
+    object = S3::Object.new(nil, "Lena.png")
+
+    expected = nil
+    actual = object.acl
+    assert_equal expected, actual
+
+    assert object.acl=:public_read
+
+    expected = "public-read"
+    actual = object.acl
+    assert_equal expected, actual
+
+    assert object.acl=:private
+
+    expected = "private"
+    actual = object.acl
+    assert_equal expected, actual
+  end
+
+  def test_copy
+    bucket = S3::Bucket.new(nil, "images")
+    object = S3::Object.new(bucket, "Lena.png")
+
+    @response = Net::HTTPOK.new("1.1", "200", "OK")
+    xml_body = <<-EOXML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <CopyObjectResult>
+      <LastModified>timestamp</LastModified>
+       <ETag>"etag"</ETag>
+    </CopyObjectResult>
+    EOXML
+    mock(bucket).bucket_request(:put, {:path=>"Lena.png", :headers=>{:x_amz_acl=>"public-read", :content_type=>"application/octet-stream", :x_amz_copy_source=>"images/Lena.png", :x_amz_metadata_directive=>"REPLACE"}}) { @response }
+    mock(@response).body { xml_body }
+
+    new_object = object.copy
+
+    assert_equal object, new_object
+    assert ! object.eql?(new_object)
+  end
 end
