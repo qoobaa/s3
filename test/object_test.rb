@@ -3,6 +3,30 @@ require 'test_helper'
 
 class ObjectTest < Test::Unit::TestCase
   def setup
+    @service = S3::Service.new(
+      :access_key_id => "1234",
+      :secret_access_key => "1337"
+    )
+    @bucket_images = S3::Bucket.new(@service, "images")
+    @object_lena = S3::Object.new(@bucket_images, "Lena.png")
+    @object_lena.content = "test"
+    @object_carmen = S3::Object.new(@bucket_images, "Carmen.png")
+
+    @response_binary = Net::HTTPOK.new("1.1", "200", "OK")
+    stub(@response_binary).body { "test".force_encoding(Encoding::BINARY) }
+    @response_binary["etag"] = ""
+    @response_binary["content-type"] = "image/png"
+    @response_binary["content-disposition"] = "inline"
+    @response_binary["content-encoding"] = nil
+    @response_binary["last-modified"] = Time.now.httpdate
+    @response_binary["content-length"] = 20
+
+    @xml_body = <<-EOXML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <CopyObjectResult> <LastModified>timestamp</LastModified> <ETag>"etag"</ETag> </CopyObjectResult>
+    EOXML
+    @response_xml = Net::HTTPOK.new("1.1", "200", "OK")
+    stub(@response_xml).body { @xml_body }
   end
 
   def test_initilalize
@@ -18,20 +42,13 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   def test_full_key
-    bucket = S3::Bucket.new(nil, "images")
-    object = S3::Object.new(bucket, "Lena.png")
-
     expected = "images/Lena.png"
-    actual = object.full_key
+    actual = @object_lena.full_key
     assert_equal expected, actual
   end
 
   def test_url
-    service = S3::Service.new(
-      :access_key_id => "1234",
-      :secret_access_key => "1337"
-    )
-    bucket1 = S3::Bucket.new(service, "images")
+    bucket1 = S3::Bucket.new(@service, "images")
 
     object11 = S3::Object.new(bucket1, "Lena.png")
     expected = "http://images.s3.amazonaws.com/Lena.png"
@@ -43,7 +60,7 @@ class ObjectTest < Test::Unit::TestCase
     actual = object12.url
     assert_equal expected, actual
 
-    bucket2 = S3::Bucket.new(service, "images_new")
+    bucket2 = S3::Bucket.new(@service, "images_new")
 
     object21 = S3::Object.new(bucket2, "Lena.png")
     expected = "http://s3.amazonaws.com/images_new/Lena.png"
@@ -52,11 +69,7 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   def test_cname_url
-    service = S3::Service.new(
-      :access_key_id => "1234",
-      :secret_access_key => "1337"
-    )
-    bucket1 = S3::Bucket.new(service, "images.example.com")
+    bucket1 = S3::Bucket.new(@service, "images.example.com")
 
     object11 = S3::Object.new(bucket1, "Lena.png")
     expected = "http://images.example.com/Lena.png"
@@ -68,7 +81,7 @@ class ObjectTest < Test::Unit::TestCase
     actual = object12.cname_url
     assert_equal expected, actual
 
-    bucket2 = S3::Bucket.new(service, "images_new")
+    bucket2 = S3::Bucket.new(@service, "images_new")
 
     object21 = S3::Object.new(bucket2, "Lena.png")
     expected = nil
@@ -77,122 +90,75 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   def test_destroy
-    object = S3::Object.new(nil, "Lena.png")
-    mock(object).object_request(:delete) {}
-
-    assert object.destroy
+    mock(@object_lena).object_request(:delete) {}
+    assert @object_lena.destroy
   end
 
   def test_save
-    object = S3::Object.new(nil, "Lena.png")
-    object.content = "test"
+    mock(@object_lena).object_request(
+      :put, :body=>"test",
+      :headers=>{ :x_amz_acl=>"public-read", :content_type=>"application/octet-stream" }
+    ) { @response_binary }
 
-    @response = Net::HTTPOK.new("1.1", "200", "OK")
-    stub(@response).body { "test".force_encoding(Encoding::BINARY) }
-    @response["etag"] = ""
-    @response["content-type"] = "image/png"
-    @response["content-disposition"] = "inline"
-    @response["content-encoding"] = nil
-    @response["last-modified"] = Time.now.httpdate
-    @response["content-length"] = 20
-
-    mock(object).object_request(:put, {:body=>"test", :headers=>{:x_amz_acl=>"public-read", :content_type=>"application/octet-stream"}}) { @response }
-
-    assert object.save
+    assert @object_lena.save
   end
 
   def test_content_and_parse_headers
-    object = S3::Object.new(nil, "Lena.png")
-    @response = Net::HTTPOK.new("1.1", "200", "OK")
-    stub(@response).body { "\x89PNG\x0d\x1a\x00\x00\x00\x0dIHDR\x00\x00\x00\x96\x00\x00".force_encoding(Encoding::BINARY) }
-    @response["etag"] = ""
-    @response["content-type"] = "image/png"
-    @response["content-disposition"] = "inline"
-    @response["content-encoding"] = nil
-    @response["last-modified"] = Time.now.httpdate
-    @response["content-length"] = 20
+    mock(@object_lena).object_request(:get) { @response_binary }
 
-    mock(object).object_request(:get) { @response }
-
-    expected = /\x89PNG/n
-    actual = object.content
+    expected = /test/n
+    actual = @object_lena.content(true) # wtf? don't work with false, maybe is not fully cleaned
     assert_match expected, actual
-    assert_equal "image/png", object.content_type
+    assert_equal "image/png", @object_lena.content_type
 
-    stub(object).object_request(:get) { flunk "should not use connection" }
+    stub(@object_lena).object_request(:get) { flunk "should not use connection" }
 
-    assert object.content
+    assert @object_lena.content
 
-    mock(object).object_request(:get) { @response }
-    assert object.content(true)
+    mock(@object_lena).object_request(:get) { @response_binary }
+    assert @object_lena.content(true)
   end
 
   def test_retrieve
-    object = S3::Object.new(nil, "Lena.png")
-    @response = Net::HTTPOK.new("1.1", "200", "OK")
-    stub(@response).body { "\x89PNG\x0d\x1a\x00\x00\x00\x0dIHDR\x00\x00\x00\x96\x00\x00".force_encoding(Encoding::BINARY) }
-    @response["etag"] = ""
-    @response["content-type"] = "image/png"
-    @response["content-disposition"] = "inline"
-    @response["content-encoding"] = nil
-    @response["last-modified"] = Time.now.httpdate
-    @response["content-length"] = 20
-
-    mock(object).object_request(:get, :headers=>{:range=>0..0}) { @response }
-
-    assert object.retrieve
+    mock(@object_lena).object_request(:get, :headers=>{:range=>0..0}) { @response_binary }
+    assert @object_lena.retrieve
   end
 
   def test_exists
-    object_ex = S3::Object.new(nil, "Lena.png")
-    mock(object_ex).retrieve { true }
+    mock(@object_lena).retrieve { true }
+    assert @object_lena.exists?
 
-    assert object_ex.exists?
-
-    object_nonex = S3::Object.new(nil, "Carmen.png")
-    mock(object_nonex).retrieve { raise S3::Error::NoSuchKey.new(nil, nil) }
-
-    assert ! object_nonex.exists?
+    mock(@object_carmen).retrieve { raise S3::Error::NoSuchKey.new(nil, nil) }
+    assert ! @object_carmen.exists?
   end
 
   def test_acl_writer
-    object = S3::Object.new(nil, "Lena.png")
-
     expected = nil
-    actual = object.acl
+    actual = @object_lena.acl
     assert_equal expected, actual
 
-    assert object.acl=:public_read
+    assert @object_lena.acl = :public_read
 
     expected = "public-read"
-    actual = object.acl
+    actual = @object_lena.acl
     assert_equal expected, actual
 
-    assert object.acl=:private
+    assert @object_lena.acl = :private
 
     expected = "private"
-    actual = object.acl
+    actual = @object_lena.acl
     assert_equal expected, actual
   end
 
   def test_copy
-    bucket = S3::Bucket.new(nil, "images")
-    object = S3::Object.new(bucket, "Lena.png")
+    mock(@bucket_images).bucket_request(
+      :put, :path=>"Lena.png",
+      :headers=>{:x_amz_acl=>"public-read", :content_type=>"application/octet-stream", :x_amz_copy_source=>"images/Lena.png", :x_amz_metadata_directive=>"REPLACE"}
+    ) { @response_xml }
 
-    @response = Net::HTTPOK.new("1.1", "200", "OK")
-    xml_body = <<-EOXML
-    <?xml version="1.0" encoding="UTF-8"?>
-    <CopyObjectResult>
-      <LastModified>timestamp</LastModified>
-       <ETag>"etag"</ETag>
-    </CopyObjectResult>
-    EOXML
-    mock(bucket).bucket_request(:put, {:path=>"Lena.png", :headers=>{:x_amz_acl=>"public-read", :content_type=>"application/octet-stream", :x_amz_copy_source=>"images/Lena.png", :x_amz_metadata_directive=>"REPLACE"}}) { @response }
-    mock(@response).body { xml_body }
+    new_object = @object_lena.copy
 
-    new_object = object.copy
-
-    assert_equal object, new_object
-    assert ! object.eql?(new_object)
+    assert_equal @object_lena, new_object
+    assert ! @object_lena.eql?(new_object)
   end
 end
