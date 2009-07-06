@@ -126,7 +126,11 @@ module S3
     end
 
     def key_valid?(key)
-      key !~ /\/\//
+      if (key.nil? or key.empty? or key =~ %r#//#)
+        false
+      else
+        true
+      end
     end
 
     def parse_headers(response)
