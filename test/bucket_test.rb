@@ -134,21 +134,21 @@ class BucketTest < Test::Unit::TestCase
     assert_equal expected, actual
 
     stub(@bucket).fetch_objects { @objects_list }
-    # ugly hack
+
     expected = @objects_list
-    actual = @bucket.objects(true).map { |obj| obj }
+    actual = @bucket.objects(true)
     assert_equal expected, actual
   end
 
   def test_fetch_objects_and_parse_objects
     mock(@bucket).bucket_request(:get, :test=>true) { @response_objects_list_empty }
     expected = @objects_list_empty
-    actual = @bucket.objects(true, :test=>true).map { |obj| obj }
+    actual = @bucket.objects.find_all(:test => true)
     assert_equal expected, actual
 
     mock(@bucket).bucket_request(:get, :test=>true) { @response_objects_list }
     expected = @objects_list
-    actual = @bucket.objects(true, :test=>true).map { |obj| obj }
+    actual = @bucket.objects.find_all(:test => true)
     assert_equal expected, actual
   end
 
@@ -214,7 +214,7 @@ class BucketTest < Test::Unit::TestCase
     assert @bucket.objects.reload
 
     expected = @objects_list
-    actual = @bucket.objects.map { |obj| obj }
+    actual = @bucket.objects
     assert_equal expected, actual
   end
 
@@ -232,7 +232,7 @@ class BucketTest < Test::Unit::TestCase
     @bucket.objects.reload
 
     expected = @objects_list
-    actual = @bucket.objects.map { |obj| obj }
+    actual = @bucket.objects
     assert_equal expected, actual
   end
 

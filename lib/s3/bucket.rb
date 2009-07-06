@@ -67,15 +67,11 @@ module S3
       vhost? ? "" : "#@name/"
     end
 
-    def objects(reload = false, options = {})
-      if options.empty?
-        if reload or @objects.nil?
-          @objects = fetch_objects
-        else
-          @objects
-        end
+    def objects(reload = false)
+      if reload or @objects.nil?
+        @objects = fetch_objects
       else
-        fetch_objects(options)
+        @objects
       end
     end
 
@@ -91,11 +87,11 @@ module S3
       alias :find :find_first
 
       def find_all(options = {})
-        proxy_owner.objects(true, options)
+        proxy_owner.send(:fetch_objects, options)
       end
 
       def reload
-        proxy_owner.objects(true)
+        Array(proxy_owner.objects(true))
       end
 
       def destroy_all
