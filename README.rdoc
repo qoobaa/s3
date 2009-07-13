@@ -16,30 +16,39 @@ environment variables and uses them by default, so if you don't want
 to pass them each time, export them (e.g. in .bashrc file).
 
 * list buckets
+
   stree bucket
 
 * create bucket
+
   stree bucket add name-of-bucket
 
 * list objects in bucket
+
   stree bucket show name-of-bucket
 
 * destroy bucket
+
   stree bucket remove name-of-bucket
 
 * list objects (in all buckets)
+
   stree object
 
 * show the object information
+
   stree object show bucket_name/path/to/object.extension
 
 * download the content of the object
+
   stree object show bucket_name/path/to/object.extension filename_to_store_the_content.extension
 
 * show the content of the object to STDOUT
+
   stree object show bucket_name/path/to/object.extension -
 
 You can also pass --help to the commmands like:
+
   stree bucket add --help
   stree object show --help
 
