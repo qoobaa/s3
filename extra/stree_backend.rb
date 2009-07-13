@@ -103,7 +103,7 @@ module Technoweenie
         # :nodoc:
         def current_data
           # Object.value full_filename, bucket_name
-          object = self.class.bucket.find(full_filename)
+          object = self.class.bucket.objects.find(full_filename)
           object.content
         end
 
