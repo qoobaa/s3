@@ -6,11 +6,12 @@ require 'rake'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "s3"
+    gem.name = "stree"
     gem.summary = %Q{Library for accessing S3 objects and buckets, with command line tool}
     gem.email = "qoobaa@gmail.com"
-    gem.homepage = "http://github.com/qoobaa/s3"
+    gem.homepage = "http://github.com/qoobaa/stree"
     gem.authors = ["Jakub Kuźma", "Mirosław Boruta"]
+    gem.add_dependency "trollop", ">=1.14"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 
@@ -38,7 +39,6 @@ rescue LoadError
   end
 end
 
-
 task :default => :test
 
 require 'rake/rdoctask'
@@ -51,7 +51,7 @@ Rake::RDocTask.new do |rdoc|
   end
 
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "s3 #{version}"
+  rdoc.title = "stree #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

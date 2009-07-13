@@ -1,7 +1,6 @@
-module S3
+module Stree
 
   # Class responsible for handling objects stored in S3 buckets
-
   class Object
     extend Forwardable
 
@@ -12,7 +11,7 @@ module S3
     def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
     def_instance_delegators :service, :protocol, :port
 
-    # Compares the object with +other+ object. Returns true if the key
+    # Compares the object with other object. Returns true if the key
     # of the objects are the same, and both have the same buckets (see
     # bucket equality)
     def ==(other)
@@ -49,9 +48,9 @@ module S3
       self
     end
 
-    # Retrieves the object from the server, returns +true+ if the
-    # object exists or +false+ otherwise. Uses +retrieve+ method, but
-    # catches +NoSuchKey+ exception and returns false when it happens
+    # Retrieves the object from the server, returns true if the
+    # object exists or false otherwise. Uses retrieve method, but
+    # catches NoSuchKey exception and returns false when it happens
     def exists?
       retrieve
       true
@@ -59,7 +58,7 @@ module S3
       false
     end
 
-    # Download the content of the object, and caches it. Pass +true+
+    # Download the content of the object, and caches it. Pass true
     # to clear the cache and download the object again.
     def content(reload = false)
       if reload or @content.nil?
@@ -70,7 +69,7 @@ module S3
       @content
     end
 
-    # Saves the object, returns +true+ if successfull.
+    # Saves the object, returns true if successfull.
     def save
       body = content.is_a?(IO) ? content.read : content
       response = object_request(:put, :body => body, :headers => dump_headers)
@@ -80,11 +79,10 @@ module S3
 
     # Copies the file to another key and/or bucket.
     # ==== Options:
-    # +:key+:: new key to store object in
-    # +:bucket+:: new bucket to store object in (instance of S3::Bucket)
-    # +:acl+:: acl of the copied object (default: +public-read+)
-    # +:content_type+:: content type of the copied object (default: +application/octet-stream+)
-    # TODO
+    # +key+:: new key to store object in
+    # +bucket+:: new bucket to store object in (instance of Stree::Bucket)
+    # +acl+:: acl of the copied object (default: "public-read")
+    # +content_type+:: content type of the copied object (default: "application/octet-stream")
     def copy(options = {})
       key = options[:key] || self.key
       bucket = options[:bucket] || self.bucket
@@ -105,24 +103,31 @@ module S3
       self.class.parse_copied(:object => self, :bucket => bucket, :key => key, :body => response.body, :headers => headers)
     end
 
+    # Destroys the file on the server
     def destroy
       object_request(:delete)
       true
     end
 
+    # Returns Object's URL using protocol specified in Service,
+    # e.g. http://domain.com.s3.amazonaws.com/key/with/path.extension
     def url
       URI.escape("#{protocol}#{host}/#{path_prefix}#{key}")
     end
 
+    # Returns Object's CNAME URL (without s3.amazonaws.com suffix)
+    # using protocol specified in Service,
+    # e.g. http://domain.com/key/with/path.extension. (you have to set
+    # the CNAME in your DNS before you use the CNAME URL schema).
     def cname_url
       URI.escape("#{protocol}#{name}/#{key}") if bucket.vhost?
     end
 
-    def inspect
+    def inspect #:nodoc:
       "#<#{self.class}:/#{name}/#{key}>"
     end
 
-    def initialize(bucket, key, options = {})
+    def initialize(bucket, key, options = {}) #:nodoc:
       self.bucket = bucket
       self.key = key
       self.last_modified = options[:last_modified]

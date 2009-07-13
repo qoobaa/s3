@@ -1,9 +1,6 @@
-module S3
+module Stree
 
-  # Class responsible form making connection to amazon hosts
-  #
-  # Authors:: Jakub Kuźma, Mirosław Boruta
-
+  # Class responsible for handling connections to amazon hosts
   class Connection
     attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug
     alias :use_ssl? :use_ssl
@@ -12,11 +9,11 @@ module S3
     # +options+:: Hash of options
     #
     # ==== Options:
-    # +:access_key_id+:: access key id
-    # +:secret_access_key+:: secret access key
-    # +:use_ssl+:: optional, defaults to +false+
-    # +:debug+:: optional, defaults to +false+
-    # +:timeout+:: optional, for Net::HTTP
+    # +access_key_id+:: access key id
+    # +secret_access_key+:: secret access key
+    # +use_ssl+:: optional, defaults to false
+    # +debug+:: optional, defaults to false
+    # +timeout+:: optional, for Net::HTTP
     def initialize(options = {})
       @access_key_id = options[:access_key_id]
       @secret_access_key = options[:secret_access_key]
@@ -25,19 +22,20 @@ module S3
       @timeout = options[:timeout]
     end
 
-    # Makes request with given method (HTTP Method), sets missing parameters,
-    # adds signature to request header and returns response object (Net::HTTPResponse)
+    # Makes request with given HTTP method, sets missing parameters,
+    # adds signature to request header and returns response object
+    # (Net::HTTPResponse)
     #
     # ==== Parameters:
-    # +method+:: HTTP Method symbol, can be +:get+, +:put+, +:delete+
+    # +method+:: HTTP Method symbol, can be :get, :put, :delete
     # +options+:: hash of options
     #
     # ==== Options:
-    # +:host+:: hostname to connecto to, optional, defaults to s3.amazonaws.com[s3.amazonaws.com]
-    # +:path+:: path to send request to, required, throws ArgumentError if not given
-    # +:body+:: request body, only meaningful for :put request
-    # +:params+:: parameters to add to query string for request, can be String or Hash
-    # +:headers+:: Hash of headers fields to add to request header
+    # +host+:: hostname to connecto to, optional, defaults to s3.amazonaws.com[s3.amazonaws.com]
+    # +path+:: path to send request to, required, throws ArgumentError if not given
+    # +body+:: request body, only meaningful for :put request
+    # +params+:: parameters to add to query string for request, can be String or Hash
+    # +headers+:: Hash of headers fields to add to request header
     #
     # ==== Returns:
     # Net::HTTPResponse object -- response from remote server
@@ -70,7 +68,7 @@ module S3
     # added to questy string
     #
     # ==== Parameters:
-    # +params+:: Hash of parameters if form <tt>key => value|nil</tt>
+    # +params+: Hash of parameters if form <tt>key => value|nil</tt>
     #
     # ==== Returns:
     # String -- containing all parameters joined in one params string,
@@ -169,7 +167,7 @@ module S3
           request["Content-MD5"] = Base64.encode64(Digest::MD5.digest(request.body)).chomp
         end
 
-        request["Authorization"] = S3::Signature.generate(:host => host,
+        request["Authorization"] = Signature.generate(:host => host,
                                                           :request => request,
                                                           :access_key_id => access_key_id,
                                                           :secret_access_key => secret_access_key)
@@ -185,18 +183,17 @@ module S3
         response
       when 300...600
         if response.body.nil? || response.body.empty?
-          raise S3::Error::ResponseError.new(nil, response)
+          raise Error::ResponseError.new(nil, response)
         else
           xml = XmlSimple.xml_in(response.body)
           message = xml["Message"].first
           code = xml["Code"].first
-          raise S3::Error::ResponseError.exception(code).new(message, response)
+          raise Error::ResponseError.exception(code).new(message, response)
         end
       else
         raise(ConnectionError.new(response, "Unknown response code: #{response.code}"))
       end
       response
     end
-
   end
 end

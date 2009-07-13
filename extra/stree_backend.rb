@@ -1,14 +1,14 @@
 require "singleton"
-require "s3"
+require "stree"
 
-# S3 Backend for attachment-fu plugin. After installing attachment-fu
+# Stree Backend for attachment-fu plugin. After installing attachment-fu
 # plugin, copy the file to:
 # +vendor/plugins/attachment-fu/lib/technoweenie/attachment_fu/backends+
 #
-# To configure S3Backend create initializer file in your Rails
-# application, e.g. +config/initializers/s3_backend.rb+.
+# To configure StreeBackend create initializer file in your Rails
+# application, e.g. +config/initializers/stree_backend.rb+.
 #
-#   Technoweenie::AttachmentFu::Backends::S3Backend.configuration do |config|
+#   Technoweenie::AttachmentFu::Backends::StreeBackend.configuration do |config|
 #     config.access_key_id = "..." # your access key id
 #     config.secret_access_key = "..." # your secret access key
 #     config.bucket_name = "..." # default bucket name to store attachments
@@ -18,9 +18,9 @@ require "s3"
 module Technoweenie
   module AttachmentFu
     module Backends
-      module S3Backend
+      module StreeBackend
 
-        # S3Backend configuration class
+        # StreeBackend configuration class
         class Configuration
           include Singleton
 
@@ -29,7 +29,7 @@ module Technoweenie
           attr_accessor *ATTRIBUTES
         end
 
-        # Method used to configure S3Backend, see the example above
+        # Method used to configure StreeBackend, see the example above
         def self.configuration
           if block_given?
             yield Configuration.instance
@@ -39,7 +39,7 @@ module Technoweenie
 
         # :nodoc:
         def self.included(base)
-          include S3
+          include Stree
 
           service = Service.new(:access_key_id => configuration.access_key_id,
                                 :secret_access_key => configuration.secret_access_key,
@@ -102,7 +102,9 @@ module Technoweenie
 
         # :nodoc:
         def current_data
-          S3Object.value full_filename, bucket_name
+          # Object.value full_filename, bucket_name
+          object = self.class.bucket.find(full_filename)
+          object.content
         end
 
         # Returns http:// or https:// depending on use_ssl setting

@@ -1,13 +1,14 @@
-module S3
+module Stree
   module Error
 
     # All responses with a code between 300 and 599 that contain an
-    # <Error></Error> body are wrapped in an ErrorResponse which contains
-    # an Error object. This Error class generates a custom exception
-    # with the name of the xml Error and its message. All such runtime
-    # generated exception classes descend from ResponseError and contain
-    # the ErrorResponse object so that all code that makes a request can
-    # rescue ResponseError and get access to the ErrorResponse.
+    # <Error></Error> body are wrapped in an ErrorResponse which
+    # contains an Error object. This Error class generates a custom
+    # exception with the name of the xml Error and its message. All
+    # such runtime generated exception classes descend from
+    # ResponseError and contain the ErrorResponse object so that all
+    # code that makes a request can rescue ResponseError and get
+    # access to the ErrorResponse.
     class ResponseError < StandardError
       attr_reader :response
 
@@ -29,7 +30,7 @@ module S3
       # Descendant of ResponseError suitable for that exception code or ResponseError class
       # if no class found
       def self.exception(code)
-        S3::Error.const_get(code)
+        Stree::Error.const_get(code)
       rescue NameError
         ResponseError
       end

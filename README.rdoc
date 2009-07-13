@@ -1,7 +1,48 @@
-= s3
+= Stree
 
-Description goes here.
+* repository: http://github.com/qoobaa/stree
+* issue tracker: http://github.com/qoobaa/stree/issues
+* rdoc: http://qoobaa.github.com/stree
+
+== Usage
+
+Coming soon, see Rdoc documentation.
+
+== Command tool usage
+
+You have to pass access key id (-a) and secret access key (-s) to the
+command line tool. Stree reads ACCESS_KEY_ID and SECRET_ACCESS_KEY
+environment variables and uses them by default, so if you don't want
+to pass them each time, export them (e.g. in .bashrc file).
+
+* list buckets
+  stree bucket
+
+* create bucket
+  stree bucket add name-of-bucket
+
+* list objects in bucket
+  stree bucket show name-of-bucket
+
+* destroy bucket
+  stree bucket remove name-of-bucket
+
+* list objects (in all buckets)
+  stree object
+
+* show the object information
+  stree object show bucket_name/path/to/object.extension
+
+* download the content of the object
+  stree object show bucket_name/path/to/object.extension filename_to_store_the_content.extension
+
+* show the content of the object to STDOUT
+  stree object show bucket_name/path/to/object.extension -
+
+You can also pass --help to the commmands like:
+  stree bucket add --help
+  stree object show --help
 
 == Copyright
 
-Copyright (c) 2009 Jakub Kuźma. See LICENSE for details.
+Copyright (c) 2009 Jakub Kuźma, Mirosław Boruta. See LICENSE for details.

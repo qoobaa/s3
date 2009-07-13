@@ -7,7 +7,7 @@ class SignatureTest < Test::Unit::TestCase
     request["host"] = "johnsmith.s3.amazonaws.com"
     request["date"] = "Tue, 27 Mar 2007 19:36:42 +0000"
 
-    actual = S3::Signature.generate(
+    actual = Stree::Signature.generate(
       :host => request["host"],
       :request => request,
       :access_key_id => "0PN5J17HBGZHT7JJ3X82",
@@ -24,7 +24,7 @@ class SignatureTest < Test::Unit::TestCase
     request["host"] = "johnsmith.s3.amazonaws.com"
     request["date"] = "Tue, 27 Mar 2007 21:15:45 +0000"
 
-    actual = S3::Signature.generate(
+    actual = Stree::Signature.generate(
       :host => request["host"],
       :request => request,
       :access_key_id => "0PN5J17HBGZHT7JJ3X82",
@@ -40,7 +40,7 @@ class SignatureTest < Test::Unit::TestCase
     request["host"] = "johnsmith.s3.amazonaws.com"
     request["date"] = "Tue, 27 Mar 2007 19:42:41 +0000"
 
-    actual = S3::Signature.generate(
+    actual = Stree::Signature.generate(
       :host => request["host"],
       :request => request,
       :access_key_id => "0PN5J17HBGZHT7JJ3X82",
@@ -55,7 +55,7 @@ class SignatureTest < Test::Unit::TestCase
     request["host"] = "johnsmith.s3.amazonaws.com"
     request["date"] = "Tue, 27 Mar 2007 19:44:46 +0000"
 
-    actual = S3::Signature.generate(
+    actual = Stree::Signature.generate(
       :host => request["host"],
       :request => request,
       :access_key_id => "0PN5J17HBGZHT7JJ3X82",
@@ -72,7 +72,7 @@ class SignatureTest < Test::Unit::TestCase
     request["date"] = "Tue, 27 Mar 2007 21:20:27 +0000"
     request["x-amz-date"] = "Tue, 27 Mar 2007 21:20:26 +0000"
 
-    actual = S3::Signature.generate(
+    actual = Stree::Signature.generate(
       :host => request["host"],
       :request => request,
       :access_key_id => "0PN5J17HBGZHT7JJ3X82",
@@ -101,7 +101,7 @@ class SignatureTest < Test::Unit::TestCase
     request["content-encoding"] = "gzip"
     request["content-length"] = "5913339"
 
-    actual = S3::Signature.generate(
+    actual = Stree::Signature.generate(
       :host => "static.johnsmith.net",
       :request => request,
       :access_key_id => "0PN5J17HBGZHT7JJ3X82",
@@ -116,7 +116,7 @@ class SignatureTest < Test::Unit::TestCase
     request["host"] = "s3.amazonaws.com"
     request["date"] = "Wed, 28 Mar 2007 01:29:59 +0000"
 
-    actual = S3::Signature.generate(
+    actual = Stree::Signature.generate(
       :host => request["host"],
       :request => request,
       :access_key_id => "0PN5J17HBGZHT7JJ3X82",
@@ -131,7 +131,7 @@ class SignatureTest < Test::Unit::TestCase
     request["host"] = "s3.amazonaws.com"
     request["date"] = "Wed, 28 Mar 2007 01:49:49 +0000"
 
-    actual = S3::Signature.generate(
+    actual = Stree::Signature.generate(
       :host => request["host"],
       :request => request,
       :access_key_id => "0PN5J17HBGZHT7JJ3X82",

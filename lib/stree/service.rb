@@ -1,4 +1,4 @@
-module S3
+module Stree
   class Service
     extend Roxy::Moxie
 
@@ -13,11 +13,11 @@ module S3
     # +options+:: a hash of options described below
     #
     # ==== Options:
-    # +:access_key_id+:: Amazon access key id, required
-    # +:secret_access_key+:: Amazon secret access key, required
-    # +:use_ssl+:: true if use ssl in connection, otherwise false
-    # +:timeout+:: parameter for Net::HTTP module
-    # +:debug+:: if debuging informations are needed
+    # +access_key_id+:: Amazon access key id, required
+    # +secret_access_key+:: Amazon secret access key, required
+    # +use_ssl+:: true if use ssl in connection, otherwise false
+    # +timeout+:: parameter for Net::HTTP module
+    # +debug+:: prints the raw requests to STDOUT
     def initialize(options)
       @access_key_id = options[:access_key_id] or raise ArgumentError.new("No access key id given")
       @secret_access_key = options[:secret_access_key] or raise ArgumentError.new("No secret access key given")
@@ -26,6 +26,7 @@ module S3
       @debug = options[:debug]
     end
 
+    # Returns all buckets in the service and caches the result (see reload)
     def buckets(reload = false)
       if reload or @buckets.nil?
         response = service_request(:get)
@@ -46,24 +47,31 @@ module S3
     end
 
     proxy :buckets do
+      # Builds new bucket with given name
       def build(name)
         Bucket.new(proxy_owner, name)
       end
 
+      # Finds the bucket with given name
       def find_first(name)
         bucket = build(name)
         bucket.retrieve
       end
       alias :find :find_first
 
+      # Find all buckets in the service
       def find_all
         proxy_target
       end
 
+      # Reloads the bucket list (clears the cache)
       def reload
         proxy_owner.buckets(true)
       end
 
+      # Destroy all buckets in the service. Doesn't destroy non-empty
+      # buckets by default, pass true to force destroy (USE WITH
+      # CARE!).
       def destroy_all(force = false)
         proxy_target.each do |bucket|
           bucket.destroy(force)
@@ -71,7 +79,7 @@ module S3
       end
     end
 
-    def inspect
+    def inspect #:nodoc:
       "#<#{self.class}:#@access_key_id>"
     end
 

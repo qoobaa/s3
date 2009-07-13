@@ -1,13 +1,9 @@
-module S3
+module Stree
 
   # Class responsible for generating signatures to requests.
   #
   # Implements algorithm defined by Amazon Web Services to sign
   # request with secret private credentials
-  #
-  # === Authors:
-  # * Jakub Kuźma,
-  # * Mirosław Boruta
   #
   # === See:
   # http://docs.amazonwebservices.com/AmazonS3/latest/index.html?RESTAuthentication.html
@@ -17,13 +13,13 @@ module S3
     # Generates signature for given parameters
     #
     # ==== Parameters:
-    # +options+:: a hash that contains options listed below
+    # +options+: a hash that contains options listed below
     #
     # ==== Options:
-    # +:host+:: hostname
-    # +:request+:: Net::HTTPRequest object with correct headers
-    # +:access_key_id+:: access key id
-    # +:secret_access_key+:: secret access key
+    # +host+: hostname
+    # +request+: Net::HTTPRequest object with correct headers
+    # +access_key_id+: access key id
+    # +secret_access_key+: secret access key
     #
     # ==== Returns:
     # Generated signature for given hostname and request
@@ -66,7 +62,7 @@ module S3
     # preparing them for singing in #generate method
     #
     # ==== Parameters:
-    # +request+:: Net::HTTPRequest object with header fields filled in
+    # +request+: Net::HTTPRequest object with header fields filled in
     #
     # ==== Returns:
     # String containing interesting header fields in suitable order and form
@@ -128,8 +124,8 @@ module S3
     # Helper methods for extracting caninocalized resource address
     #
     # ==== Parameters:
-    # +host+:: hostname
-    # +request+:: Net::HTTPRequest object with headers filealds filled in
+    # +host+: hostname
+    # +request+: Net::HTTPRequest object with headers filealds filled in
     #
     # ==== Returns:
     # String containing extracted canonicalized resource

@@ -8,17 +8,17 @@ require "digest/md5"
 
 require "xmlsimple"
 
-require "s3/roxy/proxy"
-require "s3/roxy/moxie"
+require "stree/roxy/proxy"
+require "stree/roxy/moxie"
 
-require "s3/bucket"
-require "s3/connection"
-require "s3/exceptions"
-require "s3/object"
-require "s3/service"
-require "s3/signature"
+require "stree/bucket"
+require "stree/connection"
+require "stree/exceptions"
+require "stree/object"
+require "stree/service"
+require "stree/signature"
 
-module S3
+module Stree
   # Default (and only) host serving S3 stuff
   HOST = "s3.amazonaws.com"
 end
