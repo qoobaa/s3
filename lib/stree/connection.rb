@@ -2,6 +2,8 @@ module Stree
 
   # Class responsible for handling connections to amazon hosts
   class Connection
+    include Parser
+
     attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug
     alias :use_ssl? :use_ssl
 
@@ -185,9 +187,7 @@ module Stree
         if response.body.nil? || response.body.empty?
           raise Error::ResponseError.new(nil, response)
         else
-          xml = XmlSimple.xml_in(response.body)
-          message = xml["Message"].first
-          code = xml["Code"].first
+          code, message = parse_error(response.body)
           raise Error::ResponseError.exception(code).new(message, response)
         end
       else

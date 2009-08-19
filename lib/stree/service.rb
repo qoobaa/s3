@@ -1,5 +1,6 @@
 module Stree
   class Service
+    include Parser
     extend Roxy::Moxie
 
     attr_reader :access_key_id, :secret_access_key, :use_ssl
@@ -19,8 +20,8 @@ module Stree
     # +timeout+:: parameter for Net::HTTP module
     # +debug+:: prints the raw requests to STDOUT
     def initialize(options)
-      @access_key_id = options[:access_key_id] or raise ArgumentError.new("No access key id given")
-      @secret_access_key = options[:secret_access_key] or raise ArgumentError.new("No secret access key given")
+      @access_key_id = options[:access_key_id] or raise ArgumentError, "No access key id given"
+      @secret_access_key = options[:secret_access_key] or raise ArgumentError, "No secret access key given"
       @use_ssl = options[:use_ssl]
       @timeout = options[:timeout]
       @debug = options[:debug]
@@ -29,8 +30,7 @@ module Stree
     # Returns all buckets in the service and caches the result (see reload)
     def buckets(reload = false)
       if reload or @buckets.nil?
-        response = service_request(:get)
-        @buckets = parse_buckets(response.body)
+        @buckets = list_all_my_buckets
       else
         @buckets
       end
@@ -49,7 +49,7 @@ module Stree
     proxy :buckets do
       # Builds new bucket with given name
       def build(name)
-        Bucket.new(proxy_owner, name)
+        Bucket.send(:new, proxy_owner, name)
       end
 
       # Finds the bucket with given name
@@ -85,6 +85,12 @@ module Stree
 
     private
 
+    def list_all_my_buckets
+      response = service_request(:get)
+      names = parse_list_all_my_buckets_result(response.body)
+      names.map { |name| Bucket.send(:new, self, name) }
+    end
+
     def service_request(method, options = {})
       connection.request(method, options.merge(:path => "/#{options[:path]}"))
     end
@@ -99,19 +105,6 @@ module Stree
         @connection.debug = @debug
       end
       @connection
-    end
-
-    def parse_buckets(xml_body)
-      xml = XmlSimple.xml_in(xml_body)
-      buckets = xml["Buckets"].first["Bucket"]
-      if buckets
-        buckets_names = buckets.map { |bucket| bucket["Name"].first }
-        buckets_names.map do |bucket_name|
-          Bucket.new(self, bucket_name)
-        end
-      else
-        []
-      end
     end
   end
 end

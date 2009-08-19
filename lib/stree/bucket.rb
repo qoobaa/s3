@@ -1,25 +1,26 @@
 module Stree
   class Bucket
+    include Parser
     extend Roxy::Moxie
     extend Forwardable
 
     attr_reader :name, :service
 
     def_instance_delegators :service, :service_request
+    private_class_method :new
 
     # Retrieves the bucket information from the server. Raises an
     # Stree::Error exception if the bucket doesn't exist or you don't
     # have access to it, etc.
     def retrieve
-      bucket_request(:get, :params => { :max_keys => 0 })
+      list_bucket(:max_keys => 0)
       self
     end
 
     # Returns location of the bucket, e.g. "EU"
     def location(reload = false)
       if reload or @location.nil?
-        response = bucket_request(:get, :params => { :location => nil })
-        @location = parse_location(response.body)
+        @location = location_constraint
       else
         @location
       end
@@ -45,7 +46,7 @@ module Stree
     # bucket is not empty. You can destroy non-empty bucket passing
     # true (to force destroy)
     def destroy(force = false)
-      bucket_request(:delete)
+      delete_bucket
       true
     rescue Error::BucketNotEmpty
       if force
@@ -59,13 +60,7 @@ module Stree
     # Saves the newly built bucket. Optionally you can pass location
     # of the bucket (:eu or :us)
     def save(location = nil)
-      location = location.to_s.upcase if location
-      options = { :headers => {} }
-      if location and location != "US"
-        options[:body] = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
-        options[:headers][:content_type] = "application/xml"
-      end
-      bucket_request(:put, options)
+      create_bucket_configuration(location)
       true
     end
 
@@ -92,7 +87,7 @@ module Stree
     # reload).
     def objects(reload = false)
       if reload or @objects.nil?
-        @objects = fetch_objects
+        @objects = list_bucket
       else
         @objects
       end
@@ -102,7 +97,7 @@ module Stree
 
       # Builds the object in the bucket with given key
       def build(key)
-        Object.new(proxy_owner, key)
+        Object.send(:new, proxy_owner, :key => key)
       end
 
       # Finds first object with given name or raises the exception if
@@ -120,7 +115,7 @@ module Stree
       # +max_keys+:: The maximum number of keys you'd like to see
       # +delimiter+:: Causes keys that contain the same string between the prefix and the first occurrence of the delimiter to be rolled up into a single result element
       def find_all(options = {})
-        proxy_owner.send(:fetch_objects, options)
+        proxy_owner.send(:list_bucket, options)
       end
 
       # Reloads the object list (clears the cache)
@@ -140,14 +135,39 @@ module Stree
       "#<#{self.class}:#{name}>"
     end
 
+    private
+
+    attr_writer :service
+
+    def location_constraint
+      response = bucket_request(:get, :params => { :location => nil })
+      parse_location_constraint(response.body)
+    end
+
+    def list_bucket(options = {})
+      response = bucket_request(:get, :params => options)
+      objects_attributes = parse_list_bucket_result(response.body)
+      objects_attributes.map { |object_attributes| Object.send(:new, self, object_attributes) }
+    end
+
+    def create_bucket_configuration(location = nil)
+      location = location.to_s.upcase if location
+      options = { :headers => {} }
+      if location and location != "US"
+        options[:body] = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
+        options[:headers][:content_type] = "application/xml"
+      end
+      bucket_request(:put, options)
+    end
+
+    def delete_bucket
+      bucket_request(:delete)
+    end
+
     def initialize(service, name) #:nodoc:
       self.service = service
       self.name = name
     end
-
-    private
-
-    attr_writer :service
 
     def name=(name)
       raise ArgumentError.new("Invalid bucket name: #{name}") unless name_valid?(name)
@@ -157,32 +177,6 @@ module Stree
     def bucket_request(method, options = {})
       path = "#{path_prefix}#{options[:path]}"
       service_request(method, options.merge(:host => host, :path => path))
-    end
-
-    def fetch_objects(options = {})
-      response = bucket_request(:get, :params => options)
-      parse_objects(response.body)
-    end
-
-    def parse_objects(xml_body)
-      xml = XmlSimple.xml_in(xml_body)
-      objects_attributes = xml["Contents"]
-      if objects_attributes
-        objects_attributes.map do |object_attributes|
-          Object.new(self,
-                     object_attributes["Key"].first,
-                     :etag => object_attributes["ETag"].first,
-                     :last_modified => object_attributes["LastModified"].first,
-                     :size => object_attributes["Size"].first)
-        end
-      else
-        []
-      end
-    end
-
-    def parse_location(xml_body)
-      xml = XmlSimple.xml_in(xml_body)
-      xml["content"]
     end
 
     def name_valid?(name)

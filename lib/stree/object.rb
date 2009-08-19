@@ -2,6 +2,7 @@ module Stree
 
   # Class responsible for handling objects stored in S3 buckets
   class Object
+    include Parser
     extend Forwardable
 
     attr_accessor :content_type, :content_disposition, :content_encoding
@@ -10,6 +11,7 @@ module Stree
 
     def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
     def_instance_delegators :service, :protocol, :port
+    private_class_method :new
 
     # Compares the object with other object. Returns true if the key
     # of the objects are the same, and both have the same buckets (see
@@ -43,8 +45,7 @@ module Stree
     # NOT download the content of the object (use the content method
     # to do it).
     def retrieve
-      response = object_request(:get, :headers => { :range => 0..0 })
-      parse_headers(response)
+      get_object(:headers => { :range => 0..0 })
       self
     end
 
@@ -62,18 +63,14 @@ module Stree
     # to clear the cache and download the object again.
     def content(reload = false)
       if reload or @content.nil?
-        response = object_request(:get)
-        parse_headers(response)
-        self.content = response.body
+        get_object
       end
       @content
     end
 
     # Saves the object, returns true if successfull.
     def save
-      body = content.is_a?(IO) ? content.read : content
-      response = object_request(:put, :body => body, :headers => dump_headers)
-      parse_headers(response)
+      put_object
       true
     end
 
@@ -84,28 +81,12 @@ module Stree
     # +acl+:: acl of the copied object (default: "public-read")
     # +content_type+:: content type of the copied object (default: "application/octet-stream")
     def copy(options = {})
-      key = options[:key] || self.key
-      bucket = options[:bucket] || self.bucket
-
-      headers = {}
-      headers[:x_amz_acl] = options[:acl] || acl || "public-read"
-      headers[:content_type] = options[:content_type] || content_type || "application/octet-stream"
-      headers[:content_encoding] = options[:content_encoding] if options[:content_encoding]
-      headers[:content_disposition] = options[:content_disposition] if options[:content_disposition]
-      headers[:x_amz_copy_source] = full_key
-      headers[:x_amz_metadata_directive] = "REPLACE"
-      headers[:x_amz_copy_source_if_match] = options[:if_match] if options[:if_match]
-      headers[:x_amz_copy_source_if_none_match] = options[:if_none_match] if options[:if_none_match]
-      headers[:x_amz_copy_source_if_unmodified_since] = options[:if_modified_since] if options[:if_modified_since]
-      headers[:x_amz_copy_source_if_modified_since] = options[:if_unmodified_since] if options[:if_unmodified_since]
-
-      response = bucket.send(:bucket_request, :put, :path => key, :headers => headers)
-      self.class.parse_copied(:object => self, :bucket => bucket, :key => key, :body => response.body, :headers => headers)
+      copy_object(options)
     end
 
     # Destroys the file on the server
     def destroy
-      object_request(:delete)
+      delete_object
       true
     end
 
@@ -127,17 +108,61 @@ module Stree
       "#<#{self.class}:/#{name}/#{key}>"
     end
 
-    def initialize(bucket, key, options = {}) #:nodoc:
+    private
+
+    attr_writer :last_modified, :etag, :size, :original_key, :bucket
+
+    def copy_object(options = {})
+      key = options[:key] or raise ArgumentError, "No key given"
+      raise ArgumentError.new("Invalid key name: #{key}") unless key_valid?(key)
+      bucket = options[:bucket] || self.bucket
+
+      headers = {}
+
+      headers[:x_amz_acl] = options[:acl] || acl || "public-read"
+      headers[:content_type] = options[:content_type] || content_type || "application/octet-stream"
+      headers[:content_encoding] = options[:content_encoding] if options[:content_encoding]
+      headers[:content_disposition] = options[:content_disposition] if options[:content_disposition]
+      headers[:x_amz_copy_source] = full_key
+      headers[:x_amz_metadata_directive] = "REPLACE"
+      headers[:x_amz_copy_source_if_match] = options[:if_match] if options[:if_match]
+      headers[:x_amz_copy_source_if_none_match] = options[:if_none_match] if options[:if_none_match]
+      headers[:x_amz_copy_source_if_unmodified_since] = options[:if_modified_since] if options[:if_modified_since]
+      headers[:x_amz_copy_source_if_modified_since] = options[:if_unmodified_since] if options[:if_unmodified_since]
+
+      response = bucket.send(:bucket_request, :put, :path => key, :headers => headers)
+      object_attributes = parse_copy_object_result(response.body)
+
+      object = Object.send(:new, bucket, object_attributes.merge(:key => key, :size => size))
+      object.acl = response[:x_amz_acl]
+      object.content_type = response[:content_type]
+      object.content_encoding = response[:content_encoding]
+      object.content_disposition = response[:content_disposition]
+      object
+    end
+
+    def get_object(options = {})
+      response = object_request(:get, options)
+      parse_headers(response)
+    end
+
+    def put_object
+      body = content.is_a?(IO) ? content.read : content
+      response = object_request(:put, :body => body, :headers => dump_headers)
+      parse_headers(response)
+    end
+
+    def delete_object(options = {})
+      object_request(:delete)
+    end
+
+    def initialize(bucket, options = {})
       self.bucket = bucket
-      self.key = key
+      self.key = options[:key]
       self.last_modified = options[:last_modified]
       self.etag = options[:etag]
       self.size = options[:size]
     end
-
-    private
-
-    attr_writer :last_modified, :etag, :size, :original_key, :bucket
 
     def object_request(method, options = {})
       bucket_request(method, options.merge(:path => key))
@@ -151,6 +176,14 @@ module Stree
       @etag = etag[1..-2] if etag
     end
 
+    def key_valid?(key)
+      if (key.nil? or key.empty? or key =~ %r#//#)
+        false
+      else
+        true
+      end
+    end
+
     def dump_headers
       headers = {}
       headers[:x_amz_acl] = @acl || "public-read"
@@ -160,37 +193,18 @@ module Stree
       headers
     end
 
-    def key_valid?(key)
-      if (key.nil? or key.empty? or key =~ %r#//#)
-        false
-      else
-        true
-      end
-    end
-
     def parse_headers(response)
       self.etag = response["etag"]
       self.content_type = response["content-type"]
       self.content_disposition = response["content-disposition"]
       self.content_encoding = response["content-encoding"]
       self.last_modified = response["last-modified"]
-      self.size = response["content-length"]
       if response["content-range"]
         self.size = response["content-range"].sub(/[^\/]+\//, "").to_i
+      else
+        self.size = response["content-length"]
+        self.content = response.body
       end
-    end
-
-    def self.parse_copied(options)
-      xml = XmlSimple.xml_in(options[:body])
-      etag = xml["ETag"].first
-      last_modified = xml["LastModified"].first
-      size = options[:object].size
-      object = Object.new(options[:bucket], options[:key], :etag => etag, :last_modified => last_modified, :size => size)
-      object.acl = options[:headers][:x_amz_acl]
-      object.content_type = options[:headers][:content_type]
-      object.content_encoding = options[:headers][:content_encoding]
-      object.content_disposition = options[:headers][:content_disposition]
-      object
     end
   end
 end
