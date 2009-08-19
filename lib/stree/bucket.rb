@@ -160,7 +160,7 @@ module Stree
     end
 
     def fetch_objects(options = {})
-      response = bucket_request(:get, options)
+      response = bucket_request(:get, :params => options)
       parse_objects(response.body)
     end
 
