@@ -2,8 +2,8 @@ require 'test_helper'
 
 class BucketTest < Test::Unit::TestCase
   def setup
-    @bucket_vhost = Stree::Bucket.new(nil, "data-bucket")
-    @bucket_path = Stree::Bucket.new(nil, "data_bucket")
+    @bucket_vhost = S3::Bucket.send(:new, nil, "data-bucket")
+    @bucket_path = S3::Bucket.send(:new, nil, "data_bucket")
     @bucket = @bucket_vhost
 
     @response_location = Net::HTTPOK.new("1.1", "200", "OK")
@@ -27,8 +27,8 @@ class BucketTest < Test::Unit::TestCase
 
     @objects_list_empty = []
     @objects_list = [
-      Stree::Object.new(@bucket, "obj1"),
-      Stree::Object.new(@bucket, "obj2")
+      S3::Object.send(:new, @bucket, :key => "obj1"),
+      S3::Object.send(:new, @bucket, :key => "obj2")
     ]
 
     @response_objects_list_empty = Net::HTTPOK.new("1.1", "200", "OK")
@@ -45,18 +45,18 @@ class BucketTest < Test::Unit::TestCase
   end
 
   def test_name_valid
-    assert_raise ArgumentError do Stree::Bucket.new(nil, "") end # should not be valid with empty name
-    assert_raise ArgumentError do Stree::Bucket.new(nil, "10.0.0.1") end # should not be valid with IP as name
-    assert_raise ArgumentError do Stree::Bucket.new(nil, "as") end # should not be valid with name shorter than 3 characters
-    assert_raise ArgumentError do Stree::Bucket.new(nil, "a"*256) end # should not be valid with name longer than 255 characters
-    assert_raise ArgumentError do Stree::Bucket.new(nil, ".asdf") end # should not allow special characters as first character
-    assert_raise ArgumentError do Stree::Bucket.new(nil, "-asdf") end # should not allow special characters as first character
-    assert_raise ArgumentError do Stree::Bucket.new(nil, "_asdf") end # should not allow special characters as first character
+    assert_raise ArgumentError do S3::Bucket.send(:new, nil, "") end # should not be valid with empty name
+    assert_raise ArgumentError do S3::Bucket.send(:new, nil, "10.0.0.1") end # should not be valid with IP as name
+    assert_raise ArgumentError do S3::Bucket.send(:new, nil, "as") end # should not be valid with name shorter than 3 characters
+    assert_raise ArgumentError do S3::Bucket.send(:new, nil, "a"*256) end # should not be valid with name longer than 255 characters
+    assert_raise ArgumentError do S3::Bucket.send(:new, nil, ".asdf") end # should not allow special characters as first character
+    assert_raise ArgumentError do S3::Bucket.send(:new, nil, "-asdf") end # should not allow special characters as first character
+    assert_raise ArgumentError do S3::Bucket.send(:new, nil, "_asdf") end # should not allow special characters as first character
 
     assert_nothing_raised do
-      Stree::Bucket.new(nil, "a-a-")
-      Stree::Bucket.new(nil, "a.a.")
-      Stree::Bucket.new(nil, "a_a_")
+      S3::Bucket.send(:new, nil, "a-a-")
+      S3::Bucket.send(:new, nil, "a.a.")
+      S3::Bucket.send(:new, nil, "a_a_")
     end
   end
 
@@ -89,7 +89,7 @@ class BucketTest < Test::Unit::TestCase
     mock(@bucket).retrieve { @bucket_vhost }
     assert @bucket.exists?
 
-    mock(@bucket).retrieve { raise Stree::Error::NoSuchBucket.new(nil, nil) }
+    mock(@bucket).retrieve { raise S3::Error::NoSuchBucket.new(nil, nil) }
     assert ! @bucket.exists?
   end
 
@@ -112,41 +112,41 @@ class BucketTest < Test::Unit::TestCase
   end
 
   def test_save_failure_owned_by_you
-    mock(@bucket).bucket_request(:put, {:headers=>{}}) { raise Stree::Error::BucketAlreadyOwnedByYou.new(409, @response_owned_by_you) }
-    assert_raise Stree::Error::BucketAlreadyOwnedByYou do
+    mock(@bucket).bucket_request(:put, {:headers=>{}}) { raise S3::Error::BucketAlreadyOwnedByYou.new(409, @response_owned_by_you) }
+    assert_raise S3::Error::BucketAlreadyOwnedByYou do
       @bucket.save
     end
 
-    mock(@bucket).bucket_request(:put, {:headers=>{}}) { raise Stree::Error::BucketAlreadyExists.new(409, @response_already_exists) }
-    assert_raise Stree::Error::BucketAlreadyExists do
+    mock(@bucket).bucket_request(:put, {:headers=>{}}) { raise S3::Error::BucketAlreadyExists.new(409, @response_already_exists) }
+    assert_raise S3::Error::BucketAlreadyExists do
       @bucket.save
     end
   end
 
   def test_objects
-    mock(@bucket).fetch_objects { @objects_list_empty }
+    mock(@bucket).list_bucket { @objects_list_empty }
     expected = @objects_list_empty
     actual = @bucket.objects
     assert_equal expected, actual
 
-    stub(@bucket).fetch_objects { flunk "should load objects from cache" }
+    stub(@bucket).list_bucket { flunk "should load objects from cache" }
     actual = @bucket.objects
     assert_equal expected, actual
 
-    stub(@bucket).fetch_objects { @objects_list }
+    stub(@bucket).list_bucket { @objects_list }
 
     expected = @objects_list
     actual = @bucket.objects(true)
     assert_equal expected, actual
   end
 
-  def test_fetch_objects_and_parse_objects
-    mock(@bucket).bucket_request(:get, :test=>true) { @response_objects_list_empty }
+  def test_list_bucket_and_parse_objects
+    mock(@bucket).bucket_request(:get, :params => { :test=>true }) { @response_objects_list_empty }
     expected = @objects_list_empty
     actual = @bucket.objects.find_all(:test => true)
     assert_equal expected, actual
 
-    mock(@bucket).bucket_request(:get, :test=>true) { @response_objects_list }
+    mock(@bucket).bucket_request(:get, :params => { :test=>true }) { @response_objects_list }
     expected = @objects_list
     actual = @bucket.objects.find_all(:test => true)
     assert_equal expected, actual
@@ -162,13 +162,13 @@ class BucketTest < Test::Unit::TestCase
 
     expected = "object_name"
     actual = @bucket.objects.build("object_name")
-    assert_kind_of Stree::Object, actual
+    assert_kind_of S3::Object, actual
     assert_equal expected, actual.key
   end
 
   def test_objects_find_first
     assert_nothing_raised do
-      stub.instance_of(Stree::Object).retrieve { Stree::Object.new(nil, "obj2") }
+      stub.instance_of(S3::Object).retrieve { S3::Object.send(:new, nil, :key => "obj2") }
       expected = "obj2"
       actual = @bucket.objects.find_first("obj2")
       assert_equal "obj2", actual.key
@@ -176,14 +176,14 @@ class BucketTest < Test::Unit::TestCase
   end
 
   def test_objects_find_first_fail
-    assert_raise Stree::Error::NoSuchKey do
-      stub.instance_of(Stree::Object).retrieve { raise Stree::Error::NoSuchKey.new(404, nil) }
+    assert_raise S3::Error::NoSuchKey do
+      stub.instance_of(S3::Object).retrieve { raise S3::Error::NoSuchKey.new(404, nil) }
       @bucket.objects.find_first("obj3")
     end
   end
 
   def test_objects_find_all_on_empty_list
-    stub(@bucket).fetch_objects { @objects_list_empty }
+    stub(@bucket).list_bucket { @objects_list_empty }
     assert_nothing_raised do
       expected = @objects_list_empty
       actual = @bucket.objects.find_all
@@ -192,7 +192,7 @@ class BucketTest < Test::Unit::TestCase
   end
 
   def test_objects_find_all
-    stub(@bucket).fetch_objects { @objects_list }
+    stub(@bucket).list_bucket { @objects_list }
     assert_nothing_raised do
       expected = @objects_list
       actual = @bucket.objects.find_all
@@ -201,12 +201,12 @@ class BucketTest < Test::Unit::TestCase
   end
 
   def test_objects_reload
-    stub(@bucket).fetch_objects { @objects_list_empty }
+    stub(@bucket).list_bucket { @objects_list_empty }
     expected = @objects_list_empty
     actual = @bucket.objects
     assert_equal expected, actual
 
-    stub(@bucket).fetch_objects { @objects_list }
+    stub(@bucket).list_bucket { @objects_list }
     expected = @objects_list_empty
     actual = @bucket.objects
     assert_equal expected, actual
@@ -220,7 +220,7 @@ class BucketTest < Test::Unit::TestCase
 
   def test_objects_destroy_all
     @counter = 0
-    stub(@bucket).fetch_objects { @objects_list }
+    stub(@bucket).list_bucket { @objects_list }
     @bucket.objects.each do |obj|
       mock(obj).destroy { @counter += 1 }
     end

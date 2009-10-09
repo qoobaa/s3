@@ -1,4 +1,4 @@
-module Stree
+module S3
   class Service
     include Parser
     extend Roxy::Moxie

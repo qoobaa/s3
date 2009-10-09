@@ -2,7 +2,7 @@ require 'test_helper'
 
 class ConnectionTest < Test::Unit::TestCase
   def setup
-    @connection = Stree::Connection.new(
+    @connection = S3::Connection.new(
       :access_key_id =>  "12345678901234567890",
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
     )
@@ -27,15 +27,16 @@ class ConnectionTest < Test::Unit::TestCase
   def test_handle_response_throws_exception_when_not_ok
     response_body = <<-EOFakeBody
     <?xml version=\"1.0\" encoding=\"UTF-8\"?>
-    <SomeResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\">
+    <Error>
       <Code>NoSuchBucket</Code>
       <Message>The specified bucket does not exist</Message>
-    </SomeResult>
+    </Error>
     EOFakeBody
+
     stub(@http_request).start { @response_not_found }
     stub(@response_not_found).body { response_body }
 
-    assert_raise Stree::Error::NoSuchBucket do
+    assert_raise S3::Error::NoSuchBucket do
       response = @connection.request(
         :get,
         :host => "data.example.com.s3.amazonaws.com",
@@ -47,7 +48,7 @@ class ConnectionTest < Test::Unit::TestCase
   def test_handle_response_throws_standard_exception_when_not_ok
     stub(@http_request).start { @response_not_found }
     stub(@response_not_found).body { nil }
-    assert_raise Stree::Error::ResponseError do
+    assert_raise S3::Error::ResponseError do
       response = @connection.request(
         :get,
         :host => "data.example.com.s3.amazonaws.com",
@@ -56,7 +57,7 @@ class ConnectionTest < Test::Unit::TestCase
     end
 
     stub(@response_not_found).body { "" }
-    assert_raise Stree::Error::ResponseError do
+    assert_raise S3::Error::ResponseError do
       response = @connection.request(
         :get,
         :host => "data.example.com.s3.amazonaws.com",
@@ -67,37 +68,37 @@ class ConnectionTest < Test::Unit::TestCase
 
   def test_parse_params_empty
     expected = ""
-    actual = Stree::Connection.parse_params({})
+    actual = S3::Connection.parse_params({})
     assert_equal expected, actual
   end
 
   def test_parse_params_only_interesting_params
     expected = ""
-    actual = Stree::Connection.parse_params(:param1 => "1", :maxkeys => "2")
+    actual = S3::Connection.parse_params(:param1 => "1", :maxkeys => "2")
     assert_equal expected, actual
   end
 
   def test_parse_params_remove_underscore
     expected = "max-keys=100"
-    actual = Stree::Connection.parse_params(:max_keys => 100)
+    actual = S3::Connection.parse_params(:max_keys => 100)
     assert_equal expected, actual
   end
 
   def test_parse_params_with_and_without_values
     expected = "max-keys=100&prefix"
-    actual = Stree::Connection.parse_params(:max_keys => 100, :prefix => nil)
+    actual = S3::Connection.parse_params(:max_keys => 100, :prefix => nil)
     assert_equal expected, actual
   end
 
   def test_headers_headers_empty
     expected = {}
-    actual = Stree::Connection.parse_headers({})
+    actual = S3::Connection.parse_headers({})
     assert_equal expected, actual
   end
 
   def test_parse_headers_only_interesting_headers
     expected = {}
-    actual = Stree::Connection.parse_headers(
+    actual = S3::Connection.parse_headers(
       :accept => "text/*, text/html, text/html;level=1, */*",
       :accept_charset => "iso-8859-2, unicode-1-1;q=0.8"
     )
@@ -115,7 +116,7 @@ class ConnectionTest < Test::Unit::TestCase
       "content-disposition" => nil,
       "content-encoding" => nil
     }
-    actual = Stree::Connection.parse_headers(
+    actual = S3::Connection.parse_headers(
       :content_type => nil,
       :x_amz_acl => nil,
       :if_modified_since => nil,
@@ -139,7 +140,7 @@ class ConnectionTest < Test::Unit::TestCase
       "content-disposition" => "inline",
       "content-encoding" => "gzip"
     }
-    actual = Stree::Connection.parse_headers(
+    actual = S3::Connection.parse_headers(
       :content_type => "text/html",
       :x_amz_acl => "public-read",
       :if_modified_since => "today",
@@ -156,7 +157,7 @@ class ConnectionTest < Test::Unit::TestCase
     expected = {
       "range" => "bytes=0-100"
     }
-    actual = Stree::Connection.parse_headers(
+    actual = S3::Connection.parse_headers(
       :range => 0..100
     )
     assert_equal expected, actual

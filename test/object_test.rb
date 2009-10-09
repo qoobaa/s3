@@ -3,14 +3,14 @@ require 'test_helper'
 
 class ObjectTest < Test::Unit::TestCase
   def setup
-    @service = Stree::Service.new(
+    @service = S3::Service.new(
       :access_key_id => "1234",
       :secret_access_key => "1337"
     )
-    @bucket_images = Stree::Bucket.new(@service, "images")
-    @object_lena = Stree::Object.new(@bucket_images, "Lena.png")
+    @bucket_images = S3::Bucket.send(:new, @service, "images")
+    @object_lena = S3::Object.send(:new, @bucket_images, :key => "Lena.png")
     @object_lena.content = "test"
-    @object_carmen = Stree::Object.new(@bucket_images, "Carmen.png")
+    @object_carmen = S3::Object.send(:new, @bucket_images, :key => "Carmen.png")
 
     @response_binary = Net::HTTPOK.new("1.1", "200", "OK")
     stub(@response_binary).body { "test".force_encoding(Encoding::BINARY) }
@@ -30,14 +30,14 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   def test_initilalize
-    assert_raise ArgumentError do Stree::Object.new(nil, "") end # should not allow empty key
-    assert_raise ArgumentError do Stree::Object.new(nil, "//") end # should not allow key with double slash
+    assert_raise ArgumentError do S3::Object.send(:new, nil, :key => "") end # should not allow empty key
+    assert_raise ArgumentError do S3::Object.send(:new, nil, :key => "//") end # should not allow key with double slash
 
     assert_nothing_raised do
-      Stree::Object.new(nil, "Lena.png")
-      Stree::Object.new(nil, "Lena playboy.png")
-      Stree::Object.new(nil, "Lena Söderberg.png")
-      Stree::Object.new(nil, "/images/pictures/test images/Lena not full.png")
+      S3::Object.send(:new, nil, :key => "Lena.png")
+      S3::Object.send(:new, nil, :key => "Lena playboy.png")
+      S3::Object.send(:new, nil, :key => "Lena Söderberg.png")
+      S3::Object.send(:new, nil, :key => "/images/pictures/test images/Lena not full.png")
     end
   end
 
@@ -48,42 +48,42 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   def test_url
-    bucket1 = Stree::Bucket.new(@service, "images")
+    bucket1 = S3::Bucket.send(:new, @service, "images")
 
-    object11 = Stree::Object.new(bucket1, "Lena.png")
+    object11 = S3::Object.send(:new, bucket1, :key => "Lena.png")
     expected = "http://images.s3.amazonaws.com/Lena.png"
     actual = object11.url
     assert_equal expected, actual
 
-    object12 = Stree::Object.new(bucket1, "Lena Söderberg.png")
+    object12 = S3::Object.send(:new, bucket1, :key => "Lena Söderberg.png")
     expected = "http://images.s3.amazonaws.com/Lena%20S%C3%B6derberg.png"
     actual = object12.url
     assert_equal expected, actual
 
-    bucket2 = Stree::Bucket.new(@service, "images_new")
+    bucket2 = S3::Bucket.send(:new, @service, "images_new")
 
-    object21 = Stree::Object.new(bucket2, "Lena.png")
+    object21 = S3::Object.send(:new, bucket2, :key => "Lena.png")
     expected = "http://s3.amazonaws.com/images_new/Lena.png"
     actual = object21.url
     assert_equal expected, actual
   end
 
   def test_cname_url
-    bucket1 = Stree::Bucket.new(@service, "images.example.com")
+    bucket1 = S3::Bucket.send(:new, @service, "images.example.com")
 
-    object11 = Stree::Object.new(bucket1, "Lena.png")
+    object11 = S3::Object.send(:new, bucket1, :key => "Lena.png")
     expected = "http://images.example.com/Lena.png"
     actual = object11.cname_url
     assert_equal expected, actual
 
-    object12 = Stree::Object.new(bucket1, "Lena Söderberg.png")
+    object12 = S3::Object.send(:new, bucket1, :key => "Lena Söderberg.png")
     expected = "http://images.example.com/Lena%20S%C3%B6derberg.png"
     actual = object12.cname_url
     assert_equal expected, actual
 
-    bucket2 = Stree::Bucket.new(@service, "images_new")
+    bucket2 = S3::Bucket.send(:new, @service, "images_new")
 
-    object21 = Stree::Object.new(bucket2, "Lena.png")
+    object21 = S3::Object.send(:new, bucket2, :key => "Lena.png")
     expected = nil
     actual = object21.cname_url
     assert_equal expected, actual
@@ -95,16 +95,13 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   def test_save
-    mock(@object_lena).object_request(
-      :put, :body=>"test",
-      :headers=>{ :x_amz_acl=>"public-read", :content_type=>"application/octet-stream" }
-    ) { @response_binary }
+    mock(@object_lena).object_request(:put, :body=>"test", :headers=>{ :x_amz_acl=>"public-read", :content_type=>"application/octet-stream" }) { @response_binary }
 
     assert @object_lena.save
   end
 
   def test_content_and_parse_headers
-    mock(@object_lena).object_request(:get) { @response_binary }
+    mock(@object_lena).object_request(:get, {}).times(2) { @response_binary }
 
     expected = /test/n
     actual = @object_lena.content(true) # wtf? don't work with false, maybe is not fully cleaned
@@ -114,8 +111,6 @@ class ObjectTest < Test::Unit::TestCase
     stub(@object_lena).object_request(:get) { flunk "should not use connection" }
 
     assert @object_lena.content
-
-    mock(@object_lena).object_request(:get) { @response_binary }
     assert @object_lena.content(true)
   end
 
@@ -128,7 +123,7 @@ class ObjectTest < Test::Unit::TestCase
     mock(@object_lena).retrieve { true }
     assert @object_lena.exists?
 
-    mock(@object_carmen).retrieve { raise Stree::Error::NoSuchKey.new(nil, nil) }
+    mock(@object_carmen).retrieve { raise S3::Error::NoSuchKey.new(nil, nil) }
     assert ! @object_carmen.exists?
   end
 
@@ -151,14 +146,11 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   def test_copy
-    mock(@bucket_images).bucket_request(
-      :put, :path=>"Lena.png",
-      :headers=>{:x_amz_acl=>"public-read", :content_type=>"application/octet-stream", :x_amz_copy_source=>"images/Lena.png", :x_amz_metadata_directive=>"REPLACE"}
-    ) { @response_xml }
+    mock(@bucket_images).bucket_request(:put, :path => "Lena-copy.png", :headers => { :x_amz_acl => "public-read", :content_type => "application/octet-stream", :x_amz_copy_source => "images/Lena.png", :x_amz_metadata_directive => "REPLACE" }) { @response_xml }
 
-    new_object = @object_lena.copy
+    new_object = @object_lena.copy(:key => "Lena-copy.png")
 
-    assert_equal @object_lena, new_object
-    assert ! @object_lena.eql?(new_object)
+    assert_equal "Lena-copy.png", new_object.key
+    assert_equal "Lena.png", @object_lena.key
   end
 end
