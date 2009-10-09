@@ -1,8 +1,19 @@
 = S3
 
+S3 library provides access to Amazon's Simple Storage Service. It
+supports both: European and US buckets through REST API.
+
 * repository: http://github.com/qoobaa/s3
 * issue tracker: http://github.com/qoobaa/s3/issues
 * rdoc: http://qoobaa.github.com/s3
+
+== Installation
+
+If you don't have the Gemcutter sources yet:
+  gem sources -a http://gemcutter.org
+
+To install the gem type:
+  sudo gem install s3
 
 == Usage
 
@@ -13,7 +24,7 @@ Coming soon, see Rdoc documentation.
 You have to pass access key id (-a) and secret access key (-s) to the
 command line tool. S3 reads ACCESS_KEY_ID and SECRET_ACCESS_KEY
 environment variables and uses them by default, so if you don't want
-to pass them each time, export them (e.g. in .bashrc file).
+to pass them each time, export them (e.g. in ~/.bashrc file).
 
 * list buckets
     s3 bucket
