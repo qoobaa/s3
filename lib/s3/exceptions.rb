@@ -1,4 +1,4 @@
-module Stree
+module S3
   module Error
 
     # All responses with a code between 300 and 599 that contain an
@@ -30,7 +30,7 @@ module Stree
       # Descendant of ResponseError suitable for that exception code or ResponseError class
       # if no class found
       def self.exception(code)
-        Stree::Error.const_get(code)
+        S3::Error.const_get(code)
       rescue NameError
         ResponseError
       end

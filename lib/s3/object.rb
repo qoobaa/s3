@@ -1,4 +1,4 @@
-module Stree
+module S3
 
   # Class responsible for handling objects stored in S3 buckets
   class Object
@@ -77,7 +77,7 @@ module Stree
     # Copies the file to another key and/or bucket.
     # ==== Options:
     # +key+:: new key to store object in
-    # +bucket+:: new bucket to store object in (instance of Stree::Bucket)
+    # +bucket+:: new bucket to store object in (instance of S3::Bucket)
     # +acl+:: acl of the copied object (default: "public-read")
     # +content_type+:: content type of the copied object (default: "application/octet-stream")
     def copy(options = {})

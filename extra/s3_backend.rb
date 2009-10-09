@@ -1,14 +1,14 @@
 require "singleton"
-require "stree"
+require "s3"
 
-# Stree Backend for attachment-fu plugin. After installing attachment-fu
+# S3 Backend for attachment-fu plugin. After installing attachment-fu
 # plugin, copy the file to:
 # +vendor/plugins/attachment-fu/lib/technoweenie/attachment_fu/backends+
 #
-# To configure StreeBackend create initializer file in your Rails
-# application, e.g. +config/initializers/stree_backend.rb+.
+# To configure S3Backend create initializer file in your Rails
+# application, e.g. +config/initializers/s3_backend.rb+.
 #
-#   Technoweenie::AttachmentFu::Backends::StreeBackend.configuration do |config|
+#   Technoweenie::AttachmentFu::Backends::S3Backend.configuration do |config|
 #     config.access_key_id = "..." # your access key id
 #     config.secret_access_key = "..." # your secret access key
 #     config.bucket_name = "..." # default bucket name to store attachments
@@ -18,9 +18,9 @@ require "stree"
 module Technoweenie
   module AttachmentFu
     module Backends
-      module StreeBackend
+      module S3Backend
 
-        # StreeBackend configuration class
+        # S3Backend configuration class
         class Configuration
           include Singleton
 
@@ -29,7 +29,7 @@ module Technoweenie
           attr_accessor *ATTRIBUTES
         end
 
-        # Method used to configure StreeBackend, see the example above
+        # Method used to configure S3Backend, see the example above
         def self.configuration
           if block_given?
             yield Configuration.instance
@@ -39,7 +39,7 @@ module Technoweenie
 
         # :nodoc:
         def self.included(base)
-          include Stree
+          include S3
 
           service = Service.new(:access_key_id => configuration.access_key_id,
                                 :secret_access_key => configuration.secret_access_key,

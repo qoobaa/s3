@@ -20,7 +20,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-module Stree
+module S3
   module Roxy # :nodoc:all
     module Moxie
       # Set up this class to proxy on the given name

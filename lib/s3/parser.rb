@@ -1,4 +1,4 @@
-module Stree
+module S3
   module Parser
     include REXML
 

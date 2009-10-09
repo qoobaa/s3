@@ -1,4 +1,4 @@
-module Stree
+module S3
 
   # Class responsible for handling connections to amazon hosts
   class Connection

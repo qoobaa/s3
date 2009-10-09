@@ -1,4 +1,4 @@
-module Stree
+module S3
   class Bucket
     include Parser
     extend Roxy::Moxie
@@ -10,7 +10,7 @@ module Stree
     private_class_method :new
 
     # Retrieves the bucket information from the server. Raises an
-    # Stree::Error exception if the bucket doesn't exist or you don't
+    # S3::Error exception if the bucket doesn't exist or you don't
     # have access to it, etc.
     def retrieve
       list_bucket(:max_keys => 0)

@@ -3,11 +3,11 @@
 $: << File.expand_path(File.dirname(__FILE__) + "/../lib")
 
 require "trollop"
-require "stree"
+require "s3"
 
 # HELPER METHODS
 
-include Stree
+include S3
 
 def list_buckets(service)
   service.buckets.each do |bucket|
@@ -82,7 +82,7 @@ BUCKET_SUBCOMMANDS = %w(add remove show)
 OBJECT_SUBCOMMANDS = %w(add remove show)
 
 global_options = Trollop::options do
-  banner "stree - s3 command line tool"
+  banner "s3 command line tool"
   opt :access_key_id, "Your access key id to AWS", :type => :string, :default => ACCESS_KEY_ID
   opt :secret_access_key, "Your secret access key to AWS", :type => :string, :default => SECRET_ACCESS_KEY
   opt :debug, "Debug mode", :type => :flag, :default => false

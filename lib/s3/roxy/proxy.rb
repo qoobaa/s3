@@ -20,7 +20,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-module Stree
+module S3
   module Roxy # :nodoc:all
     # The very simple proxy class that provides a basic pass-through
     # mechanism between the proxy owner and the proxy target.
