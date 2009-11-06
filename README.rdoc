@@ -1,7 +1,7 @@
 = S3
 
-S3 library provides access to Amazon's Simple Storage Service. It
-supports both: European and US buckets through REST API.
+S3 library provides access to {Amazon's Simple Storage Service}[http://aws.amazon.com/s3/].
+It supports both: European and US buckets through {REST API}[http://docs.amazonwebservices.com/AmazonS3/latest/RESTAPI.html].
 
 * homepage[http://jah.pl/projects/s3.html]
 * repository[http://github.com/qoobaa/s3]
@@ -10,11 +10,11 @@ supports both: European and US buckets through REST API.
 
 == Installation
 
-If you don't have the Gemcutter sources yet:
+If you don't have the {Gemcutter sources}[http://gemcutter.org/pages/gem_docs] yet:
   gem sources -a http://gemcutter.org
 
 To install the gem type:
-  sudo gem install s3
+  gem install s3
 
 == Usage
 
@@ -22,4 +22,4 @@ See homepage[http://jah.pl/projects/s3.html] for details.
 
 == Copyright
 
-Copyright (c) 2009 Jakub Kuźma, Mirosław Boruta. See LICENSE for details.
+Copyright (c) 2009 Jakub Kuźma, Mirosław Boruta. See LICENSE[http://github.com/qoobaa/s3/raw/master/LICENSE] for details.
