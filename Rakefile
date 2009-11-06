@@ -9,7 +9,7 @@ begin
     gem.name = "s3"
     gem.summary = %Q{Library for accessing S3 objects and buckets, with command line tool}
     gem.email = "qoobaa@gmail.com"
-    gem.homepage = "http://github.com/qoobaa/s3"
+    gem.homepage = "http://jah.pl/projects/s3.html"
     gem.authors = ["Jakub Kuźma", "Mirosław Boruta"]
     gem.add_dependency "trollop", ">=1.14"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
