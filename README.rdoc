@@ -3,6 +3,7 @@
 S3 library provides access to Amazon's Simple Storage Service. It
 supports both: European and US buckets through REST API.
 
+* homepage: http://jah.pl/projects/s3.html
 * repository: http://github.com/qoobaa/s3
 * issue tracker: http://github.com/qoobaa/s3/issues
 * rdoc: http://qoobaa.github.com/s3
@@ -17,42 +18,7 @@ To install the gem type:
 
 == Usage
 
-Coming soon, see Rdoc documentation.
-
-== Command tool usage
-
-You have to pass access key id (-a) and secret access key (-s) to the
-command line tool. S3 reads ACCESS_KEY_ID and SECRET_ACCESS_KEY
-environment variables and uses them by default, so if you don't want
-to pass them each time, export them (e.g. in ~/.bashrc file).
-
-* list buckets
-    s3 bucket
-
-* create bucket
-    s3 bucket add name-of-bucket
-
-* list objects in bucket
-    s3 bucket show name-of-bucket
-
-* destroy bucket
-    s3 bucket remove name-of-bucket
-
-* list objects (in all buckets)
-    s3 object
-
-* show the object information
-    s3 object show bucket_name/path/to/object.extension
-
-* download the content of the object
-    s3 object show bucket_name/path/to/object.extension filename_to_store_the_content.extension
-
-* show the content of the object to STDOUT
-    s3 object show bucket_name/path/to/object.extension -
-
-You can also pass --help to the commmands like:
-  s3 bucket add --help
-  s3 object show --help
+See http://jah.pl/projects/s3.html
 
 == Copyright
 
