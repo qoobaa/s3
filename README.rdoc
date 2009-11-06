@@ -3,10 +3,10 @@
 S3 library provides access to Amazon's Simple Storage Service. It
 supports both: European and US buckets through REST API.
 
-* homepage: http://jah.pl/projects/s3.html
-* repository: http://github.com/qoobaa/s3
-* issue tracker: http://github.com/qoobaa/s3/issues
-* rdoc: http://qoobaa.github.com/s3
+* homepage[link:http://jah.pl/projects/s3.html]
+* repository[link:http://github.com/qoobaa/s3]
+* {issue tracker}[link:http://github.com/qoobaa/s3/issues]
+* rdoc[link:http://qoobaa.github.com/s3]
 
 == Installation
 
@@ -18,7 +18,7 @@ To install the gem type:
 
 == Usage
 
-See http://jah.pl/projects/s3.html
+See homepage[link:http://jah.pl/projects/s3.html] for details.
 
 == Copyright
 
