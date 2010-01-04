@@ -2,8 +2,8 @@ require 'test_helper'
 
 class BucketTest < Test::Unit::TestCase
   def setup
-    @bucket_vhost = S3::Bucket.send(:new, nil, "data-bucket")
-    @bucket_path = S3::Bucket.send(:new, nil, "data_bucket")
+    @bucket_vhost = S3::Bucket.send(:new, nil, "Data-Bucket")
+    @bucket_path = S3::Bucket.send(:new, nil, "Data_Bucket")
     @bucket = @bucket_vhost
 
     @response_location = Net::HTTPOK.new("1.1", "200", "OK")
@@ -65,13 +65,13 @@ class BucketTest < Test::Unit::TestCase
     actual = @bucket_vhost.path_prefix
     assert_equal expected, actual
 
-    expected = "data_bucket/"
+    expected = "Data_Bucket/"
     actual = @bucket_path.path_prefix
     assert_equal expected, actual
   end
 
   def test_host
-    expected = "data-bucket.s3.amazonaws.com"
+    expected = "Data-Bucket.s3.amazonaws.com"
     actual = @bucket_vhost.host
     assert_equal expected, actual
 
