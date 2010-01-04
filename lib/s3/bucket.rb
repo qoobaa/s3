@@ -180,7 +180,7 @@ module S3
     end
 
     def name_valid?(name)
-      name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/ and name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
+      name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/i and name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
     end
   end
 end
