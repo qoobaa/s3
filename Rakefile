@@ -12,6 +12,8 @@ begin
     gem.homepage = "http://jah.pl/projects/s3.html"
     gem.authors = ["Jakub Kuźma", "Mirosław Boruta"]
     gem.add_dependency "trollop", ">=1.14"
+    gem.add_development_dependency "test-unit", ">= 2.0"
+    gem.add_development_dependency "rr", "=0.10.2"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 
