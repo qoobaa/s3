@@ -1,4 +1,5 @@
 require "base64"
+require "cgi"
 require "digest/md5"
 require "forwardable"
 require "net/http"

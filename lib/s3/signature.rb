@@ -56,6 +56,30 @@ module S3
       "AWS #{access_key_id}:#{signature}"
     end
 
+    # ==== Parameters:
+    # +options+:: Hash of options
+    #
+    # ==== Options:
+    # +bucket+:: the bucket in which the resource resides
+    # +resource+:: the path to the resouce you want to create a teporary link to
+    # +secret_access_key+:: the secret access key
+    # +expires_on+:: the unix time stamp of when the resouce link will expire
+    def self.generate_temporary_url_signature(options)
+      bucket = options[:bucket]
+      resource = options[:resource]
+      secret_access_key = options[:secret_access_key]
+      expires = options[:expires_on]
+
+      string_to_sign = "GET\n\n\n#{expires}\n/#{bucket}/#{resource}";
+
+      digest = OpenSSL::Digest::Digest.new('sha1')
+      hmac = OpenSSL::HMAC.digest(digest, secret_access_key, string_to_sign)
+      base64 = Base64.encode64(hmac)
+      signature = base64.chomp
+
+      CGI.escape(signature)
+    end
+
     private
 
     # Helper method for extracting header fields from Net::HTTPRequest and
