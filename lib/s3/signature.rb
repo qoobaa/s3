@@ -56,6 +56,8 @@ module S3
       "AWS #{access_key_id}:#{signature}"
     end
 
+    # Generates temporary URL for given resource
+    #
     # ==== Parameters:
     # +options+:: Hash of options
     #

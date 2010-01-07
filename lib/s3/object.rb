@@ -10,7 +10,7 @@ module S3
     attr_writer :content
 
     def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
-    def_instance_delegators :service, :protocol, :port
+    def_instance_delegators :service, :protocol, :port, :secret_access_key
     private_class_method :new
 
     # Compares the object with other object. Returns true if the key
@@ -95,6 +95,18 @@ module S3
     def url
       URI.escape("#{protocol}#{host}/#{path_prefix}#{key}")
     end
+
+    # Returns a temporary url to the object that expires on the timestamp given
+    # Defaults to one hour expire time
+    def temporary_url(expires_at = Time.now + 3600)
+      signature = Signature.generate_temporary_url_signature(:bucket => name,
+                                                             :resource => key,
+                                                             :expires_on => expires_at,
+                                                             :secret_access_key => secret_access_key)
+
+      "#{url}?Signature=#{URI.escape(signature)}&Expires=#{URI.escape(expires_at.to_i)}"
+    end
+
 
     # Returns Object's CNAME URL (without s3.amazonaws.com suffix)
     # using protocol specified in Service,
