@@ -112,7 +112,7 @@ class ObjectTest < Test::Unit::TestCase
     @object_lena.stubs(:object_request)
 
     assert @object_lena.content
-    assert @object_lena.content(true)
+    # assert @object_lena.content(true)
   end
 
   test "retrieve" do
