@@ -103,12 +103,11 @@ module S3
 
     def connection
       if @connection.nil?
-        @connection = Connection.new
-        @connection.access_key_id = @access_key_id
-        @connection.secret_access_key = @secret_access_key
-        @connection.use_ssl = @use_ssl
-        @connection.timeout = @timeout
-        @connection.debug = @debug
+        @connection = Connection.new(:access_key_id => @access_key_id,
+                                     :secret_access_key => @secret_access_key,
+                                     :use_ssl => @use_ssl,
+                                     :timeout => @timeout,
+                                     :debug => @debug)
       end
       @connection
     end
