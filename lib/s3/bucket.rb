@@ -26,15 +26,15 @@ module S3
       end
     end
 
-    # Compares the bucket with other bucket. Returns true if the key
-    # of the objects are the same, and both have the same buckets (see
-    # bucket equality)
+    # Compares the bucket with other bucket. Returns true if the names
+    # of the buckets are the same, and both have the same services
+    # (see Service equality)
     def ==(other)
       self.name == other.name and self.service == other.service
     end
 
-    # Similar to retrieve, but catches NoSuchBucket exceptions and
-    # returns false instead.
+    # Similar to retrieve, but catches S3::Error::NoSuchBucket
+    # exceptions and returns false instead.
     def exists?
       retrieve
       true
@@ -42,9 +42,9 @@ module S3
       false
     end
 
-    # Destroys given bucket. Raises an BucketNotEmpty exception if the
-    # bucket is not empty. You can destroy non-empty bucket passing
-    # true (to force destroy)
+    # Destroys given bucket. Raises an S3::Error::BucketNotEmpty
+    # exception if the bucket is not empty. You can destroy non-empty
+    # bucket passing true (to force destroy)
     def destroy(force = false)
       delete_bucket
       true
@@ -58,33 +58,32 @@ module S3
     end
 
     # Saves the newly built bucket. Optionally you can pass location
-    # of the bucket (:eu or :us)
+    # of the bucket (<tt>:eu</tt> or <tt>:us</tt>)
     def save(location = nil)
       create_bucket_configuration(location)
       true
     end
 
-    # Returns true if the name of the bucket can be used like VHOST
+    # Returns true if the name of the bucket can be used like +VHOST+
     # name. If the bucket contains characters like underscore it can't
-    # be used as VHOST (e.g. bucket_name.s3.amazonaws.com)
+    # be used as +VHOST+ (e.g. <tt>bucket_name.s3.amazonaws.com</tt>)
     def vhost?
       "#@name.#{HOST}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
     end
 
-    # Returns host name of the bucket according (see vhost?)
+    # Returns host name of the bucket according (see #vhost? method)
     def host
       vhost? ? "#@name.#{HOST}" : "#{HOST}"
     end
 
-    # Returns path prefix for non VHOST bucket. Path prefix is used
-    # instead of VHOST name,
-    # e.g. "bucket_name/"
+    # Returns path prefix for non +VHOST+ bucket. Path prefix is used
+    # instead of +VHOST+ name, e.g. "bucket_name/"
     def path_prefix
       vhost? ? "" : "#@name/"
     end
 
     # Returns the objects in the bucket and caches the result (see
-    # reload).
+    # #reload method).
     def objects(reload = false)
       if reload or @objects.nil?
         @objects = list_bucket
@@ -109,11 +108,17 @@ module S3
       alias :find :find_first
 
       # Finds the objects in the bucket.
-      # ==== Options:
-      # +prefix+:: Limits the response to keys which begin with the indicated prefix
-      # +marker+:: Indicates where in the bucket to begin listing
-      # +max_keys+:: The maximum number of keys you'd like to see
-      # +delimiter+:: Causes keys that contain the same string between the prefix and the first occurrence of the delimiter to be rolled up into a single result element
+      #
+      # ==== Options
+      # * <tt>:prefix</tt> - Limits the response to keys which begin
+      #   with the indicated prefix
+      # * <tt>:marker</tt> - Indicates where in the bucket to begin
+      #   listing
+      # * <tt>:max_keys</tt> - The maximum number of keys you'd like
+      #   to see
+      # * <tt>:delimiter</tt> - Causes keys that contain the same
+      #   string between the prefix and the first occurrence of the
+      #   delimiter to be rolled up into a single result element
       def find_all(options = {})
         proxy_owner.send(:list_bucket, options)
       end

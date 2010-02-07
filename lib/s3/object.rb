@@ -15,12 +15,12 @@ module S3
 
     # Compares the object with other object. Returns true if the key
     # of the objects are the same, and both have the same buckets (see
-    # bucket equality)
+    # Bucket equality)
     def ==(other)
       self.key == other.key and self.bucket == other.bucket
     end
 
-    # Returns full key of the object: e.g. +bucket-name/object/key.ext+
+    # Returns full key of the object: e.g. <tt>bucket-name/object/key.ext</tt>
     def full_key
       [name, key].join("/")
     end
@@ -34,6 +34,7 @@ module S3
 
     # Assigns a new ACL to the object. Please note that ACL is not
     # retrieved from the server and set to "public-read" by default.
+    #
     # ==== Example
     #   object.acl = :public_read
     def acl=(acl)
@@ -41,17 +42,17 @@ module S3
     end
 
     # Retrieves the object from the server. Method is used to download
-    # object information only (content-type, size and so on). It does
-    # NOT download the content of the object (use the content method
+    # object information only (content type, size and so on). It does
+    # NOT download the content of the object (use the #content method
     # to do it).
     def retrieve
       get_object(:headers => { :range => 0..0 })
       self
     end
 
-    # Retrieves the object from the server, returns true if the
-    # object exists or false otherwise. Uses retrieve method, but
-    # catches NoSuchKey exception and returns false when it happens
+    # Retrieves the object from the server, returns true if the object
+    # exists or false otherwise. Uses #retrieve method, but catches
+    # S3::Error::NoSuchKey exception and returns false when it happens
     def exists?
       retrieve
       true
@@ -75,11 +76,15 @@ module S3
     end
 
     # Copies the file to another key and/or bucket.
-    # ==== Options:
-    # +key+:: new key to store object in
-    # +bucket+:: new bucket to store object in (instance of S3::Bucket)
-    # +acl+:: acl of the copied object (default: "public-read")
-    # +content_type+:: content type of the copied object (default: "application/octet-stream")
+    #
+    # ==== Options
+    # * <tt>:key</tt> - New key to store object in
+    # * <tt>:bucket</tt> - New bucket to store object in (instance of
+    #   S3::Bucket)
+    # * <tt>:acl</tt> - ACL of the copied object (default:
+    #   "public-read")
+    # * <tt>:content_type</tt> - Content type of the copied object
+    #   (default: "application/octet-stream")
     def copy(options = {})
       copy_object(options)
     end
@@ -90,14 +95,14 @@ module S3
       true
     end
 
-    # Returns Object's URL using protocol specified in Service,
-    # e.g. http://domain.com.s3.amazonaws.com/key/with/path.extension
+    # Returns Object's URL using protocol specified in service,
+    # e.g. <tt>http://domain.com.s3.amazonaws.com/key/with/path.extension</tt>
     def url
       URI.escape("#{protocol}#{host}/#{path_prefix}#{key}")
     end
 
-    # Returns a temporary url to the object that expires on the timestamp given
-    # Defaults to one hour expire time
+    # Returns a temporary url to the object that expires on the
+    # timestamp given. Defaults to one hour expire time.
     def temporary_url(expires_at = Time.now + 3600)
       signature = Signature.generate_temporary_url_signature(:bucket => name,
                                                              :resource => key,
@@ -107,11 +112,11 @@ module S3
       "#{url}?Signature=#{URI.escape(signature)}&Expires=#{URI.escape(expires_at.to_i)}"
     end
 
-
-    # Returns Object's CNAME URL (without s3.amazonaws.com suffix)
-    # using protocol specified in Service,
-    # e.g. http://domain.com/key/with/path.extension. (you have to set
-    # the CNAME in your DNS before you use the CNAME URL schema).
+    # Returns Object's CNAME URL (without <tt>s3.amazonaws.com</tt>
+    # suffix) using protocol specified in Service,
+    # e.g. <tt>http://domain.com/key/with/path.extension</tt>. (you
+    # have to set the CNAME in your DNS before using the CNAME URL
+    # schema).
     def cname_url
       URI.escape("#{protocol}#{name}/#{key}") if bucket.vhost?
     end

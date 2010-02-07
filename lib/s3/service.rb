@@ -5,20 +5,22 @@ module S3
 
     attr_reader :access_key_id, :secret_access_key, :use_ssl
 
-    # Compares service to other, by access_key_id and secret_access_key
+    # Compares service to other, by <tt>access_key_id</tt> and
+    # <tt>secret_access_key</tt>
     def ==(other)
       self.access_key_id == other.access_key_id and self.secret_access_key == other.secret_access_key
     end
 
-    # ==== Parameters:
-    # +options+:: a hash of options described below
+    # Creates new service.
     #
-    # ==== Options:
-    # +access_key_id+:: Amazon access key id, required
-    # +secret_access_key+:: Amazon secret access key, required
-    # +use_ssl+:: true if use ssl in connection, otherwise false
-    # +timeout+:: parameter for Net::HTTP module
-    # +debug+:: prints the raw requests to STDOUT
+    # ==== Options
+    # * <tt>:access_key_id</tt> - Access key id (REQUIRED)
+    # * <tt>:secret_access_key</tt> - Secret access key (REQUIRED)
+    # * <tt>:use_ssl</tt> - Use https or http protocol (false by
+    #   default)
+    # * <tt>:debug</tt> - Display debug information on the STDOUT
+    #   (false by default)
+    # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
     def initialize(options)
       @access_key_id = options[:access_key_id] or raise ArgumentError, "No access key id given"
       @secret_access_key = options[:secret_access_key] or raise ArgumentError, "No secret access key given"
@@ -27,7 +29,8 @@ module S3
       @debug = options[:debug]
     end
 
-    # Returns all buckets in the service and caches the result (see reload)
+    # Returns all buckets in the service and caches the result (see
+    # +reload+)
     def buckets(reload = false)
       if reload or @buckets.nil?
         @buckets = list_all_my_buckets
@@ -36,12 +39,14 @@ module S3
       end
     end
 
-    # Returns "http://" or "https://", depends on use_ssl value from initializer
+    # Returns "http://" or "https://", depends on <tt>:use_ssl</tt>
+    # value from initializer
     def protocol
       use_ssl ? "https://" : "http://"
     end
 
-    # Return 443 or 80, depends on use_ssl value from initializer
+    # Returns 443 or 80, depends on <tt>:use_ssl</tt> value from
+    # initializer
     def port
       use_ssl ? 443 : 80
     end

@@ -7,46 +7,52 @@ module S3
     attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug
     alias :use_ssl? :use_ssl
 
-    # ==== Parameters:
-    # +options+:: Hash of options
+    # Creates new connection object.
     #
-    # ==== Options:
-    # +access_key_id+:: access key id
-    # +secret_access_key+:: secret access key
-    # +use_ssl+:: optional, defaults to false
-    # +debug+:: optional, defaults to false
-    # +timeout+:: optional, for Net::HTTP
+    # ==== Options
+    # * <tt>:access_key_id</tt> - Access key id (REQUIRED)
+    # * <tt>:secret_access_key</tt> - Secret access key (REQUIRED)
+    # * <tt>:use_ssl</tt> - Use https or http protocol (false by
+    #   default)
+    # * <tt>:debug</tt> - Display debug information on the STDOUT
+    #   (false by default)
+    # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
     def initialize(options = {})
-      @access_key_id = options[:access_key_id]
-      @secret_access_key = options[:secret_access_key]
-      @use_ssl = options[:use_ssl] || false
-      @debug = options[:debug]
-      @timeout = options[:timeout]
+      @access_key_id = options.fetch(:access_key_id)
+      @secret_access_key = options.fetch(:secret_access_key)
+      @use_ssl = options.fetch(:use_ssl, false)
+      @debug = options.fetch(:debug)
+      @timeout = options.fetch(:timeout)
     end
 
     # Makes request with given HTTP method, sets missing parameters,
     # adds signature to request header and returns response object
     # (Net::HTTPResponse)
     #
-    # ==== Parameters:
-    # +method+:: HTTP Method symbol, can be :get, :put, :delete
-    # +options+:: hash of options
+    # ==== Parameters
+    # * <tt>method</tt> - HTTP Method symbol, can be <tt>:get</tt>,
+    #   <tt>:put</tt>, <tt>:delete</tt>
     #
     # ==== Options:
-    # +host+:: hostname to connecto to, optional, defaults to s3.amazonaws.com[s3.amazonaws.com]
-    # +path+:: path to send request to, required, throws ArgumentError if not given
-    # +body+:: request body, only meaningful for :put request
-    # +params+:: parameters to add to query string for request, can be String or Hash
-    # +headers+:: Hash of headers fields to add to request header
+    # * <tt>:host</tt> - Hostname to connecto to, defaults
+    #   to <tt>s3.amazonaws.com</tt>
+    # * <tt>:path</tt> - path to send request to, throws
+    #   ArgumentError if not given (REQUIRED)
+    # * <tt>:body</tt> - Request body, only meaningful for
+    #   <tt>:put</tt> request
+    # * <tt>:params</tt> - Parameters to add to query string for
+    #   request, can be String or Hash
+    # * <tt>:headers</tt> - Hash of headers fields to add to request
+    #   header
     #
-    # ==== Returns:
-    # Net::HTTPResponse object -- response from remote server
+    # ==== Returns
+    # Net::HTTPResponse object -- response from the server
     def request(method, options)
-      host = options[:host] || HOST
-      path = options[:path] or raise ArgumentError.new("no path given")
-      body = options[:body]
-      params = options[:params]
-      headers = options[:headers]
+      host = options.fetch(:host, HOST)
+      path = options.fetch(:path) or raise ArgumentError.new("no path given")
+      body = options.fetch(:body)
+      params = options.fetch(:params)
+      headers = options.fetch(:headers)
 
       if params
         params = params.is_a?(String) ? params : self.class.parse_params(params)
@@ -66,13 +72,13 @@ module S3
       send_request(host, request)
     end
 
-    # Helper function to parser parameters and create single string of params
-    # added to questy string
+    # Helper function to parser parameters and create single string of
+    # params added to questy string
     #
-    # ==== Parameters:
-    # +params+: Hash of parameters if form <tt>key => value|nil</tt>
+    # ==== Parameters
+    # * <tt>params</tt> - Hash of parameters
     #
-    # ==== Returns:
+    # ==== Returns
     # String -- containing all parameters joined in one params string,
     # i.e. <tt>param1=val&param2&param3=0</tt>
     def self.parse_params(params)
@@ -96,14 +102,14 @@ module S3
     # Helper function to change headers from symbols, to in correct
     # form (i.e. with '-' instead of '_')
     #
-    # ==== Parameters:
-    # +headers+:: Hash of pairs <tt>headername => value</tt>,
-    #             where value can be Range (for Range header) or any other
-    #             value which can be translated to string
+    # ==== Parameters
+    # * <tt>headers</tt> - Hash of pairs <tt>headername => value</tt>,
+    #   where value can be Range (for Range header) or any other value
+    #   which can be translated to string
     #
-    # ==== Returns:
-    # Hash of headers translated from symbol to string,
-    # containing only interesting headers
+    # ==== Returns
+    # Hash of headers translated from symbol to string, containing
+    # only interesting headers
     def self.parse_headers(headers)
       interesting_keys = [:content_type, :x_amz_acl, :range,
                           :if_modified_since, :if_unmodified_since,
@@ -170,9 +176,9 @@ module S3
         end
 
         request["Authorization"] = Signature.generate(:host => host,
-                                                          :request => request,
-                                                          :access_key_id => access_key_id,
-                                                          :secret_access_key => secret_access_key)
+                                                      :request => request,
+                                                      :access_key_id => access_key_id,
+                                                      :secret_access_key => secret_access_key)
         http.request(request)
       end
 

@@ -12,23 +12,25 @@ module S3
     class ResponseError < StandardError
       attr_reader :response
 
-      # ==== Parameters:
-      # +message+:: what went wrong
-      # +response+:: Net::HTTPResponse object or nil
+      # Creates new S3::ResponseError.
+      #
+      # ==== Parameters
+      # * <tt>message</tt> - what went wrong
+      # * <tt>response</tt> - Net::HTTPResponse object or nil
       def initialize(message, response)
         @response = response
         super(message)
       end
 
-      # Factory for all other Exception classes in module, each for every
-      # error response available from AmazonAWS
+      # Factory for all other Exception classes in module, each for
+      # every error response available from AmazonAWS
       #
-      # ==== Parameters:
-      # +code+:: code name of exception
+      # ==== Parameters
+      # * <tt>code</tt> - Code name of exception
       #
-      # ==== Returns:
-      # Descendant of ResponseError suitable for that exception code or ResponseError class
-      # if no class found
+      # ==== Returns
+      # Descendant of ResponseError suitable for that exception code
+      # or ResponseError class if no class found
       def self.exception(code)
         S3::Error.const_get(code)
       rescue NameError

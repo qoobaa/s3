@@ -5,24 +5,22 @@ module S3
   # Implements algorithm defined by Amazon Web Services to sign
   # request with secret private credentials
   #
-  # === See:
+  # === See
   # http://docs.amazonwebservices.com/AmazonS3/latest/index.html?RESTAuthentication.html
 
   class Signature
 
     # Generates signature for given parameters
     #
-    # ==== Parameters:
-    # +options+: a hash that contains options listed below
+    # ==== Options
+    # * <tt>:host</tt> - Hostname
+    # * <tt>:request</tt> - Net::HTTPRequest object with correct
+    #   headers
+    # * <tt>:access_key_id</tt> - Access key id
+    # * <tt>:secret_access_key</tt> - Secret access key
     #
-    # ==== Options:
-    # +host+: hostname
-    # +request+: Net::HTTPRequest object with correct headers
-    # +access_key_id+: access key id
-    # +secret_access_key+: secret access key
-    #
-    # ==== Returns:
-    # Generated signature for given hostname and request
+    # ==== Returns
+    # Generated signature string for given hostname and request
     def self.generate(options)
       request = options[:request]
       host = options[:host]
@@ -58,14 +56,13 @@ module S3
 
     # Generates temporary URL for given resource
     #
-    # ==== Parameters:
-    # +options+:: Hash of options
-    #
-    # ==== Options:
-    # +bucket+:: the bucket in which the resource resides
-    # +resource+:: the path to the resouce you want to create a teporary link to
-    # +secret_access_key+:: the secret access key
-    # +expires_on+:: the unix time stamp of when the resouce link will expire
+    # ==== Options
+    # * <tt>:bucket</tt> - Bucket in which the resource resides
+    # * <tt>:resource</tt> - Path to the resouce you want to create
+    #   a teporary link to
+    # * <tt>:secret_access_key</tt> - Secret access key
+    # * <tt>:expires_on</tt> - Unix time stamp of when the resouce
+    #   link will expire
     def self.generate_temporary_url_signature(options)
       bucket = options[:bucket]
       resource = options[:resource]
@@ -84,14 +81,16 @@ module S3
 
     private
 
-    # Helper method for extracting header fields from Net::HTTPRequest and
-    # preparing them for singing in #generate method
+    # Helper method for extracting header fields from Net::HTTPRequest
+    # and preparing them for singing in #generate method
     #
-    # ==== Parameters:
-    # +request+: Net::HTTPRequest object with header fields filled in
+    # ==== Parameters
+    # * <tt>request</tt> - Net::HTTPRequest object with header fields
+    #   filled in
     #
-    # ==== Returns:
-    # String containing interesting header fields in suitable order and form
+    # ==== Returns
+    # String containing interesting header fields in suitable order
+    # and form
     def self.canonicalized_amz_headers(request)
       headers = []
 
@@ -149,11 +148,12 @@ module S3
 
     # Helper methods for extracting caninocalized resource address
     #
-    # ==== Parameters:
-    # +host+: hostname
-    # +request+: Net::HTTPRequest object with headers filealds filled in
+    # ==== Parameters
+    # * <tt>host</tt> - Hostname
+    # * <tt>request</tt> - Net::HTTPRequest object with header fields
+    #   filled in
     #
-    # ==== Returns:
+    # ==== Returns
     # String containing extracted canonicalized resource
     def self.canonicalized_resource(host, request)
       # 1. Start with the empty string ("").
