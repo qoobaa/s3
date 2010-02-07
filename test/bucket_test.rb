@@ -6,25 +6,27 @@ class BucketTest < Test::Unit::TestCase
     @bucket_path = S3::Bucket.send(:new, nil, "Data_Bucket")
     @bucket = @bucket_vhost
 
-    @response_location = Net::HTTPOK.new("1.1", "200", "OK")
-    @response_location.stubs(:body).returns(@bucket_location_body)
-
     @bucket_location = "EU"
     @bucket_location_body = <<-EOLocation
     <?xml version="1.0" encoding="UTF-8"?>\n<LocationConstraint xmlns="http://s3.amazonaws.com/doc/2006-03-01/">EU</LocationConstraint>
     EOLocation
 
-    @reponse_owned_by_you = Net::HTTPConflict.new("1.1", "409", "Conflict")
-    @reponse_owned_by_you.stubs(:body).returns(@bucket_owned_by_you_body)
+    @response_location = Net::HTTPOK.new("1.1", "200", "OK")
+    @response_location.stubs(:body).returns(@bucket_location_body)
+
     @bucket_owned_by_you_body = <<-EOOwnedByYou
     <?xml version="1.0" encoding="UTF-8"?>\n<Error> <Code>BucketAlreadyOwnedByYou</Code> <Message>Your previous request to create the named bucket succeeded and you already own it.</Message> <BucketName>bucket</BucketName> <RequestId>117D08EA0EC6E860</RequestId> <HostId>4VpMSvmJ+G5+DLtVox6O5cZNgdPlYcjCu3l0n4HjDe01vPxxuk5eTAtcAkUynRyV</HostId> </Error>
     EOOwnedByYou
 
-    @reponse_already_exists = Net::HTTPConflict.new("1.1", "409", "Conflict")
-    @response_already_exists.stubs(:body).returns(@bucket_already_exists_body)
+    @reponse_owned_by_you = Net::HTTPConflict.new("1.1", "409", "Conflict")
+    @reponse_owned_by_you.stubs(:body).returns(@bucket_owned_by_you_body)
+
     @bucket_already_exists_body = <<-EOAlreadyExists
     <?xml version="1.0" encoding="UTF-8"?>\n<Error> <Code>BucketAlreadyExists</Code> <Message>The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.</Message> <BucketName>bucket</BucketName> <RequestId>4C154D32807C92BD</RequestId> <HostId>/xyHQgXcUXTZQhoO+NUBzbaxbFrIhKlyuaRHFnmcId0bMePvY9Zwg+dyk2LYE4g5</HostId> </Error>
     EOAlreadyExists
+
+    @reponse_already_exists = Net::HTTPConflict.new("1.1", "409", "Conflict")
+    @response_already_exists.stubs(:body).returns(@bucket_already_exists_body)
 
     @objects_list_empty = []
     @objects_list = [
@@ -32,24 +34,26 @@ class BucketTest < Test::Unit::TestCase
       S3::Object.send(:new, @bucket, :key => "obj2")
     ]
 
-    @response_objects_list_empty = Net::HTTPOK.new("1.1", "200", "OK")
-    @response_objects_list_empty.stubs(:body).returns(@response_objects_list_empty_body)
     @response_objects_list_empty_body = <<-EOEmpty
     <?xml version="1.0" encoding="UTF-8"?>\n<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Name>bucket</Name> <Prefix></Prefix> <Marker></Marker> <MaxKeys>1000</MaxKeys> <IsTruncated>false</IsTruncated> </ListBucketResult>
     EOEmpty
 
-    @response_objects_list = Net::HTTPOK.new("1.1", "200", "OK")
-    @response_objects_list.stubs(:body).returns(@response_objects_list_body)
+    @response_objects_list_empty = Net::HTTPOK.new("1.1", "200", "OK")
+    @response_objects_list_empty.stubs(:body).returns(@response_objects_list_empty_body)
+
     @response_objects_list_body = <<-EOObjects
     <?xml version="1.0" encoding="UTF-8"?>\n<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Name>bucket</Name> <Prefix></Prefix> <Marker></Marker> <MaxKeys>1000</MaxKeys> <IsTruncated>false</IsTruncated> <Contents> <Key>obj1</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> <Contents> <Key>obj2</Key> <LastModified>2009-07-03T11:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e586e1b12bca85a458c&quot;</ETag> <Size>179</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f17e247b037a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> </ListBucketResult>
     EOObjects
+
+    @response_objects_list = Net::HTTPOK.new("1.1", "200", "OK")
+    @response_objects_list.stubs(:body).returns(@response_objects_list_body)
   end
 
   test "name valid" do
     assert_raise ArgumentError do S3::Bucket.send(:new, nil, "") end # should not be valid with empty name
     assert_raise ArgumentError do S3::Bucket.send(:new, nil, "10.0.0.1") end # should not be valid with IP as name
     assert_raise ArgumentError do S3::Bucket.send(:new, nil, "as") end # should not be valid with name shorter than 3 characters
-    assert_raise ArgumentError do S3::Bucket.send(:new, nil, "a"*256) end # should not be valid with name longer than 255 characters
+    assert_raise ArgumentError do S3::Bucket.send(:new, nil, "a" * 256) end # should not be valid with name longer than 255 characters
     assert_raise ArgumentError do S3::Bucket.send(:new, nil, ".asdf") end # should not allow special characters as first character
     assert_raise ArgumentError do S3::Bucket.send(:new, nil, "-asdf") end # should not allow special characters as first character
     assert_raise ArgumentError do S3::Bucket.send(:new, nil, "_asdf") end # should not allow special characters as first character
