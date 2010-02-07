@@ -86,9 +86,12 @@ class ConnectionTest < Test::Unit::TestCase
   end
 
   test "parse params with and without values" do
-    expected = "max-keys=100&prefix"
-    actual = S3::Connection.parse_params(:max_keys => 100, :prefix => nil)
-    assert_equal expected, actual
+    params = S3::Connection.parse_params(:max_keys => 100, :prefix => nil)
+
+    splitted_params = params.split("&")
+    assert_equal 2, splitted_params.length
+    assert splitted_params.include?("max-keys=100")
+    assert splitted_params.include?("prefix")
   end
 
   test "headers empty" do
