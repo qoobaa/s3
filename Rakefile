@@ -8,6 +8,7 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "s3"
     gem.summary = %Q{Library for accessing S3 objects and buckets, with command line tool}
+    gem.description = %Q{S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API.}
     gem.email = "qoobaa@gmail.com"
     gem.homepage = "http://jah.pl/projects/s3.html"
     gem.authors = ["Jakub Kuźma", "Mirosław Boruta"]
