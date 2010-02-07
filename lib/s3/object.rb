@@ -151,10 +151,10 @@ module S3
       object_attributes = parse_copy_object_result(response.body)
 
       object = Object.send(:new, bucket, object_attributes.merge(:key => key, :size => size))
-      object.acl = response[:x_amz_acl]
-      object.content_type = response[:content_type]
-      object.content_encoding = response[:content_encoding]
-      object.content_disposition = response[:content_disposition]
+      object.acl = response["x-amz-acl"]
+      object.content_type = response["content-type"]
+      object.content_encoding = response["content-encoding"]
+      object.content_disposition = response["content-disposition"]
       object
     end
 
