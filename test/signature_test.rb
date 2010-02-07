@@ -89,9 +89,9 @@ class SignatureTest < Test::Unit::TestCase
     request["date"] = "Tue, 27 Mar 2007 21:06:08 +0000"
     request["x-amz-acl"] = "public-read"
     request["content-type"] = "application/x-download"
-    request["content-MD5"] = "4gJE4saaMU4BqNR0kLY+lw=="
-    # TODO:
-    # was:
+    request["content-md5"] = "4gJE4saaMU4BqNR0kLY+lw=="
+    # FIXME: Net::HTTP doesn't allow to have multiple headers with the same name
+    # request.add_field add additional spaces (breaks signature)
     #request["x-amz-meta-reviewedby"] = "joe@johnsmith.net"
     #request["x-amz-meta-reviewedby"] = "jane@johnsmith.net"
     request["x-amz-meta-reviewedby"] = "joe@johnsmith.net,jane@johnsmith.net"

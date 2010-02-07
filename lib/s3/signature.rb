@@ -111,11 +111,13 @@ module S3
       # 'x-amz-meta-username: fred' and 'x-amz-meta-username: barney'
       # would be combined into the single header 'x-amz-meta-username:
       # fred,barney'.
-      groupped_headers = headers.group_by { |i| i.first }
-      #=> {"a"=>[["a", 1], ["a", 2]], "b"=>[["b", 3]], "c"=>[["c", 0]]}
-      combined_headers = groupped_headers.map do |key, value|
-        values = value.map { |e| e.last }
-        [key, values.join(",")]
+      combined_headers = headers.inject([]) do |new_headers, header|
+        existing_header = new_headers.find { |h| h.first == header.first }
+        if existing_header
+          existing_header.last << ",#{header.last}"
+        else
+          new_headers << header
+        end
       end
       #=> [["a", "1,2"], ["b", "3"], ["c", "0"]]
 
