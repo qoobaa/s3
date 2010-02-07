@@ -100,19 +100,17 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "content and parse headers" do
-    # mock(@object_lena).object_request(:get, {}).times(2) { @response_binary }
-    @object_lena.expects(:object_request).times(2).with(:get, {}).returns(@response_binary)
+    @object_lena.expects(:object_request).with(:get, {}).returns(@response_binary)
 
     expected = /test/n
-    actual = @object_lena.content(true) # wtf? don't work with false, maybe is not fully cleaned
+    actual = @object_lena.content(true)
     assert_match expected, actual
     assert_equal "image/png", @object_lena.content_type
 
-    # stub(@object_lena).object_request(:get) { flunk "should not use connection" }
-    @object_lena.stubs(:object_request)
-
     assert @object_lena.content
-    # assert @object_lena.content(true)
+
+    @object_lena.expects(:object_request).with(:get, {}).returns(@response_binary)
+    assert @object_lena.content(true)
   end
 
   test "retrieve" do
