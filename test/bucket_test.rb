@@ -219,7 +219,7 @@ class BucketTest < Test::Unit::TestCase
     assert @bucket.objects.reload
 
     expected = @objects_list
-    actual = @bucket.objects
+    actual = @bucket.objects(true)
     assert_equal expected, actual
   end
 
