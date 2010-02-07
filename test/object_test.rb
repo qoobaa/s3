@@ -13,7 +13,7 @@ class ObjectTest < Test::Unit::TestCase
     @object_carmen = S3::Object.send(:new, @bucket_images, :key => "Carmen.png")
 
     @response_binary = Net::HTTPOK.new("1.1", "200", "OK")
-    @response_binary.stubs(:body).returns("test".force_encoding(Encoding::BINARY)) if "test".respond_to?(:force_encoding)
+    @response_binary.stubs(:body).returns("test".respond_to?(:force_encoding) ? "test".force_encoding(Encoding::BINARY) : "test")
     @response_binary["etag"] = ""
     @response_binary["content-type"] = "image/png"
     @response_binary["content-disposition"] = "inline"
