@@ -2,7 +2,7 @@ require 'test_helper'
 
 class SignatureTest < Test::Unit::TestCase
   # from http://docs.amazonwebservices.com/AmazonS3/latest/RESTAuthentication.html
-  def test_signature_for_object_get
+  test "signature for object get" do
     request = Net::HTTP::Get.new("/photos/puppy.jpg")
     request["host"] = "johnsmith.s3.amazonaws.com"
     request["date"] = "Tue, 27 Mar 2007 19:36:42 +0000"
@@ -17,7 +17,7 @@ class SignatureTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_signature_for_object_put
+  test "signature for object put" do
     request = Net::HTTP::Put.new("/photos/puppy.jpg");
     request["content-type"] = "image/jpeg"
     request["content-length"] = "94328"
@@ -34,7 +34,7 @@ class SignatureTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_signature_for_list
+  test "signature for list" do
     request = Net::HTTP::Get.new("/?prefix=photos&max-keys=50&marker=puppy");
     request["user-agent"] = "Mozilla/5.0"
     request["host"] = "johnsmith.s3.amazonaws.com"
@@ -50,7 +50,7 @@ class SignatureTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_signature_for_fetch
+  test "signature for fetch" do
     request = Net::HTTP::Get.new("/?acl");
     request["host"] = "johnsmith.s3.amazonaws.com"
     request["date"] = "Tue, 27 Mar 2007 19:44:46 +0000"
@@ -65,7 +65,7 @@ class SignatureTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_signature_for_delete
+  test "signature for delete" do
     request = Net::HTTP::Delete.new("/johnsmith/photos/puppy.jpg");
     request["user-agent"] = "dotnet"
     request["host"] = "s3.amazonaws.com"
@@ -82,7 +82,7 @@ class SignatureTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_signature_for_upload
+  test "signature for upload" do
     request = Net::HTTP::Put.new("/db-backup.dat.gz");
     request["user-agent"] = "curl/7.15.5"
     request["host"] = "static.johnsmith.net:8080"
@@ -111,7 +111,7 @@ class SignatureTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_signature_for_list_all_my_buckets
+  test "signature for list all my buckets" do
     request = Net::HTTP::Get.new("/");
     request["host"] = "s3.amazonaws.com"
     request["date"] = "Wed, 28 Mar 2007 01:29:59 +0000"
@@ -126,7 +126,7 @@ class SignatureTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_signature_for_unicode_keys
+  test "signature for unicode keys" do
     request = Net::HTTP::Get.new("/dictionary/fran%C3%A7ais/pr%c3%a9f%c3%a8re");
     request["host"] = "s3.amazonaws.com"
     request["date"] = "Wed, 28 Mar 2007 01:49:49 +0000"

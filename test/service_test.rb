@@ -7,32 +7,32 @@ class ServiceTest < Test::Unit::TestCase
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
     )
     @response_empty_buckets_list = Net::HTTPOK.new("1.1", "200", "OK")
-    stub(@service_empty_buckets_list).service_request { @response_empty_buckets_list }
-    stub(@response_empty_buckets_list).body { @buckets_empty_list_body }
+    @service_empty_buckets_list.stubs(:service_request).returns(@response_empty_buckets_list)
+    @response_empty_buckets_list.stubs(:body).returns(@buckets_empty_list_body)
 
     @service_buckets_list = S3::Service.new(
       :access_key_id =>  "12345678901234567890",
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
     )
     @response_buckets_list = Net::HTTPOK.new("1.1", "200", "OK")
-    stub(@service_buckets_list).service_request { @response_buckets_list }
-    stub(@response_buckets_list).body { @buckets_list_body }
+    @service_buckets_list.stubs(:service_request).returns(@response_buckets_list)
+    @response_buckets_list.stubs(:body).returns(@buckets_list_body)
 
     @service_bucket_exists = S3::Service.new(
       :access_key_id =>  "12345678901234567890",
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
     )
     @response_bucket_exists = Net::HTTPNotFound.new("1.1", "200", "OK")
-    stub(@service_bucket_exists).service_request { @response_bucket_exists }
-    stub(@response_bucket_exists).body { @bucket_exists }
+    @service_bucket_exists.stubs(:service_request).returns(@response_bucket_exists)
+    @response_bucket_exists.stubs(:body).returns(@bucket_exists)
 
     @service_bucket_not_exists = S3::Service.new(
       :access_key_id =>  "12345678901234567890",
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
     )
     @response_bucket_not_exists = Net::HTTPNotFound.new("1.1", "404", "Not Found")
-    stub(@service_bucket_not_exists).service_request { raise S3::Error::NoSuchBucket.new(404, @response_bucket_not_exists) }
-    stub(@response_bucket_not_exists).body { @bucket_not_exists }
+    @service_bucket_not_exists.stubs(:service_request).raises(S3::Error::NoSuchBucket.new(404, @response_bucket_not_exists))
+    @response_bucket_not_exists.stubs(:body).returns(@bucket_not_exists)
 
     @buckets_empty_list = []
     @buckets_empty_list_body = <<-EOEmptyBuckets
@@ -56,21 +56,21 @@ class ServiceTest < Test::Unit::TestCase
     EOBucketexists
   end
 
-  def test_buckets_and_parse_buckets_empty
+  test "buckets and parse buckets empty" do
     expected = @buckets_empty_list
     actual = @service_empty_buckets_list.buckets
     assert_equal expected.length, actual.length
     assert_equal expected, actual
   end
 
-  def test_buckets_and_parse_buckets
+  test "buckets and parse buckets" do
     expected = @buckets_list
     # ugly hack
     actual = @service_buckets_list.buckets(true).map { |obj| obj }
     assert_equal expected, actual
   end
 
-  def test_buckets_reload
+  test "buckets reload" do
     @service = @service_empty_buckets_list
 
     expected = @buckets_empty_list
@@ -78,7 +78,7 @@ class ServiceTest < Test::Unit::TestCase
     actual = @service.buckets
     assert_equal expected.length, actual.length, "deliver from cache"
 
-    stub(@service).service_request { @response_buckets_list }
+    @service.stubs(:service_request).returns(@response_buckets_list)
     expected = @buckets_empty_list
     actual = @service.buckets
     assert_equal expected.length, actual.length, "deliver from cache"
@@ -88,8 +88,8 @@ class ServiceTest < Test::Unit::TestCase
     assert_equal expected.length, actual.length
   end
 
-  def test_buckets_build
-    stub(@service_empty_buckets_list).service_request { flunk "should not connect to server" }
+  test "buckets build" do
+    @service_empty_buckets_list.stubs(:service_request)
 
     expected = "bucket_name"
     actual = @service_empty_buckets_list.buckets.build("bucket_name")
@@ -97,20 +97,20 @@ class ServiceTest < Test::Unit::TestCase
     assert_equal expected, actual.name
   end
 
-  def test_buckets_find_first
+  test "buckets find first" do
     assert_nothing_raised do
       actual = @service_buckets_list.buckets.find_first("data.example.com")
       assert_equal "data.example.com", actual.name
     end
   end
 
-  def test_buckets_find_first_fail
+  test "buckets find first fail" do
     assert_raise S3::Error::NoSuchBucket do
       @service_bucket_not_exists.buckets.find_first("data2.example.com")
     end
   end
 
-  def test_buckets_find_all_on_empty_list
+  test "buckets find all on empty list" do
     assert_nothing_raised do
       expected = @buckets_empty_list
       actual = @service_empty_buckets_list.buckets.find_all
@@ -118,7 +118,7 @@ class ServiceTest < Test::Unit::TestCase
     end
   end
 
-  def test_buckets_find_all
+  test "buckets find all" do
     assert_nothing_raised do
       expected = @buckets_list
       actual = @service_buckets_list.buckets.find_all

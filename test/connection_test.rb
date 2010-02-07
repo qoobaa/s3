@@ -9,11 +9,12 @@ class ConnectionTest < Test::Unit::TestCase
     @http_request = Net::HTTP.new("")
     @response_ok = Net::HTTPOK.new("1.1", "200", "OK")
     @response_not_found = Net::HTTPNotFound.new("1.1", "404", "Not Found")
-    stub(@connection).http { @http_request }
-    stub(@http_request).start { @response_ok }
+    @connection.stubs(:http).returns(@http_request)
+
+    @http_request.stubs(:start).returns(@response_ok)
   end
 
-  def test_handle_response_not_modify_response_when_ok
+  test "handle response not modify response when ok" do
     assert_nothing_raised do
       response = @connection.request(
         :get,
@@ -24,7 +25,7 @@ class ConnectionTest < Test::Unit::TestCase
     end
   end
 
-  def test_handle_response_throws_exception_when_not_ok
+  test "handle response throws exception when error" do
     response_body = <<-EOFakeBody
     <?xml version=\"1.0\" encoding=\"UTF-8\"?>
     <Error>
@@ -33,8 +34,8 @@ class ConnectionTest < Test::Unit::TestCase
     </Error>
     EOFakeBody
 
-    stub(@http_request).start { @response_not_found }
-    stub(@response_not_found).body { response_body }
+    @http_request.stubs(:start).returns(@response_not_found)
+    @response_not_found.stubs(:body).returns(response_body)
 
     assert_raise S3::Error::NoSuchBucket do
       response = @connection.request(
@@ -45,9 +46,9 @@ class ConnectionTest < Test::Unit::TestCase
     end
   end
 
-  def test_handle_response_throws_standard_exception_when_not_ok
-    stub(@http_request).start { @response_not_found }
-    stub(@response_not_found).body { nil }
+  test "handle response throws standard exception when error" do
+    @http_request.stubs(:start).returns(@response_not_found)
+    @response_not_found.stubs(:body)
     assert_raise S3::Error::ResponseError do
       response = @connection.request(
         :get,
@@ -56,7 +57,7 @@ class ConnectionTest < Test::Unit::TestCase
       )
     end
 
-    stub(@response_not_found).body { "" }
+    @response_not_found.stubs(:body).returns("")
     assert_raise S3::Error::ResponseError do
       response = @connection.request(
         :get,
@@ -66,37 +67,37 @@ class ConnectionTest < Test::Unit::TestCase
     end
   end
 
-  def test_parse_params_empty
+  test "parse params empty" do
     expected = ""
     actual = S3::Connection.parse_params({})
     assert_equal expected, actual
   end
 
-  def test_parse_params_only_interesting_params
+  test "parse params only interesting params" do
     expected = ""
     actual = S3::Connection.parse_params(:param1 => "1", :maxkeys => "2")
     assert_equal expected, actual
   end
 
-  def test_parse_params_remove_underscore
+  test "parse params remove underscore" do
     expected = "max-keys=100"
     actual = S3::Connection.parse_params(:max_keys => 100)
     assert_equal expected, actual
   end
 
-  def test_parse_params_with_and_without_values
+  test "parse params with and without values" do
     expected = "max-keys=100&prefix"
     actual = S3::Connection.parse_params(:max_keys => 100, :prefix => nil)
     assert_equal expected, actual
   end
 
-  def test_headers_headers_empty
+  test "headers empty" do
     expected = {}
     actual = S3::Connection.parse_headers({})
     assert_equal expected, actual
   end
 
-  def test_parse_headers_only_interesting_headers
+  test "parse only interesting headers" do
     expected = {}
     actual = S3::Connection.parse_headers(
       :accept => "text/*, text/html, text/html;level=1, */*",
@@ -105,7 +106,7 @@ class ConnectionTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_parse_headers_remove_underscore
+  test "parse headers remove underscore" do
     expected = {
       "content-type" => nil,
       "x-amz-acl" => nil,
@@ -129,7 +130,7 @@ class ConnectionTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_parse_headers_with_values
+  test "parse headers with values" do
     expected = {
       "content-type" => "text/html",
       "x-amz-acl" => "public-read",
@@ -153,7 +154,7 @@ class ConnectionTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_parse_headers_with_range
+  test "parse headers with range" do
     expected = {
       "range" => "bytes=0-100"
     }

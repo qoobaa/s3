@@ -13,7 +13,7 @@ class ObjectTest < Test::Unit::TestCase
     @object_carmen = S3::Object.send(:new, @bucket_images, :key => "Carmen.png")
 
     @response_binary = Net::HTTPOK.new("1.1", "200", "OK")
-    stub(@response_binary).body { "test".force_encoding(Encoding::BINARY) }
+    @response_binary.stubs(:body).returns("test".force_encoding(Encoding::BINARY))
     @response_binary["etag"] = ""
     @response_binary["content-type"] = "image/png"
     @response_binary["content-disposition"] = "inline"
@@ -26,10 +26,10 @@ class ObjectTest < Test::Unit::TestCase
     <CopyObjectResult> <LastModified>timestamp</LastModified> <ETag>"etag"</ETag> </CopyObjectResult>
     EOXML
     @response_xml = Net::HTTPOK.new("1.1", "200", "OK")
-    stub(@response_xml).body { @xml_body }
+    @response_xml.stubs(:body).returns(@xml_body)
   end
 
-  def test_initilalize
+  test "initializing" do
     assert_raise ArgumentError do S3::Object.send(:new, nil, :key => "") end # should not allow empty key
     assert_raise ArgumentError do S3::Object.send(:new, nil, :key => "//") end # should not allow key with double slash
 
@@ -41,13 +41,13 @@ class ObjectTest < Test::Unit::TestCase
     end
   end
 
-  def test_full_key
+  test "full key" do
     expected = "images/Lena.png"
     actual = @object_lena.full_key
     assert_equal expected, actual
   end
 
-  def test_url
+  test "url" do
     bucket1 = S3::Bucket.send(:new, @service, "images")
 
     object11 = S3::Object.send(:new, bucket1, :key => "Lena.png")
@@ -68,7 +68,7 @@ class ObjectTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_cname_url
+  test "cname url" do
     bucket1 = S3::Bucket.send(:new, @service, "images.example.com")
 
     object11 = S3::Object.send(:new, bucket1, :key => "Lena.png")
@@ -89,45 +89,46 @@ class ObjectTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_destroy
-    mock(@object_lena).object_request(:delete) {}
+  test "destroy" do
+    @object_lena.expects(:object_request).with(:delete)
     assert @object_lena.destroy
   end
 
-  def test_save
-    mock(@object_lena).object_request(:put, :body=>"test", :headers=>{ :x_amz_acl=>"public-read", :content_type=>"application/octet-stream" }) { @response_binary }
-
+  test "save" do
+    @object_lena.expects(:object_request).with(:put, :body=>"test", :headers=>{ :x_amz_acl=>"public-read", :content_type=>"application/octet-stream" }).returns(@response_binary)
     assert @object_lena.save
   end
 
-  def test_content_and_parse_headers
-    mock(@object_lena).object_request(:get, {}).times(2) { @response_binary }
+  test "content and parse headers" do
+    # mock(@object_lena).object_request(:get, {}).times(2) { @response_binary }
+    @object_lena.expects(:object_request).times(2).with(:get, {}).returns(@response_binary)
 
     expected = /test/n
     actual = @object_lena.content(true) # wtf? don't work with false, maybe is not fully cleaned
     assert_match expected, actual
     assert_equal "image/png", @object_lena.content_type
 
-    stub(@object_lena).object_request(:get) { flunk "should not use connection" }
+    # stub(@object_lena).object_request(:get) { flunk "should not use connection" }
+    @object_lena.stubs(:object_request)
 
     assert @object_lena.content
     assert @object_lena.content(true)
   end
 
-  def test_retrieve
-    mock(@object_lena).object_request(:get, :headers=>{:range=>0..0}) { @response_binary }
+  test "retrieve" do
+    @object_lena.expects(:object_request).with(:get, :headers=>{:range=>0..0}).returns(@response_binary)
     assert @object_lena.retrieve
   end
 
-  def test_exists
-    mock(@object_lena).retrieve { true }
+  test "exists" do
+    @object_lena.expects(:retrieve).returns(true)
     assert @object_lena.exists?
 
-    mock(@object_carmen).retrieve { raise S3::Error::NoSuchKey.new(nil, nil) }
+    @object_carmen.expects(:retrieve).raises(S3::Error::NoSuchKey.new(nil, nil))
     assert ! @object_carmen.exists?
   end
 
-  def test_acl_writer
+  test "ACL writer" do
     expected = nil
     actual = @object_lena.acl
     assert_equal expected, actual
@@ -145,8 +146,8 @@ class ObjectTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
-  def test_copy
-    mock(@bucket_images).bucket_request(:put, :path => "Lena-copy.png", :headers => { :x_amz_acl => "public-read", :content_type => "application/octet-stream", :x_amz_copy_source => "images/Lena.png", :x_amz_metadata_directive => "REPLACE" }) { @response_xml }
+  test "copy" do
+    @bucket_images.expects(:bucket_request).with(:put, :path => "Lena-copy.png", :headers => { :x_amz_acl => "public-read", :content_type => "application/octet-stream", :x_amz_copy_source => "images/Lena.png", :x_amz_metadata_directive => "REPLACE" }).returns(@response_xml)
 
     new_object = @object_lena.copy(:key => "Lena-copy.png")
 

@@ -21,12 +21,13 @@ module S3
     # * <tt>:debug</tt> - Display debug information on the STDOUT
     #   (false by default)
     # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
+    #   (60 by default)
     def initialize(options)
-      @access_key_id = options[:access_key_id] or raise ArgumentError, "No access key id given"
-      @secret_access_key = options[:secret_access_key] or raise ArgumentError, "No secret access key given"
-      @use_ssl = options[:use_ssl]
-      @timeout = options[:timeout]
-      @debug = options[:debug]
+      @access_key_id = options.fetch(:access_key_id)
+      @secret_access_key = options.fetch(:secret_access_key)
+      @use_ssl = options.fetch(:use_ssl, false)
+      @timeout = options.fetch(:timeout, 60)
+      @debug = options.fetch(:debug, false)
     end
 
     # Returns all buckets in the service and caches the result (see

@@ -17,12 +17,13 @@ module S3
     # * <tt>:debug</tt> - Display debug information on the STDOUT
     #   (false by default)
     # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
+    #   (60 by default)
     def initialize(options = {})
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
       @use_ssl = options.fetch(:use_ssl, false)
-      @debug = options.fetch(:debug)
-      @timeout = options.fetch(:timeout)
+      @debug = options.fetch(:debug, false)
+      @timeout = options.fetch(:timeout, 60)
     end
 
     # Makes request with given HTTP method, sets missing parameters,
@@ -36,8 +37,7 @@ module S3
     # ==== Options:
     # * <tt>:host</tt> - Hostname to connecto to, defaults
     #   to <tt>s3.amazonaws.com</tt>
-    # * <tt>:path</tt> - path to send request to, throws
-    #   ArgumentError if not given (REQUIRED)
+    # * <tt>:path</tt> - path to send request to (REQUIRED)
     # * <tt>:body</tt> - Request body, only meaningful for
     #   <tt>:put</tt> request
     # * <tt>:params</tt> - Parameters to add to query string for
@@ -49,10 +49,10 @@ module S3
     # Net::HTTPResponse object -- response from the server
     def request(method, options)
       host = options.fetch(:host, HOST)
-      path = options.fetch(:path) or raise ArgumentError.new("no path given")
-      body = options.fetch(:body)
-      params = options.fetch(:params)
-      headers = options.fetch(:headers)
+      path = options.fetch(:path)
+      body = options.fetch(:body, "")
+      params = options.fetch(:params, {})
+      headers = options.fetch(:headers, {})
 
       if params
         params = params.is_a?(String) ? params : self.class.parse_params(params)
