@@ -5,10 +5,10 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3}
-  s.version = "0.2.5"
+  s.version = "0.2.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Jakub Kuźma", "Mirosław Boruta"]
+  s.authors = ["Jakub Ku\305\272ma", "Miros\305\202aw Boruta"]
   s.date = %q{2010-02-07}
   s.default_executable = %q{s3}
   s.description = %q{S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API.}
@@ -38,6 +38,7 @@ Gem::Specification.new do |s|
      "lib/s3/roxy/proxy.rb",
      "lib/s3/service.rb",
      "lib/s3/signature.rb",
+     "s3.gemspec",
      "test/bucket_test.rb",
      "test/connection_test.rb",
      "test/object_test.rb",
