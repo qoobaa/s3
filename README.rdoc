@@ -11,11 +11,7 @@ It supports both: European and US buckets through {REST API}[http://docs.amazonw
 
 == Installation
 
-If you don't have the {Gemcutter sources}[http://gemcutter.org/pages/gem_docs] yet:
-  gem sources -a http://gemcutter.org
-
-To install the gem type:
-  gem install s3
+  gem install s3 --source http://gemcutter.org
 
 == Usage
 
