@@ -67,11 +67,11 @@ module S3
       bucket = options[:bucket]
       resource = options[:resource]
       secret_access_key = options[:secret_access_key]
-      expires = options[:expires_on]
+      expires = options[:expires_at]
 
-      string_to_sign = "GET\n\n\n#{expires}\n/#{bucket}/#{resource}";
+      string_to_sign = "GET\n\n\n#{expires.to_i.to_s}\n/#{bucket}/#{resource}";
 
-      digest = OpenSSL::Digest::Digest.new('sha1')
+      digest = OpenSSL::Digest::Digest.new("sha1")
       hmac = OpenSSL::HMAC.digest(digest, secret_access_key, string_to_sign)
       base64 = Base64.encode64(hmac)
       signature = base64.chomp

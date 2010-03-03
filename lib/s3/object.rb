@@ -106,10 +106,10 @@ module S3
     def temporary_url(expires_at = Time.now + 3600)
       signature = Signature.generate_temporary_url_signature(:bucket => name,
                                                              :resource => key,
-                                                             :expires_on => expires_at,
+                                                             :expires_at => expires_at,
                                                              :secret_access_key => secret_access_key)
 
-      "#{url}?Signature=#{URI.escape(signature)}&Expires=#{URI.escape(expires_at.to_i)}"
+      "#{url}?AWSAccessKeyId=#{self.bucket.service.access_key_id}&Expires=#{expires_at.to_i.to_s}&Signature=#{signature}"
     end
 
     # Returns Object's CNAME URL (without <tt>s3.amazonaws.com</tt>
