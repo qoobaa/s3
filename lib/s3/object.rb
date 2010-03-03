@@ -46,7 +46,7 @@ module S3
     # NOT download the content of the object (use the #content method
     # to do it).
     def retrieve
-      get_object(:headers => { :range => 0..0 })
+      get_object(:headers => { :range => 0 })
       self
     end
 
