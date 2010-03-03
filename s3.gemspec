@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3}
-  s.version = "0.2.6"
+  s.version = "0.2.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Jakub Ku\305\272ma", "Miros\305\202aw Boruta"]
-  s.date = %q{2010-02-07}
+  s.authors = ["Jakub Kuźma", "Mirosław Boruta"]
+  s.date = %q{2010-03-03}
   s.default_executable = %q{s3}
   s.description = %q{S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API.}
   s.email = %q{qoobaa@gmail.com}
@@ -49,7 +49,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://jah.pl/projects/s3.html}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{Library for accessing S3 objects and buckets, with command line tool}
   s.test_files = [
     "test/object_test.rb",
