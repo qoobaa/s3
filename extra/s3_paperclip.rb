@@ -100,7 +100,7 @@ module Paperclip
             log("saving #{path(style)}")
             object = bucket.objects.build(path(style))
             object.content = file.read
-            object.acl = @s3_permisions
+            object.acl = @s3_permissions
             object.content_type = instance_read(:content_type)
             object.content_disposition = @s3_headers[:content_disposition]
             object.content_encoding = @s3_headers[:content_encoding]
