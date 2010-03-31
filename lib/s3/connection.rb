@@ -172,7 +172,7 @@ module S3
 
         if request.body
           request["Content-Type"] ||= "application/octet-stream"
-          request["Content-MD5"] = Base64.encode64(Digest::MD5.digest(request.body)).chomp
+          request["Content-MD5"] = Base64.encode64(Digest::MD5.digest(request.body)).chomp unless request.body.empty?
         end
 
         request["Authorization"] = Signature.generate(:host => host,
