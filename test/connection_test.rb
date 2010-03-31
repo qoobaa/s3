@@ -9,6 +9,7 @@ class ConnectionTest < Test::Unit::TestCase
     @http_request = Net::HTTP.new("")
     @response_ok = Net::HTTPOK.new("1.1", "200", "OK")
     @response_not_found = Net::HTTPNotFound.new("1.1", "404", "Not Found")
+    @response_error = Net::HTTPInternalServerError.new("1.1", "500", "Internal Server Error")
     @connection.stubs(:http).returns(@http_request)
 
     @http_request.stubs(:start).returns(@response_ok)
@@ -47,8 +48,8 @@ class ConnectionTest < Test::Unit::TestCase
   end
 
   test "handle response throws standard exception when error" do
-    @http_request.stubs(:start).returns(@response_not_found)
-    @response_not_found.stubs(:body)
+    @http_request.stubs(:start).returns(@response_error)
+    @response_error.stubs(:body)
     assert_raise S3::Error::ResponseError do
       response = @connection.request(
         :get,
@@ -57,7 +58,7 @@ class ConnectionTest < Test::Unit::TestCase
       )
     end
 
-    @response_not_found.stubs(:body).returns("")
+    @response_error.stubs(:body).returns("")
     assert_raise S3::Error::ResponseError do
       response = @connection.request(
         :get,

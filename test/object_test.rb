@@ -114,7 +114,7 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "retrieve" do
-    @object_lena.expects(:object_request).with(:get, :headers=>{:range=>0..0}).returns(@response_binary)
+    @object_lena.expects(:object_request).with(:head, {}).returns(@response_binary)
     assert @object_lena.retrieve
   end
 
