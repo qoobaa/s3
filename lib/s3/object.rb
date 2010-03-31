@@ -46,7 +46,7 @@ module S3
     # NOT download the content of the object (use the #content method
     # to do it).
     def retrieve
-      get_object(:headers => { :range => 0 })
+      object_head
       self
     end
 
@@ -160,6 +160,11 @@ module S3
 
     def get_object(options = {})
       response = object_request(:get, options)
+      parse_headers(response)
+    end
+    
+    def object_head(options = {})
+      response = object_request(:head, options)
       parse_headers(response)
     end
 

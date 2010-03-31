@@ -144,6 +144,8 @@ module S3
       case method
       when :get
         request_class = Net::HTTP::Get
+      when :head
+        request_class = Net::HTTP::Head
       when :put
         request_class = Net::HTTP::Put
       when :delete
@@ -191,7 +193,11 @@ module S3
         response
       when 300...600
         if response.body.nil? || response.body.empty?
-          raise Error::ResponseError.new(nil, response)
+          if response.code.to_i == 404
+            raise Error::ResponseError.exception("NoSuchKey").new("The specified key does not exist.", nil)
+          else
+            raise Error::ResponseError.new(nil, response)
+          end
         else
           code, message = parse_error(response.body)
           raise Error::ResponseError.exception(code).new(message, response)
