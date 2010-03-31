@@ -193,11 +193,7 @@ module S3
         response
       when 300...600
         if response.body.nil? || response.body.empty?
-          if response.code.to_i == 404
-            raise Error::ResponseError.exception("NoSuchKey").new("The specified key does not exist.", nil)
-          else
-            raise Error::ResponseError.new(nil, response)
-          end
+          raise Error::ResponseError.new(nil, response)
         else
           code, message = parse_error(response.body)
           raise Error::ResponseError.exception(code).new(message, response)

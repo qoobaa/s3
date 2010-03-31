@@ -46,7 +46,7 @@ module S3
     # NOT download the content of the object (use the #content method
     # to do it).
     def retrieve
-      object_head
+      object_headers
       self
     end
 
@@ -163,9 +163,15 @@ module S3
       parse_headers(response)
     end
     
-    def object_head(options = {})
+    def object_headers(options = {})
       response = object_request(:head, options)
       parse_headers(response)
+    rescue Error::ResponseError => e
+      if e.response.code.to_i == 404
+        raise Error::ResponseError.exception("NoSuchKey").new("The specified key does not exist.", nil)
+      else
+        raise e
+      end
     end
 
     def put_object

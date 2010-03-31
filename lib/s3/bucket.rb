@@ -13,7 +13,7 @@ module S3
     # S3::Error exception if the bucket doesn't exist or you don't
     # have access to it, etc.
     def retrieve
-      list_bucket(:max_keys => 0)
+      bucket_headers
       self
     end
 
@@ -153,6 +153,16 @@ module S3
       response = bucket_request(:get, :params => options)
       objects_attributes = parse_list_bucket_result(response.body)
       objects_attributes.map { |object_attributes| Object.send(:new, self, object_attributes) }
+    end
+    
+    def bucket_headers(options = {})
+      response = bucket_request(:head, :params => options)
+    rescue Error::ResponseError => e
+      if e.response.code.to_i == 404
+        raise Error::ResponseError.exception("NoSuchBucket").new("The specified bucket does not exist.", nil)
+      else
+        raise e
+      end
     end
 
     def create_bucket_configuration(location = nil)
