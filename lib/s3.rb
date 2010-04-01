@@ -8,9 +8,9 @@ require "openssl"
 require "rexml/document"
 require "time"
 
-require "s3/roxy/moxie"
-require "s3/roxy/proxy"
-
+require "proxies"
+require "s3/objects_extension"
+require "s3/buckets_extension"
 require "s3/parser"
 require "s3/bucket"
 require "s3/connection"

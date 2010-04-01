@@ -67,26 +67,8 @@ class ServiceTest < Test::Unit::TestCase
   test "buckets and parse buckets" do
     expected = @buckets_list
     # ugly hack
-    actual = @service_buckets_list.buckets(true).map { |obj| obj }
+    actual = @service_buckets_list.buckets.map { |obj| obj }
     assert_equal expected, actual
-  end
-
-  test "buckets reload" do
-    @service = @service_empty_buckets_list
-
-    expected = @buckets_empty_list
-    assert @service.buckets, "retrive buckets"
-    actual = @service.buckets
-    assert_equal expected.length, actual.length, "deliver from cache"
-
-    @service.stubs(:service_request).returns(@response_buckets_list)
-    expected = @buckets_empty_list
-    actual = @service.buckets
-    assert_equal expected.length, actual.length, "deliver from cache"
-
-    expected = @buckets_list
-    actual = @service.buckets(true)
-    assert_equal expected.length, actual.length
   end
 
   test "buckets build" do

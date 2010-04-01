@@ -134,14 +134,14 @@ class BucketTest < Test::Unit::TestCase
     actual = @bucket.objects
     assert_equal expected, actual
 
-    @bucket.stubs(:list_bucket)
+    @bucket.stubs(:list_bucket).returns(@objects_list_empty)
     actual = @bucket.objects
     assert_equal expected, actual
 
     @bucket.stubs(:list_bucket).returns(@objects_list)
 
     expected = @objects_list
-    actual = @bucket.objects(true)
+    actual = @bucket.objects
     assert_equal expected, actual
   end
 
@@ -203,24 +203,6 @@ class BucketTest < Test::Unit::TestCase
       actual = @bucket.objects.find_all
       assert_equal expected, actual
     end
-  end
-
-  test "objects reload" do
-    @bucket.stubs(:list_bucket).returns(@objects_list_empty)
-    expected = @objects_list_empty
-    actual = @bucket.objects
-    assert_equal expected, actual
-
-    @bucket.stubs(:list_bucket).returns(@objects_list)
-    expected = @objects_list_empty
-    actual = @bucket.objects
-    assert_equal expected, actual
-
-    assert @bucket.objects.reload
-
-    expected = @objects_list
-    actual = @bucket.objects(true)
-    assert_equal expected, actual
   end
 
   test "objects destroy all" do

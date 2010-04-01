@@ -1,7 +1,7 @@
 module S3
   class Bucket
     include Parser
-    extend Roxy::Moxie
+    include Proxies
     extend Forwardable
 
     attr_reader :name, :service
@@ -84,56 +84,8 @@ module S3
 
     # Returns the objects in the bucket and caches the result (see
     # #reload method).
-    def objects(reload = false)
-      if reload or @objects.nil?
-        @objects = list_bucket
-      else
-        @objects
-      end
-    end
-
-    proxy :objects do
-
-      # Builds the object in the bucket with given key
-      def build(key)
-        Object.send(:new, proxy_owner, :key => key)
-      end
-
-      # Finds first object with given name or raises the exception if
-      # not found
-      def find_first(name)
-        object = build(name)
-        object.retrieve
-      end
-      alias :find :find_first
-
-      # Finds the objects in the bucket.
-      #
-      # ==== Options
-      # * <tt>:prefix</tt> - Limits the response to keys which begin
-      #   with the indicated prefix
-      # * <tt>:marker</tt> - Indicates where in the bucket to begin
-      #   listing
-      # * <tt>:max_keys</tt> - The maximum number of keys you'd like
-      #   to see
-      # * <tt>:delimiter</tt> - Causes keys that contain the same
-      #   string between the prefix and the first occurrence of the
-      #   delimiter to be rolled up into a single result element
-      def find_all(options = {})
-        proxy_owner.send(:list_bucket, options)
-      end
-
-      # Reloads the object list (clears the cache)
-      def reload
-        proxy_owner.objects(true)
-      end
-
-      # Destroys all keys in the bucket
-      def destroy_all
-        proxy_target.each do |object|
-          object.destroy
-        end
-      end
+    def objects
+      MethodProxy.new(self, :list_bucket, :extend => ObjectsExtension)
     end
 
     def inspect #:nodoc:

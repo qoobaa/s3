@@ -1,7 +1,7 @@
 module S3
   class Service
     include Parser
-    extend Roxy::Moxie
+    include Proxies
 
     attr_reader :access_key_id, :secret_access_key, :use_ssl
 
@@ -32,12 +32,8 @@ module S3
 
     # Returns all buckets in the service and caches the result (see
     # +reload+)
-    def buckets(reload = false)
-      if reload or @buckets.nil?
-        @buckets = list_all_my_buckets
-      else
-        @buckets
-      end
+    def buckets
+      MethodProxy.new(self, :list_all_my_buckets, :extend => BucketsExtension)
     end
 
     # Returns "http://" or "https://", depends on <tt>:use_ssl</tt>
@@ -50,39 +46,6 @@ module S3
     # initializer
     def port
       use_ssl ? 443 : 80
-    end
-
-    proxy :buckets do
-      # Builds new bucket with given name
-      def build(name)
-        Bucket.send(:new, proxy_owner, name)
-      end
-
-      # Finds the bucket with given name
-      def find_first(name)
-        bucket = build(name)
-        bucket.retrieve
-      end
-      alias :find :find_first
-
-      # Find all buckets in the service
-      def find_all
-        proxy_target
-      end
-
-      # Reloads the bucket list (clears the cache)
-      def reload
-        proxy_owner.buckets(true)
-      end
-
-      # Destroy all buckets in the service. Doesn't destroy non-empty
-      # buckets by default, pass true to force destroy (USE WITH
-      # CARE!).
-      def destroy_all(force = false)
-        proxy_target.each do |bucket|
-          bucket.destroy(force)
-        end
-      end
     end
 
     def inspect #:nodoc:
