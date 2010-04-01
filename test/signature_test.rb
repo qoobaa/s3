@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class SignatureTest < Test::Unit::TestCase
   # from http://docs.amazonwebservices.com/AmazonS3/latest/RESTAuthentication.html

@@ -154,7 +154,7 @@ module S3
       objects_attributes = parse_list_bucket_result(response.body)
       objects_attributes.map { |object_attributes| Object.send(:new, self, object_attributes) }
     end
-    
+
     def bucket_headers(options = {})
       response = bucket_request(:head, :params => options)
     rescue Error::ResponseError => e

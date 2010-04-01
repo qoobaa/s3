@@ -162,7 +162,7 @@ module S3
       response = object_request(:get, options)
       parse_headers(response)
     end
-    
+
     def object_headers(options = {})
       response = object_request(:head, options)
       parse_headers(response)

@@ -1,5 +1,5 @@
 # encoding: utf-8
-require 'test_helper'
+require "test_helper"
 
 class ObjectTest < Test::Unit::TestCase
   def setup

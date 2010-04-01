@@ -1,4 +1,4 @@
-require 'test_helper'
+require "test_helper"
 
 class ConnectionTest < Test::Unit::TestCase
   def setup
