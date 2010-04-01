@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{s3}
-  s.version = "0.2.8"
+  s.version = "0.3.0.beta"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jakub Kuźma", "Mirosław Boruta"]
-  s.date = %q{2010-03-03}
+  s.date = %q{2010-04-01}
   s.default_executable = %q{s3}
   s.description = %q{S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API.}
   s.email = %q{qoobaa@gmail.com}
@@ -30,12 +30,12 @@ Gem::Specification.new do |s|
      "extra/s3_paperclip.rb",
      "lib/s3.rb",
      "lib/s3/bucket.rb",
+     "lib/s3/buckets_extension.rb",
      "lib/s3/connection.rb",
      "lib/s3/exceptions.rb",
      "lib/s3/object.rb",
+     "lib/s3/objects_extension.rb",
      "lib/s3/parser.rb",
-     "lib/s3/roxy/moxie.rb",
-     "lib/s3/roxy/proxy.rb",
      "lib/s3/service.rb",
      "lib/s3/signature.rb",
      "s3.gemspec",
@@ -66,15 +66,18 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<trollop>, [">= 1.14"])
+      s.add_runtime_dependency(%q<proxies>, [">= 0"])
       s.add_development_dependency(%q<test-unit>, [">= 2.0"])
       s.add_development_dependency(%q<mocha>, [">= 0"])
     else
       s.add_dependency(%q<trollop>, [">= 1.14"])
+      s.add_dependency(%q<proxies>, [">= 0"])
       s.add_dependency(%q<test-unit>, [">= 2.0"])
       s.add_dependency(%q<mocha>, [">= 0"])
     end
   else
     s.add_dependency(%q<trollop>, [">= 1.14"])
+    s.add_dependency(%q<proxies>, [">= 0"])
     s.add_dependency(%q<test-unit>, [">= 2.0"])
     s.add_dependency(%q<mocha>, [">= 0"])
   end
