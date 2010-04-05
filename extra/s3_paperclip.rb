@@ -17,13 +17,12 @@
 #                     },
 #                     :bucket => "bucket.domain.tld",
 #                     :path => ":attachment/:id/:style.:extension"
-
 module Paperclip
   module Storage
     module S3
-      def self.extended(base)
+      def self.extended base
         begin
-          require "s3"
+          require 's3'
         rescue LoadError => e
           e.message << " (You may need to install the s3 gem)"
           raise e
@@ -35,13 +34,15 @@ module Paperclip
           @bucket_name    = @bucket_name.call(self) if @bucket_name.is_a?(Proc)
           @s3_options     = @options[:s3_options]     || {}
           @s3_permissions = @options[:s3_permissions] || :public_read
-          @s3_protocol    = @options[:s3_protocol]    || (@s3_permissions == :public_read ? "http" : "https")
+          @s3_protocol    = @options[:s3_protocol]    || (@s3_permissions == :public_read ? 'http' : 'https')
           @s3_headers     = @options[:s3_headers]     || {}
           @s3_host_alias  = @options[:s3_host_alias]
           @url            = ":s3_path_url" unless @url.to_s.match(/^:s3.*url$/)
-          @service = ::S3::Service.new(@s3_options.merge(:access_key_id => @s3_credentials[:access_key_id],
-                                                         :secret_access_key => @s3_credentials[:secret_access_key],
-                                                         :use_ssl => @s3_protocol == "https"))
+          @service = ::S3::Service.new(@s3_options.merge(
+            :access_key_id => @s3_credentials[:access_key_id],
+            :secret_access_key => @s3_credentials[:secret_access_key],
+            :use_ssl => @s3_protocol == "https"
+          ))
           @bucket = @service.buckets.build(@bucket_name)
         end
         Paperclip.interpolates(:s3_alias_url) do |attachment, style|
@@ -55,19 +56,23 @@ module Paperclip
         end
       end
 
-      def bucket
-        @bucket
+      def expiring_url(style_name = default_style, time = 3600)
+        bucket.objects.build(path(style_name)).temporary_url(Time.now + time)
       end
 
       def bucket_name
-        @bucket.name
+        @bucket_name
+      end
+
+      def bucket
+        @bucket
       end
 
       def s3_host_alias
         @s3_host_alias
       end
 
-      def parse_credentials(creds)
+      def parse_credentials creds
         creds = find_credentials(creds).stringify_keys
         (creds[RAILS_ENV] || creds).symbolize_keys
       end
@@ -86,12 +91,18 @@ module Paperclip
 
       # Returns representation of the data of the file assigned to the given
       # style, in the format most representative of the current storage.
-      def to_file(style = default_style)
+      def to_file style = default_style
         return @queued_for_write[style] if @queued_for_write[style]
-        file = Tempfile.new(path(style))
-        file.write(bucket.objects.find(path(style)).content)
-        file.rewind
-        return file
+        begin
+          file = Tempfile.new(path(style))
+          file.binmode if file.respond_to?(:binmode)
+          file.write(bucket.objects.find(path(style)).content)
+          file.rewind
+        rescue ::S3::Error::NoSuchKey
+          file.close if file.respond_to?(:close)
+          file = nil
+        end
+        file
       end
 
       def flush_writes #:nodoc:
@@ -100,7 +111,7 @@ module Paperclip
             log("saving #{path(style)}")
             object = bucket.objects.build(path(style))
             object.content = file.read
-            object.acl = @s3_permisions
+            object.acl = @s3_permissions
             object.content_type = instance_read(:content_type)
             object.content_disposition = @s3_headers[:content_disposition]
             object.content_encoding = @s3_headers[:content_encoding]
@@ -124,7 +135,7 @@ module Paperclip
         @queued_for_delete = []
       end
 
-      def find_credentials(creds)
+      def find_credentials creds
         case creds
         when File
           YAML::load(ERB.new(File.read(creds.path)).result)
@@ -137,6 +148,7 @@ module Paperclip
         end
       end
       private :find_credentials
+
     end
   end
 end
