@@ -22,7 +22,7 @@ module Paperclip
     module S3
       def self.extended base
         begin
-          require 's3'
+          require "s3"
         rescue LoadError => e
           e.message << " (You may need to install the s3 gem)"
           raise e
@@ -34,7 +34,7 @@ module Paperclip
           @bucket_name    = @bucket_name.call(self) if @bucket_name.is_a?(Proc)
           @s3_options     = @options[:s3_options]     || {}
           @s3_permissions = @options[:s3_permissions] || :public_read
-          @s3_protocol    = @options[:s3_protocol]    || (@s3_permissions == :public_read ? 'http' : 'https')
+          @s3_protocol    = @options[:s3_protocol]    || (@s3_permissions == :public_read ? "http" : "https")
           @s3_headers     = @options[:s3_headers]     || {}
           @s3_host_alias  = @options[:s3_host_alias]
           @url            = ":s3_path_url" unless @url.to_s.match(/^:s3.*url$/)

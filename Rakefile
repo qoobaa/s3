@@ -1,62 +1,43 @@
-# encoding: UTF-8
+$:.unshift File.expand_path("../lib", __FILE__)
 
-require 'rubygems'
-require 'rake'
+require "rubygems"
+require "rubygems/specification"
+require "rake/testtask"
+require "rake/rdoctask"
+require "rake/gempackagetask"
+require "s3"
 
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gem|
-    gem.name = "s3"
-    gem.summary = %Q{Library for accessing S3 objects and buckets, with command line tool}
-    gem.description = %Q{S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API.}
-    gem.email = "qoobaa@gmail.com"
-    gem.homepage = "http://jah.pl/projects/s3.html"
-    gem.authors = ["Jakub Kuźma", "Mirosław Boruta"]
-    gem.add_dependency "trollop", ">=1.14"
-    gem.add_dependency "proxies"
-    gem.add_development_dependency "test-unit", ">= 2.0"
-    gem.add_development_dependency "mocha"
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
-  end
-
-rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
+def gemspec
+  file = File.expand_path('../s3.gemspec', __FILE__)
+  eval(File.read(file), binding, file)
 end
 
-require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/*_test.rb'
+  test.libs << "lib" << "test"
+  test.pattern = "test/**/*_test.rb"
   test.verbose = true
 end
 
-begin
-  require 'rcov/rcovtask'
-  Rcov::RcovTask.new do |test|
-    test.libs << 'test'
-    test.pattern = 'test/**/*_test.rb'
-    test.verbose = true
-  end
-rescue LoadError
-  task :rcov do
-    abort "RCov is not available. In order to run rcov, you must: sudo gem install spicycode-rcov"
-  end
-end
-
-task :default => :test
-
-require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
-  if File.exist?('VERSION.yml')
-    config = YAML.load(File.read('VERSION.yml'))
-    version = "#{config[:major]}.#{config[:minor]}.#{config[:patch]}"
-  else
-    version = ""
-  end
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "s3 #{version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+  rdoc.rdoc_dir = "rdoc"
+  rdoc.title = "s3 #{S3::VERSION}"
+  rdoc.rdoc_files.include("README.rdoc")
+  rdoc.rdoc_files.include("lib/**/*.rb")
 end
 
+Rake::GemPackageTask.new(gemspec) do |pkg|
+  pkg.gem_spec = gemspec
+end
+
+desc "Install the gem locally"
+task :install => :package do
+  sh %{gem install pkg/#{gemspec.name}-#{gemspec.version}}
+end
+
+desc "Validate the gemspec"
+task :gemspec do
+  gemspec.validate
+end
+
+task :gem => :gemspec
+task :default => :test
