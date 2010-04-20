@@ -8,7 +8,6 @@ It supports both: European and US buckets through {REST API}[http://docs.amazonw
 * repository[http://github.com/qoobaa/s3]
 * {issue tracker}[http://github.com/qoobaa/s3/issues]
 * rdoc[http://qoobaa.github.com/s3]
-* {continuous integration}[http://runcoderun.com/qoobaa/s3]
 
 == Installation
 
