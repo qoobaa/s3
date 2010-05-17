@@ -166,7 +166,7 @@ module S3
       http
     end
 
-    def send_request(host, request)
+    def send_request(host, request, skip_authorization = false)
       response = http(host).start do |http|
         host = http.address
 
@@ -177,14 +177,24 @@ module S3
           request["Content-MD5"] = Base64.encode64(Digest::MD5.digest(request.body)).chomp unless request.body.empty?
         end
 
-        request["Authorization"] = Signature.generate(:host => host,
-                                                      :request => request,
-                                                      :access_key_id => access_key_id,
-                                                      :secret_access_key => secret_access_key)
+        unless skip_authorization
+          request["Authorization"] = Signature.generate(:host => host,
+                                                        :request => request,
+                                                        :access_key_id => access_key_id,
+                                                        :secret_access_key => secret_access_key)
+        end
+
         http.request(request)
       end
 
-      handle_response(response)
+      if response.code.to_i == 307
+        if response.body
+          doc = Document.new response.body
+          send_request(doc.elements['Error'].elements['Endpoint'].text, request, true)
+        end
+      else
+        handle_response(response)
+      end
     end
 
     def handle_response(response)
