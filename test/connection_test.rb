@@ -10,6 +10,7 @@ class ConnectionTest < Test::Unit::TestCase
     @response_ok = Net::HTTPOK.new("1.1", "200", "OK")
     @response_not_found = Net::HTTPNotFound.new("1.1", "404", "Not Found")
     @response_error = Net::HTTPInternalServerError.new("1.1", "500", "Internal Server Error")
+    @response_temporary_redirect = Net::HTTPInternalServerError.new("1.1", "307", "Temporary Redirect")
     @connection.stubs(:http).returns(@http_request)
 
     @http_request.stubs(:start).returns(@response_ok)
@@ -166,5 +167,44 @@ class ConnectionTest < Test::Unit::TestCase
       :range => 0..100
     )
     assert_equal expected, actual
+  end
+
+  test "response.body is nil on TemporaryRedirect" do
+    @http_request.stubs(:start).returns(@response_temporary_redirect)
+    @response_temporary_redirect.stubs(:body).returns(nil)
+
+    assert_nothing_raised do
+      response = @connection.request(
+        :get,
+        :host => "data.example.com.s3.amazonaws.com",
+        :path => "/"
+      )
+      assert_equal nil, response
+    end
+  end
+
+  test "response body with new host on TemporaryRedirect" do
+    response_body = <<-EOFakeBody
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    <Error>
+      <Code>TemporaryRedirect</Code>
+      <Message>Please re-send this request to the specified temporary endpoint. Continue to use the original request endpoint for future requests.</Message>
+      <RequestId>24A0BB91158D470B</RequestId>
+      <Bucket>data.example.com</Bucket>
+      <HostId>DFcq9ktw5HvWZLduutz8fnVzqtXLwIZcAezc7mgyS7lJ2ux+RChY4qAJGa2fQDjV</HostId>
+      <Endpoint>data.example.com.s3-external-3.amazonaws.com</Endpoint>
+    </Error>"
+    EOFakeBody
+
+    @response_temporary_redirect.stubs(:body).returns(response_body)
+
+    assert_nothing_raised do
+      response = @connection.request(
+        :get,
+        :host => "data.example.com.s3.amazonaws.com",
+        :path => "/"
+      )
+      assert_equal @response_ok, response
+    end
   end
 end
