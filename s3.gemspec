@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+lib = File.expand_path("../lib/", __FILE__)
+$:.unshift lib unless $:.include?(lib)
+
+require "s3/version"
+
 Gem::Specification.new do |s|
   s.name = "s3"
   s.version = S3::VERSION

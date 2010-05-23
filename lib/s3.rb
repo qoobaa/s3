@@ -18,9 +18,9 @@ require "s3/exceptions"
 require "s3/object"
 require "s3/service"
 require "s3/signature"
+require "s3/version"
 
 module S3
-  VERSION = "0.3.0.beta2"
   # Default (and only) host serving S3 stuff
   HOST = "s3.amazonaws.com"
 end
