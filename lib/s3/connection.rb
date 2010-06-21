@@ -4,7 +4,7 @@ module S3
   class Connection
     include Parser
 
-    attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug
+    attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug, :proxy
     alias :use_ssl? :use_ssl
 
     # Creates new connection object.
@@ -18,12 +18,15 @@ module S3
     #   (false by default)
     # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
     #   (60 by default)
+    # * <tt>:proxy</tt> - Hash for Net::HTTP Proxy settings
+    # { :host => "proxy.mydomain.com", :port => "80, :user => "user_a", :password => "secret" }
     def initialize(options = {})
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
       @use_ssl = options.fetch(:use_ssl, false)
       @debug = options.fetch(:debug, false)
       @timeout = options.fetch(:timeout, 60)
+      @proxy = options.fetch(:proxy, nil)
     end
 
     # Makes request with given HTTP method, sets missing parameters,
@@ -157,8 +160,12 @@ module S3
       use_ssl ? 443 : 80
     end
 
+    def proxy_settings
+      @proxy.values_at(:host, :port, :user, :password) unless @proxy.blank?
+    end
+
     def http(host)
-      http = Net::HTTP.new(host, port)
+      http = Net::HTTP.new(host, port, *proxy_settings)
       http.set_debug_output(STDOUT) if @debug
       http.use_ssl = @use_ssl
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE if @use_ssl

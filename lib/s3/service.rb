@@ -3,7 +3,7 @@ module S3
     include Parser
     include Proxies
 
-    attr_reader :access_key_id, :secret_access_key, :use_ssl
+    attr_reader :access_key_id, :secret_access_key, :use_ssl, :proxy
 
     # Compares service to other, by <tt>access_key_id</tt> and
     # <tt>secret_access_key</tt>
@@ -28,6 +28,9 @@ module S3
       @use_ssl = options.fetch(:use_ssl, false)
       @timeout = options.fetch(:timeout, 60)
       @debug = options.fetch(:debug, false)
+      
+      raise ArgumentError, "Missing proxy settings. Must specify at least :host." if options[:proxy] && !options[:proxy][:host]
+      @proxy = options.fetch(:proxy, nil)
     end
 
     # Returns all buckets in the service and caches the result (see
@@ -70,7 +73,8 @@ module S3
                                      :secret_access_key => @secret_access_key,
                                      :use_ssl => @use_ssl,
                                      :timeout => @timeout,
-                                     :debug => @debug)
+                                     :debug => @debug,
+                                     :proxy => @proxy)
       end
       @connection
     end
