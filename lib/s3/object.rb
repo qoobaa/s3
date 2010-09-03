@@ -17,7 +17,7 @@ module S3
     # of the objects are the same, and both have the same buckets (see
     # Bucket equality)
     def ==(other)
-      self.key == other.key and self.bucket == other.bucket
+      other.equal?(self) || (other.instance_of?(self.class) && self.key == other.key && self.bucket == other.bucket)
     end
 
     # Returns full key of the object: e.g. <tt>bucket-name/object/key.ext</tt>
