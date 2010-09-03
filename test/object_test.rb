@@ -23,7 +23,7 @@ class ObjectTest < Test::Unit::TestCase
 
     @xml_body = <<-EOXML
     <?xml version="1.0" encoding="UTF-8"?>
-    <CopyObjectResult> <LastModified>timestamp</LastModified> <ETag>"etag"</ETag> </CopyObjectResult>
+    <CopyObjectResult> <LastModified>#{Time.now.httpdate}</LastModified> <ETag>"etag"</ETag> </CopyObjectResult>
     EOXML
     @response_xml = Net::HTTPOK.new("1.1", "200", "OK")
     @response_xml.stubs(:body).returns(@xml_body)
@@ -40,7 +40,7 @@ class ObjectTest < Test::Unit::TestCase
       S3::Object.send(:new, nil, :key => "/images/pictures/test images/Lena not full.png")
     end
   end
-  
+
   test "==" do
     expected = false
     actual = @object_lena == nil
