@@ -40,12 +40,6 @@ class ObjectTest < Test::Unit::TestCase
       S3::Object.send(:new, nil, :key => "/images/pictures/test images/Lena not full.png")
     end
   end
-  
-  test "==" do
-    expected = false
-    actual = @object_lena == nil
-    assert_equal(expected, actual)
-  end
 
   test "==" do
     expected = false
