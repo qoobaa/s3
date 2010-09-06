@@ -115,6 +115,7 @@ class ConnectionTest < Test::Unit::TestCase
     expected = {
       "content-type" => nil,
       "x-amz-acl" => nil,
+      "x-amz-storage-class" => nil,
       "if-modified-since" => nil,
       "if-unmodified-since" => nil,
       "if-match" => nil,
@@ -125,6 +126,7 @@ class ConnectionTest < Test::Unit::TestCase
     actual = S3::Connection.parse_headers(
       :content_type => nil,
       :x_amz_acl => nil,
+      :x_amz_storage_class => nil,
       :if_modified_since => nil,
       :if_unmodified_since => nil,
       :if_match => nil,
@@ -139,6 +141,7 @@ class ConnectionTest < Test::Unit::TestCase
     expected = {
       "content-type" => "text/html",
       "x-amz-acl" => "public-read",
+      "x-amz-storage-class" => "STANDARD",
       "if-modified-since" => "today",
       "if-unmodified-since" => "tomorrow",
       "if-match" => "1234",
@@ -149,6 +152,7 @@ class ConnectionTest < Test::Unit::TestCase
     actual = S3::Connection.parse_headers(
       :content_type => "text/html",
       :x_amz_acl => "public-read",
+      :x_amz_storage_class => "STANDARD",
       :if_modified_since => "today",
       :if_unmodified_since => "tomorrow",
       :if_match => "1234",

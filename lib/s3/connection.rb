@@ -114,7 +114,7 @@ module S3
     # Hash of headers translated from symbol to string, containing
     # only interesting headers
     def self.parse_headers(headers)
-      interesting_keys = [:content_type, :x_amz_acl, :range,
+      interesting_keys = [:content_type, :x_amz_acl, :x_amz_storage_class, :range,
                           :if_modified_since, :if_unmodified_since,
                           :if_match, :if_none_match,
                           :content_disposition, :content_encoding,
@@ -161,7 +161,7 @@ module S3
     end
 
     def proxy_settings
-      @proxy.values_at(:host, :port, :user, :password) unless @proxy.blank?
+      @proxy.values_at(:host, :port, :user, :password) unless @proxy.nil? || @proxy.empty?
     end
 
     def http(host)

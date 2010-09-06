@@ -6,7 +6,7 @@ module S3
     extend Forwardable
 
     attr_accessor :content_type, :content_disposition, :content_encoding
-    attr_reader :last_modified, :etag, :size, :bucket, :key, :acl
+    attr_reader :last_modified, :etag, :size, :bucket, :key, :acl, :storage_class
     attr_writer :content
 
     def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
@@ -39,6 +39,16 @@ module S3
     #   object.acl = :public_read
     def acl=(acl)
       @acl = acl.to_s.gsub("_", "-") if acl
+    end
+    
+    # Assigns a new storage class (RRS) to the object. Please note 
+    # that the storage class is not retrieved from the server and set
+    # to "STANDARD" by default.
+    #
+    # ==== Example
+    #   object.storage_class = :reduced_redundancy
+    def storage_class=(storage_class)
+      @storage_class = storage_class.to_s.upcase if storage_class
     end
 
     # Retrieves the object from the server. Method is used to download
@@ -215,6 +225,7 @@ module S3
     def dump_headers
       headers = {}
       headers[:x_amz_acl] = @acl || "public-read"
+      headers[:x_amz_storage_class] = @storage_class || "STANDARD"
       headers[:content_type] = @content_type || "application/octet-stream"
       headers[:content_encoding] = @content_encoding if @content_encoding
       headers[:content_disposition] = @content_disposition if @content_disposition

@@ -101,7 +101,7 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "save" do
-    @object_lena.expects(:object_request).with(:put, :body=>"test", :headers=>{ :x_amz_acl=>"public-read", :content_type=>"application/octet-stream" }).returns(@response_binary)
+    @object_lena.expects(:object_request).with(:put, :body=>"test", :headers=>{ :x_amz_acl=>"public-read", :x_amz_storage_class=>"STANDARD", :content_type=>"application/octet-stream" }).returns(@response_binary)
     assert @object_lena.save
   end
 
@@ -147,6 +147,24 @@ class ObjectTest < Test::Unit::TestCase
 
     expected = "private"
     actual = @object_lena.acl
+    assert_equal expected, actual
+  end
+  
+  test "storage-class writer" do
+    expected = nil
+    actual = @object_lena.storage_class
+    assert_equal expected, actual
+    
+    assert @object_lena.storage_class = :standard
+    
+    expected = "STANDARD"
+    actual = @object_lena.storage_class
+    assert_equal expected, actual
+    
+    assert @object_lena.storage_class = :reduced_redundancy
+
+    expected = "REDUCED_REDUNDANCY"
+    actual = @object_lena.storage_class
     assert_equal expected, actual
   end
 

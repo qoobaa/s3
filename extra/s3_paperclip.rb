@@ -29,15 +29,16 @@ module Paperclip
         end
 
         base.instance_eval do
-          @s3_credentials = parse_credentials(@options[:s3_credentials])
-          @bucket_name    = @options[:bucket]         || @s3_credentials[:bucket]
-          @bucket_name    = @bucket_name.call(self) if @bucket_name.is_a?(Proc)
-          @s3_options     = @options[:s3_options]     || {}
-          @s3_permissions = @options[:s3_permissions] || :public_read
-          @s3_protocol    = @options[:s3_protocol]    || (@s3_permissions == :public_read ? "http" : "https")
-          @s3_headers     = @options[:s3_headers]     || {}
-          @s3_host_alias  = @options[:s3_host_alias]
-          @url            = ":s3_path_url" unless @url.to_s.match(/^:s3.*url$/)
+          @s3_credentials   = parse_credentials(@options[:s3_credentials])
+          @bucket_name      = @options[:bucket]           || @s3_credentials[:bucket]
+          @bucket_name      = @bucket_name.call(self) if @bucket_name.is_a?(Proc)
+          @s3_options       = @options[:s3_options]       || {}
+          @s3_permissions   = @options[:s3_permissions]   || :public_read
+          @s3_storage_class = @options[:s3_storage_class] || :standard
+          @s3_protocol      = @options[:s3_protocol]      || (@s3_permissions == :public_read ? "http" : "https")
+          @s3_headers       = @options[:s3_headers]       || {}
+          @s3_host_alias    = @options[:s3_host_alias]
+          @url              = ":s3_path_url" unless @url.to_s.match(/^:s3.*url$/)
           @service = ::S3::Service.new(@s3_options.merge(
             :access_key_id => @s3_credentials[:access_key_id],
             :secret_access_key => @s3_credentials[:secret_access_key],
@@ -112,6 +113,7 @@ module Paperclip
             object = bucket.objects.build(path(style))
             object.content = file.read
             object.acl = @s3_permissions
+            object.storage_class = @s3_storage_class
             object.content_type = instance_read(:content_type)
             object.content_disposition = @s3_headers[:content_disposition]
             object.content_encoding = @s3_headers[:content_encoding]
