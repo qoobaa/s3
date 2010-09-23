@@ -140,4 +140,66 @@ class SignatureTest < Test::Unit::TestCase
     expected = "AWS 0PN5J17HBGZHT7JJ3X82:dxhSBHoI6eVSPcXJqEghlUzZMnY="
     assert_equal expected, actual
   end
+
+  test "temporary signature for object get" do
+    actual = S3::Signature.generate_temporary_url_signature(
+      :bucket => "johnsmith",
+      :resource => "photos/puppy.jpg",
+      :secret_access_key => "uV3F3YluFJax1cknvbcGwgjvx4QpvB+leU8dUj2o",
+      :expires_at => 1175046589
+    )
+    expected = "gs6xNznrLJ4Bd%2B1y9pcy2HOSVeg%3D"
+    assert_equal expected, actual
+  end
+
+  test "temporary signature for object post" do
+    actual = S3::Signature.generate_temporary_url_signature(
+      :bucket => "johnsmith",
+      :resource => "photos/puppy.jpg",
+      :secret_access_key => "uV3F3YluFJax1cknvbcGwgjvx4QpvB+leU8dUj2o",
+      :expires_at => 1175046589,
+      :method => :post
+    )
+    expected = "duIzwO2KTEMIlbSYbFFS86Wj0LI%3D"
+    assert_equal expected, actual
+  end
+
+  test "temporary signature for object put with headers" do
+    actual = S3::Signature.generate_temporary_url_signature(
+      :bucket => "johnsmith",
+      :resource => "photos/puppy.jpg",
+      :secret_access_key => "uV3F3YluFJax1cknvbcGwgjvx4QpvB+leU8dUj2o",
+      :expires_at => 1175046589,
+      :method => :put,
+      :headers => {'x-amz-acl' => 'public-read'}
+    )
+    expected = "SDMxjIkOKIVR47nWfJ57UNPXxFM%3D"
+    assert_equal expected, actual
+  end
+
+  test "temporary signature for object delete" do
+    actual = S3::Signature.generate_temporary_url_signature(
+      :bucket => "johnsmith",
+      :resource => "photos/puppy.jpg",
+      :secret_access_key => "uV3F3YluFJax1cknvbcGwgjvx4QpvB+leU8dUj2o",
+      :expires_at => 1175046589,
+      :method => :delete
+    )
+    expected = "5Vg7A4HxgS6tVCYzBx%2BkMR8sztY%3D"
+    assert_equal expected, actual
+  end
+
+  test "temporary url for object put with headers" do
+    actual = S3::Signature.generate_temporary_url(
+      :bucket => "johnsmith",
+      :resource => "photos/puppy.jpg",
+      :access_key => '0PN5J17HBGZHT7JJ3X82',
+      :secret_access_key => "uV3F3YluFJax1cknvbcGwgjvx4QpvB+leU8dUj2o",
+      :expires_at => 1175046589,
+      :method => :put,
+      :headers => {'x-amz-acl' => 'public-read'}
+    )
+    expected = "http://s3.amazonaws.com/johnsmith/photos/puppy.jpg?AWSAccessKeyId=0PN5J17HBGZHT7JJ3X82&Expires=1175046589&Signature=SDMxjIkOKIVR47nWfJ57UNPXxFM%3D"
+    assert_equal expected, actual
+  end
 end
