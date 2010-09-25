@@ -1,9 +1,8 @@
 PATH
   remote: .
   specs:
-    s3 (0.3.2)
+    s3 (0.3.3)
       proxies
-      trollop
 
 GEM
   remote: http://rubygems.org/
@@ -13,7 +12,6 @@ GEM
     proxies (0.2.1)
     rake (0.8.7)
     test-unit (2.1.1)
-    trollop (1.16.2)
 
 PLATFORMS
   ruby
@@ -24,4 +22,3 @@ DEPENDENCIES
   proxies
   s3!
   test-unit (>= 2.0)
-  trollop
