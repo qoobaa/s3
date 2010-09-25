@@ -28,7 +28,7 @@ module S3
       @use_ssl = options.fetch(:use_ssl, false)
       @timeout = options.fetch(:timeout, 60)
       @debug = options.fetch(:debug, false)
-      
+
       raise ArgumentError, "Missing proxy settings. Must specify at least :host." if options[:proxy] && !options[:proxy][:host]
       @proxy = options.fetch(:proxy, nil)
     end
@@ -36,7 +36,7 @@ module S3
     # Returns all buckets in the service and caches the result (see
     # +reload+)
     def buckets
-      MethodProxy.new(self, :list_all_my_buckets, :extend => BucketsExtension)
+      Proxy.new(lambda { list_all_my_buckets}, :owner => self, :extend => BucketsExtension)
     end
 
     # Returns "http://" or "https://", depends on <tt>:use_ssl</tt>
