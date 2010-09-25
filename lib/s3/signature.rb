@@ -23,16 +23,89 @@ module S3
     # Generated signature string for given hostname and request
     def self.generate(options)
       request = options[:request]
-      host = options[:host]
+      access_key_id = options[:access_key_id]
+
+      options.merge!(:headers => request,
+                     :method => request.method,
+                     :resource => request.path)
+
+      signature = canonicalized_signature(options)
+
+      "AWS #{access_key_id}:#{signature}"
+    end
+
+    # Generates temporary URL signature for given resource
+    #
+    # ==== Options
+    # * <tt>:bucket</tt> - Bucket in which the resource resides
+    # * <tt>:resource</tt> - Path to the resouce you want to create
+    #   a temporary link to
+    # * <tt>:secret_access_key</tt> - Secret access key
+    # * <tt>:expires_at</tt> - Unix time stamp of when the resouce
+    #   link will expire
+    # * <tt>:method</tt> - HTTP request method you want to use on
+    #   the resource, defaults to GET
+    # * <tt>:headers</tt> - Any additional HTTP headers you intend
+    #   to use when requesting the resource
+    def self.generate_temporary_url_signature(options)
+      bucket = options[:bucket]
+      resource = options[:resource]
+      secret_access_key = options[:secret_access_key]
+      expires = options[:expires_at]
+
+      headers = options[:headers] || {}
+      headers.merge!('date' => expires.to_i.to_s)
+
+      options.merge!(:resource => "/#{bucket}/#{resource}",
+                     :method => options[:method] || :get,
+                     :headers => headers)
+      signature = canonicalized_signature(options)
+
+      CGI.escape(signature)
+    end
+
+    # Generates temporary URL for given resource
+    #
+    # ==== Options
+    # * <tt>:bucket</tt> - Bucket in which the resource resides
+    # * <tt>:resource</tt> - Path to the resouce you want to create
+    #   a temporary link to
+    # * <tt>:access_key</tt> - Access key
+    # * <tt>:secret_access_key</tt> - Secret access key
+    # * <tt>:expires_at</tt> - Unix time stamp of when the resouce
+    #   link will expire
+    # * <tt>:method</tt> - HTTP request method you want to use on
+    #   the resource, defaults to GET
+    # * <tt>:headers</tt> - Any additional HTTP headers you intend
+    #   to use when requesting the resource
+    def self.generate_temporary_url(options)
+      bucket = options[:bucket]
+      resource = options[:resource]
+      access_key = options[:access_key]
+      expires = options[:expires_at].to_i
+      signature = generate_temporary_url_signature(options)
+
+      url = "http://#{S3::HOST}/#{bucket}/#{resource}"
+      url << "?AWSAccessKeyId=#{access_key}"
+      url << "&Expires=#{expires}"
+      url << "&Signature=#{signature}"
+    end
+
+    private
+
+    def self.canonicalized_signature(options)
+      headers = options[:headers] || {}
+      host = options[:host] || ""
+      resource = options[:resource]
       access_key_id = options[:access_key_id]
       secret_access_key = options[:secret_access_key]
 
-      http_verb = request.method
-      content_md5 = request["content-md5"] || ""
-      content_type = request["content-type"] || ""
-      date = request["x-amz-date"].nil? ? request["date"] : ""
-      canonicalized_resource = canonicalized_resource(host, request)
-      canonicalized_amz_headers = canonicalized_amz_headers(request)
+      http_verb = options[:method].to_s.upcase
+      content_md5 = headers["content-md5"] || ""
+      content_type = headers["content-type"] || ""
+      date = headers["x-amz-date"].nil? ? headers["date"] : ""
+      canonicalized_resource = canonicalized_resource(host, resource)
+      canonicalized_amz_headers = canonicalized_amz_headers(headers)
 
       string_to_sign = ""
       string_to_sign << http_verb
@@ -49,37 +122,8 @@ module S3
       digest = OpenSSL::Digest::Digest.new('sha1')
       hmac = OpenSSL::HMAC.digest(digest, secret_access_key, string_to_sign)
       base64 = Base64.encode64(hmac)
-      signature = base64.chomp
-
-      "AWS #{access_key_id}:#{signature}"
+      base64.chomp
     end
-
-    # Generates temporary URL for given resource
-    #
-    # ==== Options
-    # * <tt>:bucket</tt> - Bucket in which the resource resides
-    # * <tt>:resource</tt> - Path to the resouce you want to create
-    #   a teporary link to
-    # * <tt>:secret_access_key</tt> - Secret access key
-    # * <tt>:expires_on</tt> - Unix time stamp of when the resouce
-    #   link will expire
-    def self.generate_temporary_url_signature(options)
-      bucket = options[:bucket]
-      resource = options[:resource]
-      secret_access_key = options[:secret_access_key]
-      expires = options[:expires_at]
-
-      string_to_sign = "GET\n\n\n#{expires.to_i.to_s}\n/#{bucket}/#{resource}";
-
-      digest = OpenSSL::Digest::Digest.new("sha1")
-      hmac = OpenSSL::HMAC.digest(digest, secret_access_key, string_to_sign)
-      base64 = Base64.encode64(hmac)
-      signature = base64.chomp
-
-      CGI.escape(signature)
-    end
-
-    private
 
     # Helper method for extracting header fields from Net::HTTPRequest
     # and preparing them for singing in #generate method
@@ -157,7 +201,7 @@ module S3
     #
     # ==== Returns
     # String containing extracted canonicalized resource
-    def self.canonicalized_resource(host, request)
+    def self.canonicalized_resource(host, resource)
       # 1. Start with the empty string ("").
       string = ""
 
@@ -172,7 +216,7 @@ module S3
 
       # 3. Append the path part of the un-decoded HTTP Request-URI,
       # up-to but not including the query string.
-      uri = URI.parse(request.path)
+      uri = URI.parse(resource)
       string << uri.path
 
       # 4. If the request addresses a sub-resource, like ?location,
