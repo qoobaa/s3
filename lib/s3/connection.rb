@@ -19,7 +19,10 @@ module S3
     # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
     #   (60 by default)
     # * <tt>:proxy</tt> - Hash for Net::HTTP Proxy settings
-    # { :host => "proxy.mydomain.com", :port => "80, :user => "user_a", :password => "secret" }
+    #   { :host => "proxy.mydomain.com", :port => "80, :user => "user_a", :password => "secret" }
+    # * <tt>:proxy</tt> - Hash for Net::HTTP Proxy settings
+    # * <tt>:chunk_size</tt> - Size of a chunk when streaming
+    #   (1048576 (1 MiB) by default)
     def initialize(options = {})
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
@@ -27,6 +30,7 @@ module S3
       @debug = options.fetch(:debug, false)
       @timeout = options.fetch(:timeout, 60)
       @proxy = options.fetch(:proxy, nil)
+      @chunk_size = options.fetch(:chunk_size, 1048576)
     end
 
     # Makes request with given HTTP method, sets missing parameters,
@@ -53,7 +57,7 @@ module S3
     def request(method, options)
       host = options.fetch(:host, HOST)
       path = options.fetch(:path)
-      body = options.fetch(:body, "")
+      body = options.fetch(:body, nil)
       params = options.fetch(:params, {})
       headers = options.fetch(:headers, {})
 
@@ -63,14 +67,21 @@ module S3
       end
 
       path = URI.escape(path)
-      request = request_class(method).new(path)
+      request = Request.new(@chunk_size, method.to_s.upcase, !!body, true, path)
 
       headers = self.class.parse_headers(headers)
       headers.each do |key, value|
         request[key] = value
       end
 
-      request.body = body
+      if body
+        if body.respond_to?(:read)
+          request.body_stream = body
+        else
+          request.body = body
+        end
+        request.content_length = body.respond_to?(:lstat) ? body.stat.size : body.size
+      end
 
       send_request(host, request)
     end
@@ -142,19 +153,6 @@ module S3
     end
 
     private
-
-    def request_class(method)
-      case method
-      when :get
-        request_class = Net::HTTP::Get
-      when :head
-        request_class = Net::HTTP::Head
-      when :put
-        request_class = Net::HTTP::Put
-      when :delete
-        request_class = Net::HTTP::Delete
-      end
-    end
 
     def port
       use_ssl ? 443 : 80

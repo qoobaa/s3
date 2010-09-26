@@ -22,12 +22,15 @@ module S3
     #   (false by default)
     # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
     #   (60 by default)
+    # * <tt>:chunk_size</tt> - Size of a chunk when streaming
+    #   (1048576 (1 MiB) by default)
     def initialize(options)
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
       @use_ssl = options.fetch(:use_ssl, false)
       @timeout = options.fetch(:timeout, 60)
       @debug = options.fetch(:debug, false)
+      @chunk_size = options.fetch(:chunk_size, 1048576)
 
       raise ArgumentError, "Missing proxy settings. Must specify at least :host." if options[:proxy] && !options[:proxy][:host]
       @proxy = options.fetch(:proxy, nil)
@@ -74,7 +77,8 @@ module S3
                                      :use_ssl => @use_ssl,
                                      :timeout => @timeout,
                                      :debug => @debug,
-                                     :proxy => @proxy)
+                                     :proxy => @proxy,
+                                     :chunk_size => @chunk_size)
       end
       @connection
     end
