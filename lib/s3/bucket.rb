@@ -93,7 +93,7 @@ module S3
     # Returns the objects in the bucket and caches the result (see
     # #reload method).
     def objects
-      MethodProxy.new(self, :list_bucket, :extend => ObjectsExtension)
+      Proxy.new(lambda { list_bucket }, :owner => self, :extend => ObjectsExtension)
     end
 
     def inspect #:nodoc:

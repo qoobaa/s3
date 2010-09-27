@@ -40,8 +40,8 @@ module S3
     def acl=(acl)
       @acl = acl.to_s.gsub("_", "-") if acl
     end
-    
-    # Assigns a new storage class (RRS) to the object. Please note 
+
+    # Assigns a new storage class (RRS) to the object. Please note
     # that the storage class is not retrieved from the server and set
     # to "STANDARD" by default.
     #
@@ -185,8 +185,7 @@ module S3
     end
 
     def put_object
-      body = content.is_a?(IO) ? content.read : content
-      response = object_request(:put, :body => body, :headers => dump_headers)
+      response = object_request(:put, :body => content, :headers => dump_headers)
       parse_headers(response)
     end
 
