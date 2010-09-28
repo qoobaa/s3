@@ -21,8 +21,6 @@ module S3
     # * <tt>:proxy</tt> - Hash for Net::HTTP Proxy settings
     #   { :host => "proxy.mydomain.com", :port => "80, :user => "user_a", :password => "secret" }
     # * <tt>:proxy</tt> - Hash for Net::HTTP Proxy settings
-    # * <tt>:chunk_size</tt> - Size of a chunk when streaming
-    #   (1048576 (1 MiB) by default)
     def initialize(options = {})
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
@@ -30,7 +28,6 @@ module S3
       @debug = options.fetch(:debug, false)
       @timeout = options.fetch(:timeout, 60)
       @proxy = options.fetch(:proxy, nil)
-      @chunk_size = options.fetch(:chunk_size, 1048576)
     end
 
     # Makes request with given HTTP method, sets missing parameters,
@@ -67,7 +64,7 @@ module S3
       end
 
       path = URI.escape(path)
-      request = Request.new(@chunk_size, method.to_s.upcase, !!body, true, path)
+      request = Net::HTTPGenericRequest.new(method.to_s.upcase, !!body, true, path)
 
       headers = self.class.parse_headers(headers)
       headers.each do |key, value|
