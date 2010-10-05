@@ -175,7 +175,7 @@ module S3
       response = http(host).start do |http|
         host = http.address
 
-        request['Date'] ||= Time.now.httpdate
+        request["Date"] ||= Time.now.httpdate
 
         if request.body
           request["Content-Type"] ||= "application/octet-stream"
@@ -195,7 +195,7 @@ module S3
       if response.code.to_i == 307
         if response.body
           doc = Document.new response.body
-          send_request(doc.elements['Error'].elements['Endpoint'].text, request, true)
+          send_request(doc.elements["Error"].elements["Endpoint"].text, request, true)
         end
       else
         handle_response(response)
