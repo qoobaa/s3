@@ -5,7 +5,7 @@ module S3
     include Parser
     extend Forwardable
 
-    attr_accessor :content_type, :content_disposition, :content_encoding
+    attr_accessor :content_type, :content_disposition, :content_encoding, :cache_control
     attr_reader :last_modified, :etag, :size, :bucket, :key, :acl, :storage_class
     attr_writer :content
 
@@ -150,6 +150,7 @@ module S3
       headers[:content_type] = options[:content_type] || content_type || "application/octet-stream"
       headers[:content_encoding] = options[:content_encoding] if options[:content_encoding]
       headers[:content_disposition] = options[:content_disposition] if options[:content_disposition]
+      headers[:cache_control] = options[:cache_control] if options[:cache_control]
       headers[:x_amz_copy_source] = full_key
       headers[:x_amz_metadata_directive] = "REPLACE"
       headers[:x_amz_copy_source_if_match] = options[:if_match] if options[:if_match]
@@ -165,6 +166,7 @@ module S3
       object.content_type = response["content-type"]
       object.content_encoding = response["content-encoding"]
       object.content_disposition = response["content-disposition"]
+      object.cache_control = response["cache-control"]
       object
     end
 
@@ -199,6 +201,7 @@ module S3
       self.last_modified = options[:last_modified]
       self.etag = options[:etag]
       self.size = options[:size]
+      self.cache_control = options[:cache_control]
     end
 
     def object_request(method, options = {})
@@ -228,6 +231,7 @@ module S3
       headers[:content_type] = @content_type || "application/octet-stream"
       headers[:content_encoding] = @content_encoding if @content_encoding
       headers[:content_disposition] = @content_disposition if @content_disposition
+      headers[:cache_control] = @cache_control if @cache_control
       headers
     end
 
@@ -235,6 +239,7 @@ module S3
       self.etag = response["etag"]
       self.content_type = response["content-type"]
       self.content_disposition = response["content-disposition"]
+      self.cache_control = response["cache-control"]
       self.content_encoding = response["content-encoding"]
       self.last_modified = response["last-modified"]
       if response["content-range"]

@@ -11,6 +11,8 @@ class ObjectTest < Test::Unit::TestCase
     @object_lena = S3::Object.send(:new, @bucket_images, :key => "Lena.png")
     @object_lena.content = "test"
     @object_carmen = S3::Object.send(:new, @bucket_images, :key => "Carmen.png")
+    @object_mac = S3::Object.send(:new, @bucket_images, :key => "Mac.png", :cache_control => "max-age=315360000")
+    @object_mac.content = "test2"
 
     @response_binary = Net::HTTPOK.new("1.1", "200", "OK")
     @response_binary.stubs(:body).returns("test".respond_to?(:force_encoding) ? "test".force_encoding(Encoding::BINARY) : "test")
@@ -103,6 +105,12 @@ class ObjectTest < Test::Unit::TestCase
   test "save" do
     @object_lena.expects(:object_request).with(:put, :body=>"test", :headers=>{ :x_amz_acl=>"public-read", :x_amz_storage_class=>"STANDARD", :content_type=>"application/octet-stream" }).returns(@response_binary)
     assert @object_lena.save
+  end
+
+  test "save with cache control headers" do
+    assert_equal "max-age=315360000", @object_mac.cache_control
+    @object_mac.expects(:object_request).with(:put, :body=>"test2", :headers=>{ :x_amz_acl=>"public-read", :x_amz_storage_class=>"STANDARD", :content_type=>"application/octet-stream", :cache_control=>"max-age=315360000" }).returns(@response_binary)
+    assert @object_mac.save
   end
 
   test "content and parse headers" do
