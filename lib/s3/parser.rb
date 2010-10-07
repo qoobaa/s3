@@ -44,5 +44,9 @@ module S3
       message = document.elements["Error/Message"].text
       [code, message]
     end
+    
+    def parse_is_truncated xml
+      rexml_document(xml).elements["ListBucketResult/IsTruncated"].text =='true'
+    end
   end
 end
