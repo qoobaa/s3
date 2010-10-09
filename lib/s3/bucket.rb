@@ -57,10 +57,18 @@ module S3
       end
     end
 
-    # Saves the newly built bucket. Optionally you can pass location
-    # of the bucket (<tt>:eu</tt> or <tt>:us</tt>)
-    def save(location = nil)
-      create_bucket_configuration(location)
+    # Saves the newly built bucket.
+    #
+    # ==== Options
+    # * <tt>:location</tt> - location of the bucket
+    #   (<tt>:eu</tt> or <tt>us</tt>)
+    # * Any other options are passed through to
+    #   Connection#request
+    def save(options = {})
+      unless options.is_a?(Hash)
+        options = {:location => options}
+      end
+      create_bucket_configuration(options)
       true
     end
 
@@ -126,9 +134,9 @@ module S3
       end
     end
 
-    def create_bucket_configuration(location = nil)
-      location = location.to_s.upcase if location
-      options = { :headers => {} }
+    def create_bucket_configuration(options = {})
+      location = options[:location].to_s.upcase if options[:location]
+      options[:headers] ||= {}
       if location and location != "US"
         options[:body] = "<CreateBucketConfiguration><LocationConstraint>#{location}</LocationConstraint></CreateBucketConfiguration>"
         options[:headers][:content_type] = "application/xml"
