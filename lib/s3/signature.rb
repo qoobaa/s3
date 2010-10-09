@@ -25,9 +25,7 @@ module S3
       request = options[:request]
       access_key_id = options[:access_key_id]
 
-      options.merge!(:headers => request,
-                     :method => request.method,
-                     :resource => request.path)
+      options.merge!(:headers => request, :method => request.method, :resource => request.path)
 
       signature = canonicalized_signature(options)
 

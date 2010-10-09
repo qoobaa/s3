@@ -36,7 +36,7 @@ module S3
     # Returns all buckets in the service and caches the result (see
     # +reload+)
     def buckets
-      Proxy.new(lambda { list_all_my_buckets}, :owner => self, :extend => BucketsExtension)
+      Proxy.new(lambda { list_all_my_buckets }, :owner => self, :extend => BucketsExtension)
     end
 
     # Returns "http://" or "https://", depends on <tt>:use_ssl</tt>

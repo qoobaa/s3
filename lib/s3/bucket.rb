@@ -65,9 +65,7 @@ module S3
     # * Any other options are passed through to
     #   Connection#request
     def save(options = {})
-      unless options.is_a?(Hash)
-        options = {:location => options}
-      end
+      options = {:location => options} unless options.is_a?(Hash)
       create_bucket_configuration(options)
       true
     end
@@ -105,7 +103,7 @@ module S3
     attr_writer :service
 
     def location_constraint
-      response = bucket_request(:get, :params => { :location => nil })
+      response = bucket_request(:get, :params => {:location => nil})
       parse_location_constraint(response.body)
     end
 
