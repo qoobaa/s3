@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
   s.rubyforge_project         = "s3"
 
   s.add_dependency "proxies"
-  s.add_dependency "http_connection"
   s.add_development_dependency "test-unit", ">= 2.0"
   s.add_development_dependency "mocha"
   s.add_development_dependency "bundler", ">= 1.0.0"

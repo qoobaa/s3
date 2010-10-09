@@ -73,9 +73,7 @@ module S3
     # Download the content of the object, and caches it. Pass true
     # to clear the cache and download the object again.
     def content(reload = false)
-      if reload or @content.nil?
-        get_object
-      end
+      get_object if reload or @content.nil?
       @content
     end
 
@@ -236,13 +234,13 @@ module S3
     end
 
     def parse_headers(response)
-      self.etag = response["etag"]
-      self.content_type = response["content-type"]
-      self.content_disposition = response["content-disposition"]
-      self.cache_control = response["cache-control"]
-      self.content_encoding = response["content-encoding"]
-      self.last_modified = response["last-modified"]
-      if response["content-range"]
+      self.etag = response["etag"] if response.key?("etag")
+      self.content_type = response["content-type"] if response.key?("content-type")
+      self.content_disposition = response["content-disposition"] if response.key?("content-disposition")
+      self.cache_control = response["cache-control"] if response.key?("cache-control")
+      self.content_encoding = response["content-encoding"] if response.key?("content-encoding")
+      self.last_modified = response["last-modified"] if response.key?("last-modified")
+      if response.key?("content-range")
         self.size = response["content-range"].sub(/[^\/]+\//, "").to_i
       else
         self.size = response["content-length"]
