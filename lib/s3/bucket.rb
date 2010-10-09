@@ -112,7 +112,7 @@ module S3
     def list_bucket(options = {})
       response = bucket_request(:get, :params => options)
       objects_attributes = parse_list_bucket_result(response.body)
-      
+
       # If there are more than 1000 objects S3 truncates listing
       # and we need to request another listing for the remaining objects.
       while parse_is_truncated(response.body)
@@ -120,7 +120,7 @@ module S3
         response = bucket_request(:get, :params => options.merge(:marker => marker))
         objects_attributes += parse_list_bucket_result(response.body)
       end
-      
+
       objects_attributes.map { |object_attributes| Object.send(:new, self, object_attributes) }
     end
 
