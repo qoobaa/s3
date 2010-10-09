@@ -111,6 +111,7 @@ module Paperclip
           begin
             log("saving #{path(style)}")
             object = bucket.objects.build(path(style))
+            file.rewind
             object.content = file.read
             object.acl = @s3_permissions
             object.storage_class = @s3_storage_class
