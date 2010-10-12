@@ -1,6 +1,9 @@
 # -*- encoding: utf-8 -*-
 
-require File.expand_path("../lib/s3/version", __FILE__)
+# Load version requiring the canonical "s3/version", otherwise Ruby will think 
+# is a different file and complaint about a double declaration of S3::VERSION.
+$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+require "s3/version"
 
 Gem::Specification.new do |s|
   s.name        = "s3"
