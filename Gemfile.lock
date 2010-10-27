@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    s3 (0.3.7)
+    s3 (0.3.8)
       proxies (~> 0.2.0)
 
 GEM
