@@ -39,6 +39,13 @@ module S3
       Proxy.new(lambda { list_all_my_buckets }, :owner => self, :extend => BucketsExtension)
     end
 
+    # Returns the bucket with the given name. Does not check whether the
+    # bucket exists. But also does not issue any HTTP requests, so it's
+    # much faster than buckets.find
+    def bucket(name)
+      Bucket.send(:new, self, name)
+    end
+
     # Returns "http://" or "https://", depends on <tt>:use_ssl</tt>
     # value from initializer
     def protocol
