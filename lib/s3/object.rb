@@ -150,7 +150,7 @@ module S3
       headers[:content_disposition] = options[:content_disposition] if options[:content_disposition]
       headers[:cache_control] = options[:cache_control] if options[:cache_control]
       headers[:x_amz_copy_source] = full_key
-      headers[:x_amz_metadata_directive] = "REPLACE"
+      headers[:x_amz_metadata_directive] = options[:replace] == false ? "COPY" : "REPLACE"
       headers[:x_amz_copy_source_if_match] = options[:if_match] if options[:if_match]
       headers[:x_amz_copy_source_if_none_match] = options[:if_none_match] if options[:if_none_match]
       headers[:x_amz_copy_source_if_unmodified_since] = options[:if_modified_since] if options[:if_modified_since]
