@@ -95,7 +95,10 @@ module Paperclip
       def to_file style = default_style
         return @queued_for_write[style] if @queued_for_write[style]
         begin
-          file = Tempfile.new(path(style))
+          filename = path(style)
+          extname = File.extname(filename)
+          basename = File.basename(filename, extname)
+          file = Tempfile.new([basename, extname])
           file.binmode if file.respond_to?(:binmode)
           file.write(bucket.objects.find(path(style)).content)
           file.rewind
