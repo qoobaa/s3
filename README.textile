@@ -1,0 +1,27 @@
+h1. S3
+
+S3 library provides access to "Amazon's Simple Storage Service":http://aws.amazon.com/s3/.
+
+It supports both: European and US buckets through "REST API":http://docs.amazonwebservices.com/AmazonS3/latest/RESTAPI.html.
+
+<a href='http://www.pledgie.com/campaigns/14173'><img alt='Click here to lend your support to: S3 and make a donation at www.pledgie.com !' src='http://www.pledgie.com/campaigns/14173.png?skin_name=chrome' border='0' /></a>
+
+* "homepage":http://jah.pl/projects/s3.html
+* "gemcutter":http://gemcutter.org/gems/s3
+* "repository":http://github.com/qoobaa/s3
+* "issue tracker":http://github.com/qoobaa/s3/issues
+* "rdoc":http://qoobaa.github.com/s3
+
+h2. Installation
+
+<pre>
+gem install s3
+</pre>
+
+h2. Usage
+
+See "homepage":http://jah.pl/projects/s3.html for details.
+
+h2. Copyright
+
+Copyright (c) 2009 Jakub Kuźma, Mirosław Boruta. See "LICENSE":http://github.com/qoobaa/s3/raw/master/LICENSE for details.
