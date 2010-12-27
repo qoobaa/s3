@@ -200,6 +200,7 @@ module S3
       self.etag = options[:etag]
       self.size = options[:size]
       self.cache_control = options[:cache_control]
+      self.expires = options[:expires]
     end
 
     def object_request(method, options = {})

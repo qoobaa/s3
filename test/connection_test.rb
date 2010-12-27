@@ -121,7 +121,8 @@ class ConnectionTest < Test::Unit::TestCase
       "if-match" => nil,
       "if-none-match" => nil,
       "content-disposition" => nil,
-      "content-encoding" => nil
+      "content-encoding" => nil,
+      'expires' => nil
     }
     actual = S3::Connection.parse_headers(
       :content_type => nil,
@@ -132,7 +133,8 @@ class ConnectionTest < Test::Unit::TestCase
       :if_match => nil,
       :if_none_match => nil,
       :content_disposition => nil,
-      :content_encoding => nil
+      :content_encoding => nil,
+      :expires => nil
     )
     assert_equal expected, actual
   end
@@ -147,7 +149,8 @@ class ConnectionTest < Test::Unit::TestCase
       "if-match" => "1234",
       "if-none-match" => "1243",
       "content-disposition" => "inline",
-      "content-encoding" => "gzip"
+      "content-encoding" => "gzip",
+      "expires" => "Tue, 28 Dec 2010 16:11:08 GMT"
     }
     actual = S3::Connection.parse_headers(
       :content_type => "text/html",
@@ -158,7 +161,8 @@ class ConnectionTest < Test::Unit::TestCase
       :if_match => "1234",
       :if_none_match => "1243",
       :content_disposition => "inline",
-      :content_encoding => "gzip"
+      :content_encoding => "gzip",
+      :expires => "Tue, 28 Dec 2010 16:11:08 GMT"
     )
     assert_equal expected, actual
   end
