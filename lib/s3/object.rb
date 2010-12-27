@@ -5,7 +5,7 @@ module S3
     include Parser
     extend Forwardable
 
-    attr_accessor :content_type, :content_disposition, :content_encoding, :cache_control
+    attr_accessor :content_type, :content_disposition, :content_encoding, :cache_control, :expires
     attr_reader :last_modified, :etag, :size, :bucket, :key, :acl, :storage_class
     attr_writer :content
 
@@ -230,6 +230,7 @@ module S3
       headers[:content_encoding] = @content_encoding if @content_encoding
       headers[:content_disposition] = @content_disposition if @content_disposition
       headers[:cache_control] = @cache_control if @cache_control
+      headers[:expires] = @expires if @expires
       headers
     end
 

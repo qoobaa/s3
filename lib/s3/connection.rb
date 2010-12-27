@@ -130,6 +130,7 @@ module S3
                           :if_match, :if_none_match,
                           :content_disposition, :content_encoding,
                           :x_amz_copy_source, :x_amz_metadata_directive,
+                          :expires,
                           :x_amz_copy_source_if_match,
                           :x_amz_copy_source_if_none_match,
                           :x_amz_copy_source_if_unmodified_since,
