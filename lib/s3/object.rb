@@ -235,19 +235,22 @@ module S3
     end
 
     def parse_headers(response)
-      self.etag = response.delete("etag") if response.key?("etag")
-      self.content_type = response.delete("content-type") if response.key?("content-type")
-      self.content_disposition = response.delete("content-disposition") if response.key?("content-disposition")
-      self.cache_control = response.delete("cache-control") if response.key?("cache-control")
-      self.content_encoding = response.delete("content-encoding") if response.key?("content-encoding")
-      self.last_modified = response.delete("last-modified") if response.key?("last-modified")
-      if response.key?("content-range")
-        self.size = response.delete("content-range").sub(/[^\/]+\//, "").to_i
+      self.headers = {}
+      response.to_hash.each do |key, value|
+        self.headers[key] = value.to_s
+      end
+      self.etag = self.headers.delete("etag") if self.headers.key?("etag")
+      self.content_type = self.headers.delete("content-type") if self.headers.key?("content-type")
+      self.content_disposition = self.headers.delete("content-disposition") if self.headers.key?("content-disposition")
+      self.cache_control = self.headers.delete("cache-control") if self.headers.key?("cache-control")
+      self.content_encoding = self.headers.delete("content-encoding") if self.headers.key?("content-encoding")
+      self.last_modified = self.headers.delete("last-modified") if self.headers.key?("last-modified")
+      if self.headers.key?("content-range")
+        self.size = self.headers.delete("content-range").sub(/[^\/]+\//, "").to_i
       else
-        self.size = response.delete("content-length")
+        self.size = self.headers.delete("content-length")
         self.content = response.body
       end
-      self.headers = response.clone
     end
   end
 end
