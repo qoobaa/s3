@@ -230,7 +230,7 @@ module S3
       final_headers[:content_encoding] = @content_encoding if @content_encoding
       final_headers[:content_disposition] = @content_disposition if @content_disposition
       final_headers[:cache_control] = @cache_control if @cache_control
-      final_headers.merge(headers)
+      final_headers.merge(@headers)
     end
 
     def parse_headers(response)
