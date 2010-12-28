@@ -226,7 +226,6 @@ module S3
       final_headers = {}
       final_headers[:x_amz_acl] = @acl || "public-read"
       final_headers[:x_amz_storage_class] = @storage_class || "STANDARD"
-      final_headers[:x_amz_meta_md5_hash] = Digest::MD5.new(content).hexdigest
       final_headers[:content_type] = @content_type || "application/octet-stream"
       final_headers[:content_encoding] = @content_encoding if @content_encoding
       final_headers[:content_disposition] = @content_disposition if @content_disposition
