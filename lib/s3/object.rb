@@ -235,18 +235,19 @@ module S3
     end
 
     def parse_headers(response)
-      self.etag = response["etag"] if response.key?("etag")
-      self.content_type = response["content-type"] if response.key?("content-type")
-      self.content_disposition = response["content-disposition"] if response.key?("content-disposition")
-      self.cache_control = response["cache-control"] if response.key?("cache-control")
-      self.content_encoding = response["content-encoding"] if response.key?("content-encoding")
-      self.last_modified = response["last-modified"] if response.key?("last-modified")
+      self.etag = response.delete["etag"] if response.key?("etag")
+      self.content_type = response.delete["content-type"] if response.key?("content-type")
+      self.content_disposition = response.delete["content-disposition"] if response.key?("content-disposition")
+      self.cache_control = response.delete["cache-control"] if response.key?("cache-control")
+      self.content_encoding = response.delete["content-encoding"] if response.key?("content-encoding")
+      self.last_modified = response.delete["last-modified"] if response.key?("last-modified")
       if response.key?("content-range")
-        self.size = response["content-range"].sub(/[^\/]+\//, "").to_i
+        self.size = response.delete["content-range"].sub(/[^\/]+\//, "").to_i
       else
-        self.size = response["content-length"]
+        self.size = response.delete["content-length"]
         self.content = response.body
       end
+      self.headers = response.clone
     end
   end
 end
