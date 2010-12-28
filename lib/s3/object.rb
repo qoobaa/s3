@@ -236,7 +236,7 @@ module S3
     def parse_headers(response)
       self.headers = {}
       response.to_hash.each do |key, value|
-        self.headers[key] = value.to_s
+        self.headers[key] = value.to_s unless ['date', 'Server'].include?(key)
       end
       self.etag = self.headers.delete("etag") if self.headers.key?("etag")
       self.content_type = self.headers.delete("content-type") if self.headers.key?("content-type")
