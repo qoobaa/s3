@@ -125,27 +125,26 @@ module S3
     # Hash of headers translated from symbol to string, containing
     # only interesting headers
     def self.parse_headers(headers)
-      interesting_keys = [:content_type, :cache_control, :x_amz_acl, :x_amz_storage_class, :range,
-                          :if_modified_since, :if_unmodified_since,
-                          :if_match, :if_none_match,
-                          :content_disposition, :content_encoding,
-                          :x_amz_copy_source, :x_amz_metadata_directive,
-                          :x_amz_copy_source_if_match,
-                          :x_amz_copy_source_if_none_match,
-                          :x_amz_copy_source_if_unmodified_since,
-                          :x_amz_copy_source_if_modified_since]
-
+      # interesting_keys = [:content_type, :cache_control, :x_amz_acl, :x_amz_storage_class, :range,
+      #                     :if_modified_since, :if_unmodified_since,
+      #                     :if_match, :if_none_match,
+      #                     :content_disposition, :content_encoding,
+      #                     :x_amz_copy_source, :x_amz_metadata_directive,
+      #                     :x_amz_copy_source_if_match,
+      #                     :x_amz_copy_source_if_none_match,
+      #                     :x_amz_copy_source_if_unmodified_since,
+      #                     :x_amz_copy_source_if_modified_since]
+      
       parsed_headers = {}
       if headers
         headers.each do |key, value|
-          if interesting_keys.include?(key)
-            parsed_key = key.to_s.gsub("_", "-")
-            parsed_value = value
-            case value
-            when Range
-              parsed_value = "bytes=#{value.first}-#{value.last}"
-            end
-            parsed_headers[parsed_key] = parsed_value
+          parsed_key = key.to_s.gsub("_", "-")
+          parsed_value = value
+          case value
+          when Range
+            parsed_value = "bytes=#{value.first}-#{value.last}"
+          end
+          parsed_headers[parsed_key] = parsed_value
           end
         end
       end
