@@ -147,6 +147,7 @@ module S3
           parsed_headers[parsed_key] = parsed_value
         end
       end
+      puts parsed_headers.inspect
       parsed_headers
     end
 
