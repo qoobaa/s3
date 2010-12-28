@@ -145,7 +145,6 @@ module S3
             parsed_value = "bytes=#{value.first}-#{value.last}"
           end
           parsed_headers[parsed_key] = parsed_value
-          end
         end
       end
       parsed_headers
