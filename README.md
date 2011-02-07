@@ -12,33 +12,51 @@ It supports both: European and US buckets through the [REST API](http://docs.ama
 
 ## Usage
 
+### Initialize the service
+
     require "s3"
     service = S3::Service.new(:access_key_id => "...",
                               :secret_access_key => "...")
     #=> #<S3::Service:...>
 
+### List buckets
+
     service.buckets
     #=> [#<S3::Bucket:first-bucket>,
     #    #<S3::Bucket:second-bucket>]
 
+### Find bucket
+
     first_bucket = service.buckets.find("first-bucket")
     #=> #<S3::Bucket:first-bucket>
+
+### List objects in a bucket
 
     first_bucket.objects
     #=> [#<S3::Object:/first-bucket/lenna.png>,
     #    #<S3::Object:/first-bucket/lenna_mini.png>]
 
+### Find object in a bucket
+
     object = first_bucket.objects.find("lenna.png")
     #=> #<S3::Object:/first-bucket/lenna.png>
+
+### Access object metadata (cached from find)
 
     object.content_type
     #=> "image/png"
 
+### Access object content (downloads the object)
+
     object.content
     #=> "\x89PNG\r\n\x1A\n\x00\x00\x00\rIHDR\x00..."
 
+### Delete an object
+
     object.destroy
     #=> true
+
+### Create an object
 
     new_object = bucket.objects.build("bender.png")
     #=> #<S3::Object:/synergy-staging/bender.png>
