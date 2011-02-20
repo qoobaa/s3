@@ -220,7 +220,23 @@ module S3
       # 4. If the request addresses a sub-resource, like ?location,
       # ?acl, or ?torrent, append the sub-resource including question
       # mark.
-      string << "?#{$1}" if uri.query =~ /&?(acl|torrent|logging|location)(?:&|=|\Z)/
+      sub_resources = [
+        'acl',
+        'location',
+        'logging',
+        'notification',
+        'partNumber',
+        'policy',
+        'requestPayment',
+        'torrent',
+        'uploadId',
+        'uploads',
+        'versionId',
+        'versioning',
+        'versions',
+        'website'
+      ]
+      string << "?#{$1}" if uri.query =~ /&?(#{sub_resources.join('|')})(?:&|=|\Z)/
       string
     end
   end
