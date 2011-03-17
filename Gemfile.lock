@@ -19,6 +19,5 @@ PLATFORMS
 DEPENDENCIES
   bundler (>= 1.0.0)
   mocha
-  proxies (~> 0.2.0)
   s3!
   test-unit (>= 2.0)
