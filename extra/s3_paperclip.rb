@@ -47,13 +47,13 @@ module Paperclip
           @bucket = @service.buckets.build(@bucket_name)
         end
         Paperclip.interpolates(:s3_alias_url) do |attachment, style|
-          "#{attachment.s3_protocol}://#{attachment.s3_host_alias}/#{attachment.path(style).gsub(%r{^/}, "")}"
+          "#{attachment.s3_protocol}://#{attachment.s3_host_alias}/#{Paperclip::Storage::S3.encode_path(attachment.path(style)).gsub(%r{^/}, "")}"
         end
         Paperclip.interpolates(:s3_path_url) do |attachment, style|
-          "#{attachment.s3_protocol}://s3.amazonaws.com/#{attachment.bucket_name}/#{attachment.path(style).gsub(%r{^/}, "")}"
+          "#{attachment.s3_protocol}://s3.amazonaws.com/#{attachment.bucket_name}/#{Paperclip::Storage::S3.encode_path(attachment.path(style)).gsub(%r{^/}, "")}"
         end
         Paperclip.interpolates(:s3_domain_url) do |attachment, style|
-          "#{attachment.s3_protocol}://#{attachment.bucket_name}.s3.amazonaws.com/#{attachment.path(style).gsub(%r{^/}, "")}"
+          "#{attachment.s3_protocol}://#{attachment.bucket_name}.s3.amazonaws.com/#{Paperclip::Storage::S3.encode_path(attachment.path(style)).gsub(%r{^/}, "")}"
         end
       end
 
@@ -107,6 +107,15 @@ module Paperclip
           file = nil
         end
         file
+      end
+
+      # Encodes all characters except forward-slash (/) and explicitly legal URL characters
+      def self.encode_path(path)
+        URI.encode(path, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)
+      end
+
+      def encoded_path(style)
+        Paperclip::Storage::S3.encode_path(path(style))
       end
 
       def flush_writes #:nodoc:

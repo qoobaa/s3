@@ -60,13 +60,16 @@ module S3
       body = options.fetch(:body, nil)
       params = options.fetch(:params, {})
       headers = options.fetch(:headers, {})
+      
+      # Must be done before adding params
+      # Encodes all characters except forward-slash (/) and explicitly legal URL characters
+      path = URI.escape(path, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)
 
       if params
         params = params.is_a?(String) ? params : self.class.parse_params(params)
         path << "?#{params}"
       end
 
-      path = URI.escape(path)
       request = Request.new(@chunk_size, method.to_s.upcase, !!body, method.to_s.upcase != "HEAD", path)
 
       headers = self.class.parse_headers(headers)
