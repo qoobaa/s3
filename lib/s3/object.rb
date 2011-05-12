@@ -5,7 +5,7 @@ module S3
     include Parser
     extend Forwardable
 
-    attr_accessor :content_type, :content_disposition, :content_encoding, :cache_control
+    attr_accessor :content_type, :content_disposition, :content_encoding, :cache_control, :headers
     attr_reader :last_modified, :etag, :size, :bucket, :key, :acl, :storage_class
     attr_writer :content
 
@@ -141,9 +141,9 @@ module S3
       key = options[:key] or raise ArgumentError, "No key given"
       raise ArgumentError.new("Invalid key name: #{key}") unless key_valid?(key)
       bucket = options[:bucket] || self.bucket
-
+      
       headers = {}
-
+      
       headers[:x_amz_acl] = options[:acl] || acl || "public-read"
       headers[:content_type] = options[:content_type] || content_type || "application/octet-stream"
       headers[:content_encoding] = options[:content_encoding] if options[:content_encoding]
@@ -184,7 +184,7 @@ module S3
       end
     end
 
-    def put_object
+    def put_object()
       response = object_request(:put, :body => content, :headers => dump_headers)
       parse_headers(response)
     end
@@ -223,27 +223,31 @@ module S3
     end
 
     def dump_headers
-      headers = {}
-      headers[:x_amz_acl] = @acl || "public-read"
-      headers[:x_amz_storage_class] = @storage_class || "STANDARD"
-      headers[:content_type] = @content_type || "application/octet-stream"
-      headers[:content_encoding] = @content_encoding if @content_encoding
-      headers[:content_disposition] = @content_disposition if @content_disposition
-      headers[:cache_control] = @cache_control if @cache_control
-      headers
+      final_headers = {}
+      final_headers[:x_amz_acl] = @acl || "public-read"
+      final_headers[:x_amz_storage_class] = @storage_class || "STANDARD"
+      final_headers[:content_type] = @content_type || "application/octet-stream"
+      final_headers[:content_encoding] = @content_encoding if @content_encoding
+      final_headers[:content_disposition] = @content_disposition if @content_disposition
+      final_headers[:cache_control] = @cache_control if @cache_control
+      final_headers.merge(@headers || {})
     end
 
     def parse_headers(response)
-      self.etag = response["etag"] if response.key?("etag")
-      self.content_type = response["content-type"] if response.key?("content-type")
-      self.content_disposition = response["content-disposition"] if response.key?("content-disposition")
-      self.cache_control = response["cache-control"] if response.key?("cache-control")
-      self.content_encoding = response["content-encoding"] if response.key?("content-encoding")
-      self.last_modified = response["last-modified"] if response.key?("last-modified")
-      if response.key?("content-range")
-        self.size = response["content-range"].sub(/[^\/]+\//, "").to_i
+      self.headers = {}
+      response.to_hash.each do |key, value|
+        self.headers[key] = value.to_s unless ['date', 'Server'].include?(key)
+      end
+      self.etag = self.headers.delete("etag") if self.headers.key?("etag")
+      self.content_type = self.headers.delete("content-type") if self.headers.key?("content-type")
+      self.content_disposition = self.headers.delete("content-disposition") if self.headers.key?("content-disposition")
+      self.cache_control = self.headers.delete("cache-control") if self.headers.key?("cache-control")
+      self.content_encoding = self.headers.delete("content-encoding") if self.headers.key?("content-encoding")
+      self.last_modified = self.headers.delete("last-modified") if self.headers.key?("last-modified")
+      if self.headers.key?("content-range")
+        self.size = self.headers.delete("content-range").sub(/[^\/]+\//, "").to_i
       else
-        self.size = response["content-length"]
+        self.size = self.headers.delete("content-length")
         self.content = response.body
       end
     end
