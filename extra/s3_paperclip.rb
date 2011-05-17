@@ -5,6 +5,7 @@
 #
 #   has_attached_file :image,
 #                     :s3_host_alias => "bucket.domain.tld",
+#                     :s3_headers => { :cache_control => 10.years.from_now.httpdate },
 #                     :url => ":s3_alias_url",
 #                     :styles => {
 #                       :medium => "300x300>",
@@ -128,6 +129,7 @@ module Paperclip
             object.acl = @s3_permissions
             object.storage_class = @s3_storage_class
             object.content_type = instance_read(:content_type)
+            object.cache_control = @s3_headers[:cache_control]
             object.content_disposition = @s3_headers[:content_disposition]
             object.content_encoding = @s3_headers[:content_encoding]
             object.save
