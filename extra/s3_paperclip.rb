@@ -74,6 +74,11 @@ module Paperclip
         @s3_host_alias
       end
 
+      def content_disposition(style = default_style)
+        cd = @s3_headers[:content_disposition]
+        cd.respond_to?(:call) ? cd.call(self, style) : cd
+      end
+
       def parse_credentials creds
         creds = find_credentials(creds).stringify_keys
         (creds[RAILS_ENV] || creds).symbolize_keys
@@ -130,7 +135,7 @@ module Paperclip
             object.storage_class = @s3_storage_class
             object.content_type = instance_read(:content_type)
             object.cache_control = @s3_headers[:cache_control]
-            object.content_disposition = @s3_headers[:content_disposition]
+            object.content_disposition = content_disposition(style)
             object.content_encoding = @s3_headers[:content_encoding]
             object.save
           rescue ::S3::Error::ResponseError => e
