@@ -3,7 +3,7 @@ module S3
     include REXML
 
     def rexml_document(xml)
-      xml.force_encoding(Encoding::UTF_8) if xml.respond_to? :force_encoding
+      xml.force_encoding(::Encoding::UTF_8) if xml.respond_to? :force_encoding
       Document.new(xml)
     end
 
