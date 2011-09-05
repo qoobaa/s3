@@ -54,7 +54,7 @@ module S3
       headers = options[:headers] || {}
       headers.merge!('date' => expires.to_i.to_s)
 
-      options.merge!(:resource => "/#{bucket}/#{resource}",
+      options.merge!(:resource => "/#{bucket}/#{URI.escape(resource)}",
                      :method => options[:method] || :get,
                      :headers => headers)
       signature = canonicalized_signature(options)
