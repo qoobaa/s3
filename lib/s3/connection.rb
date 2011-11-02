@@ -60,7 +60,7 @@ module S3
       body = options.fetch(:body, nil)
       params = options.fetch(:params, {})
       headers = options.fetch(:headers, {})
-      
+
       # Must be done before adding params
       # Encodes all characters except forward-slash (/) and explicitly legal URL characters
       path = URI.escape(path, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)
