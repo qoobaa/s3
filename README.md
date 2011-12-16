@@ -64,6 +64,9 @@ It supports both: European and US buckets through the [REST API](http://docs.ama
     new_object.save
     #=> true
 
+Please note that new objects are created with "public-read" ACL by
+default.
+
 ## See also
 
 * [gemcutter](http://gemcutter.org/gems/s3)
