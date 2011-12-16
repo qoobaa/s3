@@ -69,7 +69,7 @@ default.
 
 == See also
 
-* gemcutter[http://gemcutter.org/gems/s3]
+* rubygems[http://rubygems.org/gems/s3]
 * repository[http://github.com/qoobaa/s3]
 * {issue tracker}[http://github.com/qoobaa/s3/issues]
 * documentation[http://rubydoc.info/github/qoobaa/s3/master/frames]
