@@ -4,8 +4,6 @@ S3 library provides access to [Amazon's Simple Storage Service](http://aws.amazo
 
 It supports both: European and US buckets through the [REST API](http://docs.amazonwebservices.com/AmazonS3/latest/API/APIRest.html).
 
-<a href="http://pledgie.com/campaigns/14173"><img alt="Click here to lend your support to: S3 and make a donation at www.pledgie.com!" src="http://pledgie.com/campaigns/14173.png?skin_name=chrome" border="0" /></a>
-
 ## Installation
 
     gem install s3

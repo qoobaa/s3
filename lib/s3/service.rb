@@ -75,15 +75,13 @@ module S3
     end
 
     def connection
-      if @connection.nil?
-        @connection = Connection.new(:access_key_id => @access_key_id,
-                                     :secret_access_key => @secret_access_key,
-                                     :use_ssl => @use_ssl,
-                                     :timeout => @timeout,
-                                     :debug => @debug,
-                                     :proxy => @proxy)
-      end
-      @connection
+      return @connection if defined?(@connection)
+      @connection = Connection.new(:access_key_id => @access_key_id,
+                               :secret_access_key => @secret_access_key,
+                               :use_ssl => @use_ssl,
+                               :timeout => @timeout,
+                               :debug => @debug,
+                               :proxy => @proxy)
     end
   end
 end

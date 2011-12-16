@@ -19,11 +19,8 @@ module S3
 
     # Returns location of the bucket, e.g. "EU"
     def location(reload = false)
-      if reload or @location.nil?
-        @location = location_constraint
-      else
-        @location
-      end
+      return @location if defined?(@location) and not reload
+      @location = location_constraint
     end
 
     # Compares the bucket with other bucket. Returns true if the names
@@ -88,8 +85,7 @@ module S3
       vhost? ? "" : "#@name/"
     end
 
-    # Returns the objects in the bucket and caches the result (see
-    # #reload method).
+    # Returns the objects in the bucket and caches the result
     def objects
       Proxy.new(lambda { list_bucket }, :owner => self, :extend => ObjectsExtension)
     end

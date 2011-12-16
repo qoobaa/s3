@@ -70,10 +70,11 @@ module S3
       false
     end
 
-    # Download the content of the object, and caches it. Pass true
-    # to clear the cache and download the object again.
+    # Downloads the content of the object, and caches it. Pass true to
+    # clear the cache and download the object again.
     def content(reload = false)
-      get_object if reload or @content.nil?
+      return @content if defined?(@content) and not reload
+      get_object
       @content
     end
 
