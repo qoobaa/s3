@@ -117,8 +117,16 @@ module S3
       # If there are more than 1000 objects S3 truncates listing
       # and we need to request another listing for the remaining objects.
       while parse_is_truncated(response.body)
-        marker = objects_attributes.last[:key]
-        response = bucket_request(:get, :params => options.merge(:marker => marker))
+      	next_request_options = {
+      		:marker => objects_attributes.last[:key]
+      	}
+      	
+      	if options[:max_keys]
+      		break if objects_attributes.length >= options[:max_keys]
+      		next_request_options[:max_keys] = options[:max_keys] - objects_attributes.length
+      	end
+      		
+        response = bucket_request(:get, :params => options.merge(next_request_options))
         objects_attributes += parse_list_bucket_result(response.body)
       end
 
