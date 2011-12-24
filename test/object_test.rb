@@ -22,6 +22,7 @@ class ObjectTest < Test::Unit::TestCase
     @response_binary["content-encoding"] = nil
     @response_binary["last-modified"] = Time.now.httpdate
     @response_binary["content-length"] = 20
+    @response_binary["x-amz-meta-test"] = 'metadata'
 
     @xml_body = <<-EOXML
     <?xml version="1.0" encoding="UTF-8"?>
@@ -130,6 +131,14 @@ class ObjectTest < Test::Unit::TestCase
   test "retrieve" do
     @object_lena.expects(:object_request).with(:head, {}).returns(@response_binary)
     assert @object_lena.retrieve
+  end
+
+  test "retrieve headers" do
+    @object_lena.expects(:object_request).twice.with(:head, {}).returns(@response_binary)
+    assert @object_lena.retrieve
+
+    meta = {"x-amz-meta-test"=>["metadata"]}
+    assert_equal meta, @object_lena.retrieve.metadata
   end
 
   test "exists" do
