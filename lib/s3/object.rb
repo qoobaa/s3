@@ -107,7 +107,7 @@ module S3
     # Returns Object's URL using protocol specified in service,
     # e.g. <tt>http://domain.com.s3.amazonaws.com/key/with/path.extension</tt>
     def url
-      URI.escape("#{protocol}#{host}/#{path_prefix}#{key}")
+      "#{protocol}#{host}/#{path_prefix}#{URI.escape(key, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)}"
     end
 
     # Returns a temporary url to the object that expires on the
