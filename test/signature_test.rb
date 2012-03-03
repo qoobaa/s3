@@ -151,6 +151,17 @@ class SignatureTest < Test::Unit::TestCase
     expected = "gs6xNznrLJ4Bd%2B1y9pcy2HOSVeg%3D"
     assert_equal expected, actual
   end
+  
+  test "temporary signature for object get with non-unreserved URI characters" do
+    actual = S3::Signature.generate_temporary_url_signature(
+      :bucket => "johnsmith",
+      :resource => "photos/puppy[1].jpg",
+      :secret_access_key => "uV3F3YluFJax1cknvbcGwgjvx4QpvB+leU8dUj2o",
+      :expires_at => 1175046589
+    )
+    expected = "gwCM0mVb9IrEPiUf8iaml6EISPc%3D"
+    assert_equal expected, actual
+  end
 
   test "temporary signature for object post" do
     actual = S3::Signature.generate_temporary_url_signature(

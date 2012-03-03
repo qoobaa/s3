@@ -68,6 +68,11 @@ class ObjectTest < Test::Unit::TestCase
     expected = "http://images.s3.amazonaws.com/Lena%20S%C3%B6derberg.png"
     actual = object12.url
     assert_equal expected, actual
+    
+    object13 = S3::Object.send(:new, bucket1, :key => "Lena Söderberg [1].png")
+    expected = "http://images.s3.amazonaws.com/Lena%20S%C3%B6derberg%20%5B1%5D.png"
+    actual = object13.url
+    assert_equal expected, actual
 
     bucket2 = S3::Bucket.send(:new, @service, "images_new")
 
