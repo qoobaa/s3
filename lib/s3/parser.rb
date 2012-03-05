@@ -48,5 +48,11 @@ module S3
     def parse_is_truncated xml
       rexml_document(xml).elements["ListBucketResult/IsTruncated"].text =='true'
     end
+
+    def parse_directory_list_result(xml)
+      names = []
+      rexml_document(xml).elements.each("ListBucketResult/CommonPrefixes/Prefix") { |e| names << e.text }
+      names
+    end
   end
 end

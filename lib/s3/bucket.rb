@@ -101,6 +101,13 @@ module S3
       "#<#{self.class}:#{name}>"
     end
 
+    # Returns a 'directory list' for the directoy passed in as :prefix
+    def directory_list(options = {})
+      options = {:delimiter => "/"}.merge(options)
+      response = bucket_request(:get, :params => options)
+      parse_directory_list_result(response.body)
+    end
+
     private
 
     attr_writer :service

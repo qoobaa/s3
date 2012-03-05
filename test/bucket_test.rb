@@ -47,6 +47,23 @@ class BucketTest < Test::Unit::TestCase
 
     @response_objects_list = Net::HTTPOK.new("1.1", "200", "OK")
     @response_objects_list.stubs(:body).returns(@response_objects_list_body)
+
+    @response_directory_list_body = <<-EODirectoryList
+    <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>bucket</Name><Prefix>foo/bar/baz/</Prefix><Marker></Marker><MaxKeys>1000</MaxKeys><Delimiter>/</Delimiter><IsTruncated>false</IsTruncated><CommonPrefixes><Prefix>foo/bar/baz/dir1/</Prefix></CommonPrefixes><CommonPrefixes><Prefix>foo/bar/baz/dir2/</Prefix></CommonPrefixes></ListBucketResult>
+    EODirectoryList
+
+    @response_directory_list = Net::HTTPOK.new("1.1", "200", "OK")
+    @response_directory_list.stubs(:body).returns(@response_directory_list_body)
+
+    @response_directory_list_empty_body = <<-EODirectoryList
+    <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>bucket</Name><Prefix>blah</Prefix><Marker></Marker><MaxKeys>1000</MaxKeys><Delimiter>/</Delimiter><IsTruncated>false</IsTruncated></ListBucketResult>
+    EODirectoryList
+
+    @response_directory_list_empty = Net::HTTPOK.new("1.1", "200", "OK")
+    @response_directory_list_empty.stubs(:body).returns(@response_directory_list_empty_body)
+
+    @directory_list = ["foo/bar/baz/dir1/", "foo/bar/baz/dir2/"]
+    @directory_list_empty = []
   end
 
   test "name valid" do
@@ -154,6 +171,18 @@ class BucketTest < Test::Unit::TestCase
     @bucket.expects(:bucket_request).with(:get, :params => { :test => true }).returns(@response_objects_list)
     expected = @objects_list
     actual = @bucket.objects.find_all(:test => true)
+    assert_equal expected, actual
+  end
+
+  test "list bucket directory and return prefix list" do
+    @bucket.expects(:bucket_request).with(:get, :params => { :test=>true, :delimiter => '/' }).returns(@response_directory_list_empty)
+    expected = @directory_list_empty
+    actual = @bucket.directory_list(:test => true)
+    assert_equal expected, actual
+
+    @bucket.expects(:bucket_request).with(:get, :params => { :test => true, :delimiter => '/' }).returns(@response_directory_list)
+    expected = @directory_list
+    actual = @bucket.directory_list(:test => true)
     assert_equal expected, actual
   end
 
