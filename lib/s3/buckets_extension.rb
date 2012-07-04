@@ -8,12 +8,8 @@ module S3
     # Finds the bucket with given name
     # return nil if NoSuchBucket raise
     def find_first(name)
-      begin 
-        bucket = build(name)
-        bucket.retrieve
-      rescue S3::Error::NoSuchBucket
-       return nil
-      end
+      bucket = build(name)
+      bucket.exists?
     end
     alias :find :find_first
 
