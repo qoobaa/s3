@@ -31,9 +31,12 @@ module S3
     end
 
     # Similar to retrieve, but catches S3::Error::NoSuchBucket
-    # exceptions and returns false instead.
+    # exceptions and returns false instead. Also catch S3::Error::ForbiddenBucket
+    # and return true
     def exists?
       retrieve
+      true
+    rescue Error::ForbiddenBucket
       true
     rescue Error::NoSuchBucket
       false
