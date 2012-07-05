@@ -5,10 +5,13 @@ module S3
       Bucket.send(:new, proxy_owner, name)
     end
 
-    # Finds the bucket with given name
+    # Finds the bucket with given name (only those which exist and You have access to it)
+    # return nil in case Error::NoSuchBucket or Error::ForbiddenBucket
     def find_first(name)
       bucket = build(name)
       bucket.retrieve
+    rescue Error::ForbiddenBucket, Error::NoSuchBucket
+      nil
     end
     alias :find :find_first
 
