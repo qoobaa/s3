@@ -28,6 +28,11 @@ It supports both: European and US buckets through the {REST API}[http://docs.ama
     first_bucket = service.buckets.find("first-bucket")
     #=> #<S3::Bucket:first-bucket>
 
+=== Create bucket
+
+    new_bucket = service.buckets.build("newbucketname")
+    new_bucket.save(:location => :eu)
+
 === List objects in a bucket
 
     first_bucket.objects

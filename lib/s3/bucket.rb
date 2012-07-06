@@ -31,9 +31,12 @@ module S3
     end
 
     # Similar to retrieve, but catches S3::Error::NoSuchBucket
-    # exceptions and returns false instead.
+    # exceptions and returns false instead. Also catch S3::Error::ForbiddenBucket
+    # and return true
     def exists?
       retrieve
+      true
+    rescue Error::ForbiddenBucket
       true
     rescue Error::NoSuchBucket
       false
@@ -135,10 +138,13 @@ module S3
     def bucket_headers(options = {})
       response = bucket_request(:head, :params => options)
     rescue Error::ResponseError => e
-      if e.response.code.to_i == 404
-        raise Error::ResponseError.exception("NoSuchBucket").new("The specified bucket does not exist.", nil)
-      else
-        raise e
+      case e.response.code.to_i
+        when 404
+          raise Error::ResponseError.exception("NoSuchBucket").new("The specified bucket does not exist.", nil)
+        when 403 
+          raise Error::ResponseError.exception("ForbiddenBucket").new("The specified bucket exist but you do not have access to it.", nil)
+        else
+          raise e
       end
     end
 

@@ -209,7 +209,7 @@ module S3
       # requests that don't address a bucket, do nothing. For more
       # information on virtual hosted-style requests, see Virtual
       # Hosting of Buckets.
-      bucket_name = host.sub(/\.?s3\.amazonaws\.com\Z/, "")
+      bucket_name = host.sub(/\.?#{S3::HOST}\Z/, "")
       string << "/#{bucket_name}" unless bucket_name.empty?
 
       # 3. Append the path part of the un-decoded HTTP Request-URI,
