@@ -72,6 +72,11 @@ It supports both: European and US buckets through the {REST API}[http://docs.ama
 Please note that new objects are created with "public-read" ACL by
 default.
 
+=== Modify ACL
+
+   object = bucket.objects.find("lenna.png")
+   object.copy(:key => "lenna.png", :bucket => bucket, :acl => :private)
+
 == See also
 
 * rubygems[http://rubygems.org/gems/s3]
