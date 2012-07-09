@@ -87,10 +87,8 @@ class ServiceTest < Test::Unit::TestCase
     end
   end
 
-  test "buckets find first fail" do
-    assert_raise S3::Error::NoSuchBucket do
-      @service_bucket_not_exists.buckets.find_first("data2.example.com")
-    end
+  test "buckets find first return nil" do
+    assert_equal nil, @service_bucket_not_exists.buckets.find_first("data2.example.com")
   end
 
   test "buckets find all on empty list" do
