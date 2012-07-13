@@ -199,6 +199,8 @@ module S3
         if response.body
           doc = Document.new response.body
           send_request(doc.elements["Error"].elements["Endpoint"].text, request, true)
+        elsif (location = response['location'])
+          send_request(URI.parse(location).host, request, true)
         end
       else
         handle_response(response)
