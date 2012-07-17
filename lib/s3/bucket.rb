@@ -4,7 +4,7 @@ module S3
     include Proxies
     extend Forwardable
 
-    attr_reader :name, :service
+    attr_reader :name, :service, :acl
 
     def_instance_delegators :service, :service_request
     private_class_method :new
@@ -28,6 +28,18 @@ module S3
     # (see Service equality)
     def ==(other)
       self.name == other.name and self.service == other.service
+    end
+
+
+    # Assigns a new ACL to the bucket. Please note that ACL is not
+    # retrieved from the server and set to "public-read" by default.
+    #
+    # Valid Values: :private | :public_read | :public_read_write | authenticated_read
+    #
+    # ==== Example
+    #   bucket.acl = :public_read
+    def acl=(acl)
+      @acl = acl.to_s.gsub("_","-") if acl
     end
 
     # Similar to retrieve, but catches S3::Error::NoSuchBucket
@@ -102,6 +114,14 @@ module S3
 
     def inspect #:nodoc:
       "#<#{self.class}:#{name}>"
+    end
+
+    def save_acl(options = {})
+      headers = {}
+      headers[:content_length] = 0
+      headers[:x_amz_acl] = options[:acl] || acl || "public-read"
+
+      response = bucket_request(:put, :headers => headers, :path => name)
     end
 
     private
@@ -179,6 +199,12 @@ module S3
 
     def name_valid?(name)
       name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/i and name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
+    end
+
+    # TODO parse and convert to canned ACL
+    # add to retrive
+    def request_acl
+      bucket_request(:get, :params => "acl").body
     end
   end
 end
