@@ -77,6 +77,12 @@ default.
    object = bucket.objects.find("lenna.png")
    object.copy(:key => "lenna.png", :bucket => bucket, :acl => :private)
 
+=== Upload file direct to amazon
+
+==== Rails 3 
+
+  To do that you just send file using proper form direct to amazon. You can create simple halper for that, for example like this one: https://gist.github.com/3169039
+
 == See also
 
 * rubygems[http://rubygems.org/gems/s3]
