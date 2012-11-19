@@ -11,7 +11,7 @@ module S3
 
     # Retrieves the bucket information from the server. Raises an
     # S3::Error exception if the bucket doesn't exist or you don't
-    # have access to it, etc.
+    # have access to it.
     def retrieve
       bucket_headers
       self
@@ -30,6 +30,14 @@ module S3
       self.name == other.name and self.service == other.service
     end
 
+    # Retrieves acl for bucket from the server.
+    #
+    # Return:
+    # hash: user|group => permission
+    def request_acl
+      body = bucket_request(:get, :params => "acl").body
+      parse_acl(body)
+    end
 
     # Assigns a new ACL to the bucket. Please note that ACL is not
     # retrieved from the server and set to "public-read" by default.
@@ -161,7 +169,7 @@ module S3
       case e.response.code.to_i
         when 404
           raise Error::ResponseError.exception("NoSuchBucket").new("The specified bucket does not exist.", nil)
-        when 403 
+        when 403
           raise Error::ResponseError.exception("ForbiddenBucket").new("The specified bucket exist but you do not have access to it.", nil)
         else
           raise e
@@ -201,10 +209,5 @@ module S3
       name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/i and name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
     end
 
-    # TODO parse and convert to canned ACL
-    # add to retrive
-    def request_acl
-      bucket_request(:get, :params => "acl").body
-    end
   end
 end
