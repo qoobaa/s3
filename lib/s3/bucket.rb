@@ -4,14 +4,14 @@ module S3
     include Proxies
     extend Forwardable
 
-    attr_reader :name, :service
+    attr_reader :name, :service, :acl
 
     def_instance_delegators :service, :service_request
     private_class_method :new
 
     # Retrieves the bucket information from the server. Raises an
     # S3::Error exception if the bucket doesn't exist or you don't
-    # have access to it, etc.
+    # have access to it.
     def retrieve
       bucket_headers
       self
@@ -28,6 +28,26 @@ module S3
     # (see Service equality)
     def ==(other)
       self.name == other.name and self.service == other.service
+    end
+
+    # Retrieves acl for bucket from the server.
+    #
+    # Return:
+    # hash: user|group => permission
+    def request_acl
+      body = bucket_request(:get, :params => "acl").body
+      parse_acl(body)
+    end
+
+    # Assigns a new ACL to the bucket. Please note that ACL is not
+    # retrieved from the server and set to "public-read" by default.
+    #
+    # Valid Values: :private | :public_read | :public_read_write | authenticated_read
+    #
+    # ==== Example
+    #   bucket.acl = :public_read
+    def acl=(acl)
+      @acl = acl.to_s.gsub("_","-") if acl
     end
 
     # Similar to retrieve, but catches S3::Error::NoSuchBucket
@@ -104,6 +124,14 @@ module S3
       "#<#{self.class}:#{name}>"
     end
 
+    def save_acl(options = {})
+      headers = {}
+      headers[:content_length] = 0
+      headers[:x_amz_acl] = options[:acl] || acl || "public-read"
+
+      response = bucket_request(:put, :headers => headers, :path => name)
+    end
+
     private
 
     attr_writer :service
@@ -141,7 +169,7 @@ module S3
       case e.response.code.to_i
         when 404
           raise Error::ResponseError.exception("NoSuchBucket").new("The specified bucket does not exist.", nil)
-        when 403 
+        when 403
           raise Error::ResponseError.exception("ForbiddenBucket").new("The specified bucket exist but you do not have access to it.", nil)
         else
           raise e
@@ -180,5 +208,6 @@ module S3
     def name_valid?(name)
       name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/i and name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
     end
+
   end
 end

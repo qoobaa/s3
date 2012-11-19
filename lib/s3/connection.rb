@@ -128,7 +128,7 @@ module S3
     # Hash of headers translated from symbol to string, containing
     # only interesting headers
     def self.parse_headers(headers)
-      interesting_keys = [:content_type, :cache_control, :x_amz_acl, :x_amz_storage_class, :range,
+      interesting_keys = [:content_type, :content_length, :cache_control, :x_amz_acl, :x_amz_storage_class, :range,
                           :if_modified_since, :if_unmodified_since,
                           :if_match, :if_none_match,
                           :content_disposition, :content_encoding,
