@@ -72,10 +72,23 @@ It supports both: European and US buckets through the {REST API}[http://docs.ama
 Please note that new objects are created with "public-read" ACL by
 default.
 
+=== Fetch ACL
+
+   object = bucket.objects.find('lenna.png')
+   object.request_acl # or bucket.request_acl
+
+This will return hash with all users/groups and theirs permissions
+
 === Modify ACL
 
    object = bucket.objects.find("lenna.png")
    object.copy(:key => "lenna.png", :bucket => bucket, :acl => :private)
+
+=== Upload file direct to amazon
+
+==== Rails 3
+
+  To do that you just send file using proper form direct to amazon. You can create simple halper for that, for example like this one: https://gist.github.com/3169039
 
 == See also
 
