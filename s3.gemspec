@@ -9,9 +9,9 @@ Gem::Specification.new do |s|
   s.name        = "s3"
   s.version     = S3::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Jakub Kuźma"]
-  s.email       = ["qoobaa@gmail.com"]
-  s.homepage    = "http://jah.pl/projects/s3.html"
+  s.authors     = ["Kuba Kuźma"]
+  s.email       = ["kuba@jah.pl"]
+  s.homepage    = "http://github.com/qoobaa/s3"
   s.summary     = "Library for accessing S3 objects and buckets"
   s.description = "S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API."
 
