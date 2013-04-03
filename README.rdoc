@@ -33,6 +33,10 @@ It supports both: European and US buckets through the {REST API}[http://docs.ama
     new_bucket = service.buckets.build("newbucketname")
     new_bucket.save(:location => :eu)
 
+Remember that bucket name for EU can't include "_" (underscore).
+
+Please refer to: http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html for more information about bucket name restrictions.
+
 === List objects in a bucket
 
     first_bucket.objects
