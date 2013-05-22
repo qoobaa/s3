@@ -88,7 +88,6 @@ module S3
 
       host = S3::HOST
       host = options[:bucket] + '.' + host if options[:add_bucket_to_host]
-      options[:host] = host
 
       signature = generate_temporary_url_signature(options)
 
