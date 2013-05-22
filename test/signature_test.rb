@@ -200,6 +200,18 @@ class SignatureTest < Test::Unit::TestCase
     assert_equal expected, actual
   end
 
+  test "temporary url for object get with bucket in the hostname" do
+    actual = S3::Signature.generate_temporary_url(
+      :bucket => "johnsmith",
+      :resource => "photos/puppy.jpg",
+      :secret_access_key => "uV3F3YluFJax1cknvbcGwgjvx4QpvB+leU8dUj2o",
+      :expires_at => 1175046589,
+      :add_bucket_to_host => true
+    )
+    expected = "http://johnsmith.s3.amazonaws.com/johnsmith/photos/puppy.jpg?AWSAccessKeyId=&Expires=1175046589&Signature=U%2BPDngiQd0bKrr2HCHXOK%2F9Y4vk%3D"
+    assert_equal expected, actual
+  end
+
   test "temporary url for object put with headers" do
     actual = S3::Signature.generate_temporary_url(
       :bucket => "johnsmith",
