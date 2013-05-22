@@ -208,7 +208,7 @@ class SignatureTest < Test::Unit::TestCase
       :expires_at => 1175046589,
       :add_bucket_to_host => true
     )
-    expected = "http://johnsmith.s3.amazonaws.com/johnsmith/photos/puppy.jpg?AWSAccessKeyId=&Expires=1175046589&Signature=gs6xNznrLJ4Bd%2B1y9pcy2HOSVeg%3D"
+    expected = "http://johnsmith.s3.amazonaws.com/photos/puppy.jpg?AWSAccessKeyId=&Expires=1175046589&Signature=gs6xNznrLJ4Bd%2B1y9pcy2HOSVeg%3D"
     assert_equal expected, actual
   end
 

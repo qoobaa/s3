@@ -46,7 +46,9 @@ module S3
     # * <tt>:method</tt> - HTTP request method you want to use on
     #   the resource, defaults to GET
     # * <tt>:headers</tt> - Any additional HTTP headers you intend
-    #   to use when requesting the resource
+    #   to use when requesting the resourc
+    # * <tt>:add_bucket_to_host</tt> - Use in case of virtual hosted-style,
+    #   defaults to false
     def self.generate_temporary_url_signature(options)
       bucket = options[:bucket]
       resource = options[:resource]
@@ -56,7 +58,10 @@ module S3
       headers = options[:headers] || {}
       headers.merge!("date" => expires.to_i.to_s)
 
-      options.merge!(:resource => "/#{bucket}/#{URI.escape(resource, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)}",
+      resource = "/#{URI.escape(resource, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)}"
+      resource = "/#{bucket}" + resource unless options[:add_bucket_to_host]
+
+      options.merge!(:resource => resource,
                      :method => options[:method] || :get,
                      :headers => headers)
       signature = canonicalized_signature(options)
@@ -85,13 +90,18 @@ module S3
       resource = options[:resource]
       access_key = options[:access_key]
       expires = options[:expires_at].to_i
-
       host = S3::HOST
-      host = options[:bucket] + '.' + host if options[:add_bucket_to_host]
 
+      if options[:add_bucket_to_host]
+        host = bucket + '.' + host
+        url  = "http://#{host}/#{resource}"
+      else
+        url = "http://#{host}/#{bucket}/#{resource}"
+      end
+
+      options[:host] = host
       signature = generate_temporary_url_signature(options)
 
-      url = "http://#{host}/#{bucket}/#{resource}"
       url << "?AWSAccessKeyId=#{access_key}"
       url << "&Expires=#{expires}"
       url << "&Signature=#{signature}"
