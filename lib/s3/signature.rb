@@ -46,8 +46,8 @@ module S3
     # * <tt>:method</tt> - HTTP request method you want to use on
     #   the resource, defaults to GET
     # * <tt>:headers</tt> - Any additional HTTP headers you intend
-    #   to use when requesting the resourc
-    # * <tt>:add_bucket_to_host</tt> - Use in case of virtual hosted-style,
+    #   to use when requesting the resource
+    # * <tt>:add_bucket_to_host</tt> - Use in case of virtual-host style,
     #   defaults to false
     def self.generate_temporary_url_signature(options)
       bucket = options[:bucket]
@@ -83,7 +83,7 @@ module S3
     #   the resource, defaults to GET
     # * <tt>:headers</tt> - Any additional HTTP headers you intend
     #   to use when requesting the resource
-    # * <tt>:add_bucket_to_host</tt> - Use in case of virtual hosted-style,
+    # * <tt>:add_bucket_to_host</tt> - Use in case of virtual-host style,
     #   defaults to false
     def self.generate_temporary_url(options)
       bucket = options[:bucket]
