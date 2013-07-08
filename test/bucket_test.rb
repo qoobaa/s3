@@ -31,7 +31,14 @@ class BucketTest < Test::Unit::TestCase
     @objects_list_empty = []
     @objects_list = [
       S3::Object.send(:new, @bucket, :key => "obj1"),
-      S3::Object.send(:new, @bucket, :key => "obj2")
+      S3::Object.send(:new, @bucket, :key => "obj2"),
+      S3::Object.send(:new, @bucket, :key => "prefix/"),
+      S3::Object.send(:new, @bucket, :key => "prefix/obj3")
+    ]
+    
+    @objects_list_prefix = [
+      S3::Object.send(:new, @bucket, :key => "prefix/"),
+      S3::Object.send(:new, @bucket, :key => "prefix/obj3")
     ]
 
     @response_objects_list_empty_body = <<-EOEmpty
@@ -42,11 +49,19 @@ class BucketTest < Test::Unit::TestCase
     @response_objects_list_empty.stubs(:body).returns(@response_objects_list_empty_body)
 
     @response_objects_list_body = <<-EOObjects
-    <?xml version="1.0" encoding="UTF-8"?>\n<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Name>bucket</Name> <Prefix></Prefix> <Marker></Marker> <MaxKeys>1000</MaxKeys> <IsTruncated>false</IsTruncated> <Contents> <Key>obj1</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> <Contents> <Key>obj2</Key> <LastModified>2009-07-03T11:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e586e1b12bca85a458c&quot;</ETag> <Size>179</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f17e247b037a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> </ListBucketResult>
+    <?xml version="1.0" encoding="UTF-8"?>\n<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Name>bucket</Name> <Prefix></Prefix> <Marker></Marker> <MaxKeys>1000</MaxKeys> <IsTruncated>false</IsTruncated> <Contents> <Key>obj1</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> <Contents> <Key>obj2</Key> <LastModified>2009-07-03T11:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e586e1b12bca85a458c&quot;</ETag> <Size>179</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f17e247b037a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> <Contents> <Key>prefix/</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> <Contents> <Key>prefix/obj3</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> </ListBucketResult>
     EOObjects
 
     @response_objects_list = Net::HTTPOK.new("1.1", "200", "OK")
     @response_objects_list.stubs(:body).returns(@response_objects_list_body)
+    
+    @response_objects_list_body_prefix = <<-EOObjectsPrefix
+    <?xml version="1.0" encoding="UTF-8"?>\n<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Name>bucket</Name> <Prefix>prefix</Prefix> <Marker></Marker> <MaxKeys>1000</MaxKeys> <IsTruncated>false</IsTruncated> <Contents> <Key>prefix/</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> <Contents> <Key>prefix/obj3</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> </ListBucketResult>
+    EOObjectsPrefix
+    
+
+    @response_objects_list_prefix = Net::HTTPOK.new("1.1", "200", "OK")
+    @response_objects_list_prefix.stubs(:body).returns(@response_objects_list_body_prefix)
   end
 
   test "name valid" do
@@ -143,6 +158,11 @@ class BucketTest < Test::Unit::TestCase
     expected = @objects_list
     actual = @bucket.objects
     assert_equal expected, actual
+
+    @bucket.stubs(:list_bucket).with(:prefix=>'prefix').returns(@objects_list_prefix)
+    expected = @objects_list_prefix
+    actual = @bucket.objects(:prefix => 'prefix')
+    assert_equal expected, actual
   end
 
   test "list bucket and parse objects" do
@@ -154,6 +174,11 @@ class BucketTest < Test::Unit::TestCase
     @bucket.expects(:bucket_request).with(:get, :params => { :test => true }).returns(@response_objects_list)
     expected = @objects_list
     actual = @bucket.objects.find_all(:test => true)
+    assert_equal expected, actual
+
+    @bucket.expects(:bucket_request).with(:get, :params => { :test => true }).returns(@response_objects_list_prefix)
+    expected = @objects_list_prefix
+    actual = @bucket.objects(:prefix => "prefix").find_all(:test => true)
     assert_equal expected, actual
   end
 
