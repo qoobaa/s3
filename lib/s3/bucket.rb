@@ -109,10 +109,10 @@ module S3
     end
 
     # Returns the objects in the bucket and caches the result
-    def objects
-      Proxy.new(lambda { list_bucket }, :owner => self, :extend => ObjectsExtension)
+    def objects(options={})
+      Proxy.new(lambda { list_bucket(options) }, :owner => self, :extend => ObjectsExtension)
     end
-
+    
     # Returns the object with the given key. Does not check whether the
     # object exists. But also does not issue any HTTP requests, so it's
     # much faster than objects.find
