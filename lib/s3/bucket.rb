@@ -109,13 +109,8 @@ module S3
     end
 
     # Returns the objects in the bucket and caches the result
-    def objects
-      Proxy.new(lambda { list_bucket }, :owner => self, :extend => ObjectsExtension)
-    end
-
-    # Returns the objects in the bucket with prefix and caches the result
-    def objects_with_prefix (prefix)
-      Proxy.new(lambda { list_bucket(:prefix => prefix) }, :owner => self, :extend => ObjectsExtension)
+    def objects(options={})
+      Proxy.new(lambda { list_bucket(:prefix => options[:prefix]) }, :owner => self, :extend => ObjectsExtension)
     end
     
     # Returns the object with the given key. Does not check whether the
