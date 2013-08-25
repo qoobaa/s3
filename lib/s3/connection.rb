@@ -20,7 +20,6 @@ module S3
     #   (60 by default)
     # * <tt>:proxy</tt> - Hash for Net::HTTP Proxy settings
     #   { :host => "proxy.mydomain.com", :port => "80, :user => "user_a", :password => "secret" }
-    # * <tt>:proxy</tt> - Hash for Net::HTTP Proxy settings
     # * <tt>:chunk_size</tt> - Size of a chunk when streaming
     #   (1048576 (1 MiB) by default)
     def initialize(options = {})
