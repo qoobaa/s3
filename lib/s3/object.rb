@@ -89,6 +89,12 @@ module S3
       @content
     end
 
+    # Streams the content of the object without caching it, providing
+    # successive chunks to the block
+    def stream(options = {}, &block)
+      get_object(options, &block)
+    end
+
     # Saves the object, returns true if successfull.
     def save
       put_object
@@ -180,9 +186,9 @@ module S3
       object
     end
 
-    def get_object(options = {})
+    def get_object(options = {}, &block)
       response = object_request(:get, options)
-      parse_headers(response)
+      parse_headers(response, &block)
     end
 
     def object_headers(options = {})
@@ -245,7 +251,7 @@ module S3
       headers
     end
 
-    def parse_headers(response)
+    def parse_headers(response, &block)
       @metadata = response.to_hash.select { |k, v| k.to_s.start_with?("x-amz-meta") }
       self.etag = response["etag"] if response.key?("etag")
       self.content_type = response["content-type"] if response.key?("content-type")
@@ -257,7 +263,11 @@ module S3
         self.size = response["content-range"].sub(/[^\/]+\//, "").to_i
       else
         self.size = response["content-length"]
-        self.content = response.body
+        if block.nil?
+          self.content = response.body
+        else
+          response.read_body(nil, &block)
+        end
       end
     end
   end
