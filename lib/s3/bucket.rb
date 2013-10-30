@@ -200,9 +200,9 @@ module S3
       @name = name
     end
 
-    def bucket_request(method, options = {})
+    def bucket_request(method, options = {}, &block)
       path = "#{path_prefix}#{options[:path]}"
-      service_request(method, options.merge(:host => host, :path => path))
+      service_request(method, options.merge(:host => host, :path => path), &block)
     end
 
     def name_valid?(name)
