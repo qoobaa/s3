@@ -12,8 +12,8 @@ class ConnectionTest < Test::Unit::TestCase
     @response_error = Net::HTTPInternalServerError.new("1.1", "500", "Internal Server Error")
     @response_temporary_redirect = Net::HTTPInternalServerError.new("1.1", "307", "Temporary Redirect")
     @connection.stubs(:http).returns(@http_request)
-
-    @http_request.stubs(:start).returns(@response_ok)
+    @http_request.stubs(:start).yields(@http_request)
+    @http_request.stubs(:request).yields(@response_ok)
   end
 
   test "handle response not modify response when ok" do
@@ -36,7 +36,7 @@ class ConnectionTest < Test::Unit::TestCase
     </Error>
     EOFakeBody
 
-    @http_request.stubs(:start).returns(@response_not_found)
+    @http_request.stubs(:request).yields(@response_not_found)
     @response_not_found.stubs(:body).returns(response_body)
 
     assert_raise S3::Error::NoSuchBucket do
@@ -49,7 +49,7 @@ class ConnectionTest < Test::Unit::TestCase
   end
 
   test "handle response throws standard exception when error" do
-    @http_request.stubs(:start).returns(@response_error)
+    @http_request.stubs(:request).yields(@response_error)
     @response_error.stubs(:body)
     assert_raise S3::Error::ResponseError do
       response = @connection.request(
@@ -174,7 +174,7 @@ class ConnectionTest < Test::Unit::TestCase
   end
 
   test "response.body is nil on TemporaryRedirect" do
-    @http_request.stubs(:start).returns(@response_temporary_redirect)
+    @http_request.stubs(:request).yields(@response_temporary_redirect)
     @response_temporary_redirect.stubs(:body).returns(nil)
 
     assert_nothing_raised do

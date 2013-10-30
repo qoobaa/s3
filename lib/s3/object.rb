@@ -187,8 +187,9 @@ module S3
     end
 
     def get_object(options = {}, &block)
-      response = object_request(:get, options)
-      parse_headers(response, &block)
+      object_request(:get, options) do |response|
+        parse_headers(response, &block)
+      end
     end
 
     def object_headers(options = {})
@@ -220,8 +221,8 @@ module S3
       self.cache_control = options[:cache_control]
     end
 
-    def object_request(method, options = {})
-      bucket_request(method, options.merge(:path => key))
+    def object_request(method, options = {}, &block)
+      bucket_request(method, options.merge(:path => key), &block)
     end
 
     def last_modified=(last_modified)

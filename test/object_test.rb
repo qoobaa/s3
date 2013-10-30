@@ -121,7 +121,7 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "content and parse headers" do
-    @object_lena.expects(:object_request).with(:get, {}).returns(@response_binary)
+    @object_lena.expects(:object_request).with(:get, {}).yields(@response_binary)
 
     expected = /test/n
     actual = @object_lena.content(true)
@@ -135,7 +135,7 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "streaming" do
-    @object_lena.expects(:object_request).with(:get, {}).returns(@response_binary)
+    @object_lena.expects(:object_request).with(:get, {}).yields(@response_binary)
 
     expected = /test/n
     io = StringIO.new

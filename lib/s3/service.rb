@@ -70,8 +70,8 @@ module S3
       names.map { |name| Bucket.send(:new, self, name) }
     end
 
-    def service_request(method, options = {})
-      connection.request(method, options.merge(:path => "/#{options[:path]}"))
+    def service_request(method, options = {}, &block)
+      connection.request(method, options.merge(:path => "/#{options[:path]}"), &block)
     end
 
     def connection
