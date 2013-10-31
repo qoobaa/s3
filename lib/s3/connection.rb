@@ -53,7 +53,7 @@ module S3
     #
     # ==== Returns
     # Net::HTTPResponse object -- response from the server
-    def request(method, options, &block)
+    def request(method, options)
       host = options.fetch(:host, HOST)
       path = options.fetch(:path)
       body = options.fetch(:body, nil)
@@ -85,7 +85,7 @@ module S3
         request.content_length = body.respond_to?(:lstat) ? body.stat.size : body.size
       end
 
-      send_request(host, request, &block)
+      send_request(host, request)
     end
 
     # Helper function to parser parameters and create single string of
@@ -173,8 +173,8 @@ module S3
       http
     end
 
-    def send_request(host, request, skip_authorization = false, &block)
-      http(host).start do |http|
+    def send_request(host, request, skip_authorization = false)
+      response = http(host).start do |http|
         host = http.address
 
         request["Date"] ||= Time.now.httpdate
@@ -191,18 +191,16 @@ module S3
                                                         :secret_access_key => secret_access_key)
         end
 
-        http.request(request) do |response|
-          if response.code.to_i == 307
-            if response.body
-              doc = Document.new response.body
-              return send_request(doc.elements["Error"].elements["Endpoint"].text, request, true, &block)
-            end
-          else
-            result = handle_response(response)
-            yield result unless block.nil?
-            return result
-          end
+        http.request(request)
+      end
+
+      if response.code.to_i == 307
+        if response.body
+          doc = Document.new response.body
+          send_request(doc.elements["Error"].elements["Endpoint"].text, request, true)
         end
+      else
+        handle_response(response)
       end
     end
 
