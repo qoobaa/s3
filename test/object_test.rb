@@ -15,7 +15,6 @@ class ObjectTest < Test::Unit::TestCase
     @object_mac.content = "test2"
 
     @response_binary = Net::HTTPOK.new("1.1", "200", "OK")
-    @response_binary.stubs(:read_body).multiple_yields(*%w{t e s t})
     @response_binary.stubs(:body).returns("test".respond_to?(:force_encoding) ? "test".force_encoding(Encoding::BINARY) : "test")
     @response_binary["etag"] = ""
     @response_binary["content-type"] = "image/png"
@@ -132,21 +131,6 @@ class ObjectTest < Test::Unit::TestCase
 
     @object_lena.expects(:object_request).with(:get, {}).returns(@response_binary)
     assert @object_lena.content(true)
-  end
-
-  test "streaming" do
-    @object_lena.expects(:object_request).with(:get, {}).returns(@response_binary)
-
-    expected = /test/n
-    io = StringIO.new
-    @object_lena.stream do |chunk|
-      io.write(chunk)
-    end
-    io.seek(0)
-    actual = io.read
-    assert_match expected, actual
-    assert_equal "image/png", @object_lena.content_type
-    assert_equal @object.instance_variable_defined?(:@content), false
   end
 
   test "retrieve" do
