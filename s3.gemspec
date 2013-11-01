@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/qoobaa/s3"
   s.summary     = "Library for accessing S3 objects and buckets"
   s.description = "S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API."
+  s.license     = "MIT"
 
   s.required_rubygems_version = ">= 1.3.6"
   s.rubyforge_project         = "s3"
