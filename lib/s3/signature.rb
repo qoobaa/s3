@@ -135,7 +135,7 @@ module S3
       string_to_sign << canonicalized_amz_headers
       string_to_sign << canonicalized_resource
 
-      digest = OpenSSL::Digest::Digest.new("sha1")
+      digest = OpenSSL::Digest.new("sha1")
       hmac = OpenSSL::HMAC.digest(digest, secret_access_key, string_to_sign)
       base64 = Base64.encode64(hmac)
       base64.chomp
