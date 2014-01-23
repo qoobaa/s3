@@ -112,7 +112,7 @@ module S3
     def objects(options={})
       Proxy.new(lambda { list_bucket(options) }, :owner => self, :extend => ObjectsExtension)
     end
-    
+
     # Returns the object with the given key. Does not check whether the
     # object exists. But also does not issue any HTTP requests, so it's
     # much faster than objects.find
@@ -149,7 +149,7 @@ module S3
       # If there are more than 1000 objects S3 truncates listing and
       # we need to request another listing for the remaining objects.
       while parse_is_truncated(response.body)
-        next_request_options = {:marker => objects_attributes.last[:key]}
+        next_request_options = {:marker => URI.escape(objects_attributes.last[:key])}
 
         if max_keys
           break if objects_attributes.length >= max_keys
