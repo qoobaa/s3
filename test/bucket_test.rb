@@ -19,14 +19,14 @@ class BucketTest < Test::Unit::TestCase
     <?xml version="1.0" encoding="UTF-8"?>\n<Error> <Code>BucketAlreadyOwnedByYou</Code> <Message>Your previous request to create the named bucket succeeded and you already own it.</Message> <BucketName>bucket</BucketName> <RequestId>117D08EA0EC6E860</RequestId> <HostId>4VpMSvmJ+G5+DLtVox6O5cZNgdPlYcjCu3l0n4HjDe01vPxxuk5eTAtcAkUynRyV</HostId> </Error>
     EOOwnedByYou
 
-    @reponse_owned_by_you = Net::HTTPConflict.new("1.1", "409", "Conflict")
-    @reponse_owned_by_you.stubs(:body).returns(@bucket_owned_by_you_body)
+    @response_owned_by_you = Net::HTTPConflict.new("1.1", "409", "Conflict")
+    @response_owned_by_you.stubs(:body).returns(@bucket_owned_by_you_body)
 
     @bucket_already_exists_body = <<-EOAlreadyExists
     <?xml version="1.0" encoding="UTF-8"?>\n<Error> <Code>BucketAlreadyExists</Code> <Message>The requested bucket name is not available. The bucket namespace is shared by all users of the system. Please select a different name and try again.</Message> <BucketName>bucket</BucketName> <RequestId>4C154D32807C92BD</RequestId> <HostId>/xyHQgXcUXTZQhoO+NUBzbaxbFrIhKlyuaRHFnmcId0bMePvY9Zwg+dyk2LYE4g5</HostId> </Error>
     EOAlreadyExists
 
-    @reponse_already_exists = Net::HTTPConflict.new("1.1", "409", "Conflict")
+    @response_already_exists = Net::HTTPConflict.new("1.1", "409", "Conflict")
     @response_already_exists.stubs(:body).returns(@bucket_already_exists_body)
 
     @objects_list_empty = []

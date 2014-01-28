@@ -1,23 +1,25 @@
 PATH
   remote: .
   specs:
-    s3 (0.3.19)
+    s3 (0.3.20)
       proxies (~> 0.2.0)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    mocha (0.9.8)
-      rake
+    metaclass (0.0.2)
+    mocha (1.0.0)
+      metaclass (~> 0.0.1)
     proxies (0.2.1)
-    rake (0.8.7)
-    test-unit (2.1.1)
+    rake (10.1.1)
+    test-unit (2.5.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (>= 1.0.0)
+  bundler
   mocha
+  rake
   s3!
-  test-unit (>= 2.0)
+  test-unit
