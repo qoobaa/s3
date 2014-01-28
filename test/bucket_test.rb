@@ -2,8 +2,9 @@ require "test_helper"
 
 class BucketTest < Test::Unit::TestCase
   def setup
-    @bucket_vhost = S3::Bucket.send(:new, nil, "Data-Bucket")
-    @bucket_path = S3::Bucket.send(:new, nil, "Data_Bucket")
+    @bucket_vhost = S3::Bucket.send(:new, S3::Service.new(access_key_id: 'test', secret_access_key: 'secret'), "Data-Bucket")
+    @bucket_path = S3::Bucket.send(:new, S3::Service.new(access_key_id: 'test', secret_access_key: 'secret'), "Data_Bucket")
+    @secure_bucket = S3::Bucket.send(:new, S3::Service.new(access_key_id: 'test', secret_access_key: 'secret', use_ssl: true), "Data-Secured")
     @bucket = @bucket_vhost
 
     @bucket_location = "EU"
@@ -97,6 +98,10 @@ class BucketTest < Test::Unit::TestCase
 
     expected = "s3.amazonaws.com"
     actual = @bucket_path.host
+    assert_equal expected, actual
+
+    expected = "s3.amazonaws.com"
+    actual = @secure_bucket.host
     assert_equal expected, actual
   end
 
