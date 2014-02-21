@@ -1,3 +1,3 @@
 require "test/unit"
-require "mocha"
+require "mocha/test_unit"
 require "s3"
