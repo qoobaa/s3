@@ -109,8 +109,12 @@ module S3
     end
 
     # Returns the objects in the bucket and caches the result
-    def objects(options={})
-      Proxy.new(lambda { list_bucket(options) }, :owner => self, :extend => ObjectsExtension)
+    #
+    # ==== Parameters
+    # * <tt>params</tt> - additional params for <tt>list_bucket</tt>
+    #   request.
+    def objects(params = {})
+      Proxy.new(lambda { list_bucket(params) }, :owner => self, :extend => ObjectsExtension)
     end
 
     # Returns the object with the given key. Does not check whether the
@@ -129,7 +133,7 @@ module S3
       headers[:content_length] = 0
       headers[:x_amz_acl] = options[:acl] || acl || "public-read"
 
-      response = bucket_request(:put, :headers => headers, :path => name)
+      bucket_request(:put, :headers => headers, :path => name)
     end
 
     private
@@ -141,8 +145,8 @@ module S3
       parse_location_constraint(response.body)
     end
 
-    def list_bucket(options = {})
-      response = bucket_request(:get, :params => options)
+    def list_bucket(params = {})
+      response = bucket_request(:get, :params => params)
       max_keys = options[:max_keys]
       objects_attributes = parse_list_bucket_result(response.body)
 
@@ -164,7 +168,7 @@ module S3
     end
 
     def bucket_headers(options = {})
-      response = bucket_request(:head, :params => options)
+      bucket_request(:head, :params => options)
     rescue Error::ResponseError => e
       case e.response.code.to_i
         when 404
