@@ -147,7 +147,7 @@ module S3
 
     def list_bucket(params = {})
       response = bucket_request(:get, :params => params)
-      max_keys = options[:max_keys]
+      max_keys = params[:max_keys]
       objects_attributes = parse_list_bucket_result(response.body)
 
       # If there are more than 1000 objects S3 truncates listing and
@@ -160,7 +160,7 @@ module S3
           next_request_options[:max_keys] = max_keys - objects_attributes.length
         end
 
-        response = bucket_request(:get, :params => options.merge(next_request_options))
+        response = bucket_request(:get, :params => params.merge(next_request_options))
         objects_attributes += parse_list_bucket_result(response.body)
       end
 

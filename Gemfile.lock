@@ -1,13 +1,13 @@
 PATH
   remote: .
   specs:
-    s3 (0.3.20)
+    s3 (0.3.21)
       proxies (~> 0.2.0)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    metaclass (0.0.2)
+    metaclass (0.0.4)
     mocha (1.0.0)
       metaclass (~> 0.0.1)
     proxies (0.2.1)
