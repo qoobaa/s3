@@ -6,7 +6,7 @@ module S3
     extend Forwardable
 
     attr_accessor :content_type, :content_disposition, :content_encoding, :cache_control
-    attr_reader :last_modified, :etag, :size, :bucket, :key, :acl, :request_payer, :storage_class, :metadata
+    attr_reader :last_modified, :etag, :size, :bucket, :key, :acl, :storage_class, :metadata
     attr_writer :content
 
     def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
@@ -39,11 +39,6 @@ module S3
     #   object.acl = :public_read
     def acl=(acl)
       @acl = acl.to_s.gsub("_", "-") if acl
-    end
-
-    # Sets the request payer
-    def request_payer=(request_payer)
-      @request_payer = request_payer && request_payer.to_s.gsub("_", "-")
     end
 
     # Assigns a new storage class (RRS) to the object. Please note
@@ -88,9 +83,9 @@ module S3
 
     # Downloads the content of the object, and caches it. Pass true to
     # clear the cache and download the object again.
-    def content(reload = false)
-      return @content if defined?(@content) and not reload
-      get_object
+    def content(options = {})
+      return @content if defined?(@content) and not options[:reload]
+      get_object(options)
       @content
     end
 
@@ -242,7 +237,6 @@ module S3
     def dump_headers
       headers = {}
       headers[:x_amz_acl] = @acl || "public-read"
-      headers[:x_amz_request_payer] = @request_payer if @request_payer
       headers[:x_amz_storage_class] = @storage_class || "STANDARD"
       headers[:content_type] = @content_type || "application/octet-stream"
       headers[:content_encoding] = @content_encoding if @content_encoding
