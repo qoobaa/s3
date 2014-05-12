@@ -215,7 +215,13 @@ module S3
     end
 
     def object_request(method, options = {})
-      bucket_request(method, options.merge(:path => key))
+      options = options.dup
+      options.merge!(:path => key)
+
+      options[:headers] ||= {}
+      options[:headers].merge!(default_headers)
+
+      bucket_request(method, options)
     end
 
     def last_modified=(last_modified)
@@ -232,6 +238,10 @@ module S3
       else
         true
       end
+    end
+
+    def default_headers
+      {:x_amz_request_payer => 'requester'}
     end
 
     def dump_headers
