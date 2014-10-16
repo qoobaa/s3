@@ -2,7 +2,7 @@
 
 S3 library provides access to {Amazon's Simple Storage Service}[http://aws.amazon.com/s3/].
 
-It supports both: European and US buckets through the {REST API}[http://docs.amazonwebservices.com/AmazonS3/latest/API/APIRest.html].
+It supports *all* S3 regions through the {REST API}[http://docs.amazonwebservices.com/AmazonS3/latest/API/APIRest.html].
 
 == Installation
 
