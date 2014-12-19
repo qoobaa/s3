@@ -34,7 +34,6 @@ class ObjectTest < Test::Unit::TestCase
 
   test "initializing" do
     assert_raise ArgumentError do S3::Object.send(:new, nil, :key => "") end # should not allow empty key
-    assert_raise ArgumentError do S3::Object.send(:new, nil, :key => "//") end # should not allow key with double slash
 
     assert_nothing_raised do
       S3::Object.send(:new, nil, :key => "Lena.png")
@@ -68,7 +67,7 @@ class ObjectTest < Test::Unit::TestCase
     expected = "http://images.s3.amazonaws.com/Lena%20S%C3%B6derberg.png"
     actual = object12.url
     assert_equal expected, actual
-    
+
     object13 = S3::Object.send(:new, bucket1, :key => "Lena Söderberg [1].png")
     expected = "http://images.s3.amazonaws.com/Lena%20S%C3%B6derberg%20%5B1%5D.png"
     actual = object13.url

@@ -227,11 +227,7 @@ module S3
     end
 
     def key_valid?(key)
-      if (key.nil? or key.empty? or key =~ %r#//#)
-        false
-      else
-        true
-      end
+      !(key.nil? or key.empty?)
     end
 
     def dump_headers
