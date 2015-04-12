@@ -92,7 +92,7 @@ This will return hash with all users/groups and theirs permissions
 
 ==== Rails 3
 
-  To do that you just send file using proper form direct to amazon. You can create simple halper for that, for example like this one: https://gist.github.com/3169039
+  To do that you just send file using proper form direct to amazon. You can create simple helper for that, for example like this one: https://gist.github.com/3169039
 
 == See also
 
