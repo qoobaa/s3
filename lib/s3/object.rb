@@ -253,7 +253,9 @@ module S3
         self.size = response["content-range"].sub(/[^\/]+\//, "").to_i
       else
         self.size = response["content-length"]
-        self.content = response.body
+        if body = response.body
+          self.content = body
+        end
       end
     end
   end

@@ -145,6 +145,19 @@ class ObjectTest < Test::Unit::TestCase
     assert_equal meta, @object_lena.retrieve.metadata
   end
 
+  test "retrieve dont set content" do
+    @object_lena.remove_instance_variable(:@content)
+
+    @response_binary.stubs(:body).returns(nil)
+    @object_lena.expects(:object_request).with(:head, {}).returns(@response_binary)
+    assert @object_lena.retrieve
+
+    @object_lena.expects(:object_request).with(:get, {}).returns(@response_binary)
+    @response_binary.stubs(:body).returns("hello")
+
+    assert_equal "hello", @object_lena.content
+  end
+
   test "exists" do
     @object_lena.expects(:retrieve).returns(true)
     assert @object_lena.exists?
