@@ -3,7 +3,7 @@ module S3
     include Parser
     include Proxies
 
-    attr_reader :access_key_id, :secret_access_key, :use_ssl, :proxy
+    attr_reader :access_key_id, :secret_access_key, :use_ssl, :use_vhost, :proxy
 
     # Compares service to other, by <tt>access_key_id</tt> and
     # <tt>secret_access_key</tt>
@@ -18,6 +18,8 @@ module S3
     # * <tt>:secret_access_key</tt> - Secret access key (REQUIRED)
     # * <tt>:use_ssl</tt> - Use https or http protocol (false by
     #   default)
+    # * <tt>:use_vhost</tt> - Use bucket.s3.amazonaws.com or s3.amazonaws.com/bucket (true by
+    #   default)
     # * <tt>:debug</tt> - Display debug information on the STDOUT
     #   (false by default)
     # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
@@ -26,6 +28,7 @@ module S3
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
       @use_ssl = options.fetch(:use_ssl, false)
+      @use_vhost = options.fetch(:use_vhost, true)
       @timeout = options.fetch(:timeout, 60)
       @debug = options.fetch(:debug, false)
 

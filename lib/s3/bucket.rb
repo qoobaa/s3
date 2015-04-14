@@ -94,7 +94,7 @@ module S3
     # name. If the bucket contains characters like underscore it can't
     # be used as +VHOST+ (e.g. <tt>bucket_name.s3.amazonaws.com</tt>)
     def vhost?
-      !service.use_ssl && "#@name.#{HOST}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
+      !service.use_ssl && service.use_vhost && "#@name.#{HOST}" =~ /\A#{URI::REGEXP::PATTERN::HOSTNAME}\Z/
     end
 
     # Returns host name of the bucket according (see #vhost? method)
