@@ -1,5 +1,7 @@
 = S3
 
+{<img src="https://travis-ci.org/qoobaa/s3.svg?branch=master" alt="Build Status" />}[https://travis-ci.org/qoobaa/s3]
+
 S3 library provides access to {Amazon's Simple Storage Service}[http://aws.amazon.com/s3/].
 
 It supports *all* S3 regions through the {REST API}[http://docs.amazonwebservices.com/AmazonS3/latest/API/APIRest.html].
