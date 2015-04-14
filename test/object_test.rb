@@ -146,7 +146,7 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "retrieve dont set content" do
-    @object_lena.remove_instance_variable(:@content)
+    @object_lena.send(:remove_instance_variable, :@content)
 
     @response_binary.stubs(:body).returns(nil)
     @object_lena.expects(:object_request).with(:head, {}).returns(@response_binary)
