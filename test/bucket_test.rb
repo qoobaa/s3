@@ -3,7 +3,7 @@ require "test_helper"
 class BucketTest < Test::Unit::TestCase
   def setup
     @bucket_vhost = S3::Bucket.send(:new, S3::Service.new(access_key_id: 'test', secret_access_key: 'secret'), "Data-Bucket")
-    @bucket_path = S3::Bucket.send(:new, S3::Service.new(access_key_id: 'test', secret_access_key: 'secret'), "Data_Bucket")
+    @bucket_path = S3::Bucket.send(:new, S3::Service.new(access_key_id: 'test', secret_access_key: 'secret', use_vhost: false), "Data_Bucket")
     @secure_bucket = S3::Bucket.send(:new, S3::Service.new(access_key_id: 'test', secret_access_key: 'secret', use_ssl: true), "Data-Secured")
     @bucket = @bucket_vhost
 
@@ -36,7 +36,7 @@ class BucketTest < Test::Unit::TestCase
       S3::Object.send(:new, @bucket, :key => "prefix/"),
       S3::Object.send(:new, @bucket, :key => "prefix/obj3")
     ]
-    
+
     @objects_list_prefix = [
       S3::Object.send(:new, @bucket, :key => "prefix/"),
       S3::Object.send(:new, @bucket, :key => "prefix/obj3")
@@ -55,11 +55,11 @@ class BucketTest < Test::Unit::TestCase
 
     @response_objects_list = Net::HTTPOK.new("1.1", "200", "OK")
     @response_objects_list.stubs(:body).returns(@response_objects_list_body)
-    
+
     @response_objects_list_body_prefix = <<-EOObjectsPrefix
     <?xml version="1.0" encoding="UTF-8"?>\n<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Name>bucket</Name> <Prefix>prefix</Prefix> <Marker></Marker> <MaxKeys>1000</MaxKeys> <IsTruncated>false</IsTruncated> <Contents> <Key>prefix/</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> <Contents> <Key>prefix/obj3</Key> <LastModified>2009-07-03T10:17:33.000Z</LastModified> <ETag>&quot;99519cdf14c255e580e1b7bca85a458c&quot;</ETag> <Size>1729</Size> <Owner> <ID>df864aeb6f42be43f1d9e60aaabe3f15e245b035a4b79d1cfe36c4deaec67205</ID> <DisplayName>owner</DisplayName> </Owner> <StorageClass>STANDARD</StorageClass> </Contents> </ListBucketResult>
     EOObjectsPrefix
-    
+
 
     @response_objects_list_prefix = Net::HTTPOK.new("1.1", "200", "OK")
     @response_objects_list_prefix.stubs(:body).returns(@response_objects_list_body_prefix)
