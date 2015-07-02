@@ -30,6 +30,14 @@ module S3
       objects_attributes
     end
 
+    def parse_list_directories_result(xml)
+      names = []
+      rexml_document(xml).elements.each("ListBucketResult/CommonPrefixes/Prefix") do |e|
+        names << e.text
+      end
+      names
+    end
+
     def parse_copy_object_result(xml)
       object_attributes = {}
       document = rexml_document(xml)

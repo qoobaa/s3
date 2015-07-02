@@ -124,6 +124,15 @@ module S3
       Object.send(:new, self, :key => key)
     end
 
+    # Returns the root directories in the bucket and caches the result
+    #
+    # ==== Parameters
+    # * <tt>params</tt> - additional params for <tt>list_directories</tt>
+    #   request.
+    def directories(params = {})
+      Proxy.new(lambda { list_directories(params) }, :owner => self)
+    end
+
     def inspect #:nodoc:
       "#<#{self.class}:#{name}>"
     end
@@ -165,6 +174,11 @@ module S3
       end
 
       objects_attributes.map { |object_attributes| Object.send(:new, self, object_attributes) }
+    end
+
+    def list_directories(params = {})
+      response = bucket_request(:get, :params => params.merge(:delimiter => "/"))
+      parse_list_directories_result(response.body)
     end
 
     def bucket_headers(options = {})
