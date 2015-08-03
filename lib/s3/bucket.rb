@@ -40,7 +40,7 @@ module S3
     end
 
     # Assigns a new ACL to the bucket. Please note that ACL is not
-    # retrieved from the server and set to "public-read" by default.
+    # retrieved from the server and set to "private" by default.
     #
     # Valid Values: :private | :public_read | :public_read_write | authenticated_read
     #
@@ -131,7 +131,7 @@ module S3
     def save_acl(options = {})
       headers = {}
       headers[:content_length] = 0
-      headers[:x_amz_acl] = options[:acl] || acl || "public-read"
+      headers[:x_amz_acl] = options[:acl] || acl || "private"
 
       bucket_request(:put, :headers => headers, :path => name)
     end

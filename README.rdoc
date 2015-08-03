@@ -75,7 +75,7 @@ Please refer to: http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictio
     new_object.save
     #=> true
 
-Please note that new objects are created with "public-read" ACL by
+Please note that new objects are created with "private" ACL by
 default.
 
 === Fetch ACL
@@ -88,7 +88,7 @@ This will return hash with all users/groups and theirs permissions
 === Modify ACL
 
    object = bucket.objects.find("lenna.png")
-   object.copy(:key => "lenna.png", :bucket => bucket, :acl => :private)
+   object.copy(:key => "lenna.png", :bucket => bucket, :acl => :public_read)
 
 === Upload file direct to amazon
 

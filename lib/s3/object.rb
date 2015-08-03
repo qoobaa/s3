@@ -33,7 +33,7 @@ module S3
     end
 
     # Assigns a new ACL to the object. Please note that ACL is not
-    # retrieved from the server and set to "public-read" by default.
+    # retrieved from the server and set to "private" by default.
     #
     # ==== Example
     #   object.acl = :public_read
@@ -102,7 +102,7 @@ module S3
     # * <tt>:bucket</tt> - New bucket to store object in (instance of
     #   S3::Bucket)
     # * <tt>:acl</tt> - ACL of the copied object (default:
-    #   "public-read")
+    #   "private")
     # * <tt>:content_type</tt> - Content type of the copied object
     #   (default: "application/octet-stream")
     def copy(options = {})
@@ -156,7 +156,7 @@ module S3
 
       headers = {}
 
-      headers[:x_amz_acl] = options[:acl] || acl || "public-read"
+      headers[:x_amz_acl] = options[:acl] || acl || "private"
       headers[:content_type] = options[:content_type] || content_type || "application/octet-stream"
       headers[:content_encoding] = options[:content_encoding] if options[:content_encoding]
       headers[:content_disposition] = options[:content_disposition] if options[:content_disposition]
@@ -232,7 +232,7 @@ module S3
 
     def dump_headers
       headers = {}
-      headers[:x_amz_acl] = @acl || "public-read"
+      headers[:x_amz_acl] = @acl || "private"
       headers[:x_amz_storage_class] = @storage_class || "STANDARD"
       headers[:content_type] = @content_type || "application/octet-stream"
       headers[:content_encoding] = @content_encoding if @content_encoding

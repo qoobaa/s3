@@ -108,13 +108,13 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "save" do
-    @object_lena.expects(:object_request).with(:put, :body=>"test", :headers=>{ :x_amz_acl=>"public-read", :x_amz_storage_class=>"STANDARD", :content_type=>"application/octet-stream" }).returns(@response_binary)
+    @object_lena.expects(:object_request).with(:put, :body=>"test", :headers=>{ :x_amz_acl=>"private", :x_amz_storage_class=>"STANDARD", :content_type=>"application/octet-stream" }).returns(@response_binary)
     assert @object_lena.save
   end
 
   test "save with cache control headers" do
     assert_equal "max-age=315360000", @object_mac.cache_control
-    @object_mac.expects(:object_request).with(:put, :body=>"test2", :headers=>{ :x_amz_acl=>"public-read", :x_amz_storage_class=>"STANDARD", :content_type=>"application/octet-stream", :cache_control=>"max-age=315360000" }).returns(@response_binary)
+    @object_mac.expects(:object_request).with(:put, :body=>"test2", :headers=>{ :x_amz_acl=>"private", :x_amz_storage_class=>"STANDARD", :content_type=>"application/octet-stream", :cache_control=>"max-age=315360000" }).returns(@response_binary)
     assert @object_mac.save
   end
 
@@ -203,7 +203,7 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "replace" do
-    @bucket_images.expects(:bucket_request).with(:put, :path => "Lena-copy.png", :headers => { :x_amz_acl => "public-read", :content_type => "application/octet-stream", :x_amz_copy_source => "images/Lena.png", :x_amz_metadata_directive => "REPLACE" }).returns(@response_xml)
+    @bucket_images.expects(:bucket_request).with(:put, :path => "Lena-copy.png", :headers => { :x_amz_acl => "private", :content_type => "application/octet-stream", :x_amz_copy_source => "images/Lena.png", :x_amz_metadata_directive => "REPLACE" }).returns(@response_xml)
 
     new_object = @object_lena.copy(:key => "Lena-copy.png")
 
@@ -212,7 +212,7 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "copy" do
-    @bucket_images.expects(:bucket_request).with(:put, :path => "Lena-copy.png", :headers => { :x_amz_acl => "public-read", :content_type => "application/octet-stream", :x_amz_copy_source => "images/Lena.png", :x_amz_metadata_directive => "COPY" }).returns(@response_xml)
+    @bucket_images.expects(:bucket_request).with(:put, :path => "Lena-copy.png", :headers => { :x_amz_acl => "private", :content_type => "application/octet-stream", :x_amz_copy_source => "images/Lena.png", :x_amz_metadata_directive => "COPY" }).returns(@response_xml)
 
     new_object = @object_lena.copy(:key => "Lena-copy.png", :replace => false)
 
