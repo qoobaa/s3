@@ -57,6 +57,24 @@ class ServiceTest < Test::Unit::TestCase
     ]
   end
 
+  test "no :access_key_id" do
+    assert_raise ArgumentError do
+      @service_bucket_exists = S3::Service.new(
+        :access_key_id =>  nil,
+        :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
+      )
+    end
+  end
+
+  test "no :secret_access_key" do
+    assert_raise ArgumentError do
+      @service_bucket_exists = S3::Service.new(
+        :access_key_id =>  "12345678901234567890",
+        :secret_access_key =>  nil
+      )
+    end
+  end
+
   test "buckets and parse buckets empty" do
     expected = @buckets_empty_list
     actual = @service_empty_buckets_list.buckets
