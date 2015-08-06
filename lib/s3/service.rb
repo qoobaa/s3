@@ -25,6 +25,12 @@ module S3
     # * <tt>:timeout</tt> - Timeout to use by the Net::HTTP object
     #   (60 by default)
     def initialize(options)
+      # The keys for these required options might exist in the options hash, but
+      # they might be set to something like `nil`. If this is the case, we want
+      # to fail early.
+      raise ArgumentError, "Missing :access_key_id." if !options[:access_key_id]
+      raise ArgumentError, "Missing :secret_access_key." if !options[:secret_access_key]
+
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
       @use_ssl = options.fetch(:use_ssl, false)
