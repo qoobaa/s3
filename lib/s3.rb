@@ -23,5 +23,5 @@ require "s3/version"
 
 module S3
   # Default (and only) host serving S3 stuff
-  HOST = "s3.amazonaws.com"
+  HOST = "192.168.1.248"
 end
