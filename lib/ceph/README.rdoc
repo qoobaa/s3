@@ -1,0 +1,32 @@
+= Ceph-radosgw user
+
+
+radosgw-admin guide to {create radosgw user}[http://docs.ceph.com/docs/master/radosgw/admin/].
+
+
+== Installation
+
+    gem install s3
+
+== Usage
+
+=== Initialize the service
+
+    require "s3"
+    service = CEPH::Radosgw.new(:ipaddress => "RADOSGW_HOST_IP",
+                              :username => "RADOSGW_HOST_USERNAME",
+                              :user_password => "RADOSGW_HOST_USER_PASSWORD",
+    )
+
+
+=== create user
+
+    service.user_create("UID_NAME")
+
+== See also
+
+* radosgw-admin[http://docs.ceph.com/docs/master/radosgw/admin/]
+
+== Copyright
+
+Copyright (c) 2009 Jakub Kuźma, Mirosław Boruta. See LICENSE[http://github.com/qoobaa/s3/raw/master/LICENSE] for details.

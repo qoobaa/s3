@@ -16,7 +16,8 @@ It supports *all* S3 regions through the {REST API}[http://docs.amazonwebservice
 
     require "s3"
     service = S3::Service.new(:access_key_id => "...",
-                              :secret_access_key => "...")
+                              :secret_access_key => "...",
+			      :host => "127.0.0.1")
     #=> #<S3::Service:...>
 
 === List buckets

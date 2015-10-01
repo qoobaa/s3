@@ -4,7 +4,7 @@ module S3
   class Connection
     include Parser
 
-    attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug, :proxy
+    attr_accessor :access_key_id, :secret_access_key, :use_ssl, :timeout, :debug, :proxy, :host
     alias :use_ssl? :use_ssl
 
     # Creates new connection object.
@@ -25,6 +25,7 @@ module S3
     def initialize(options = {})
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
+      @host = options.fetch(:host)
       @use_ssl = options.fetch(:use_ssl, false)
       @debug = options.fetch(:debug, false)
       @timeout = options.fetch(:timeout, 60)
@@ -54,7 +55,7 @@ module S3
     # ==== Returns
     # Net::HTTPResponse object -- response from the server
     def request(method, options)
-      host = options.fetch(:host, HOST)
+      host = @host
       path = options.fetch(:path)
       body = options.fetch(:body, nil)
       params = options.fetch(:params, {})
