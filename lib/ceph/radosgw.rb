@@ -1,3 +1,6 @@
+require 'net/ssh'
+require 'json'
+
 module CEPH
   class Radosgw
 
@@ -17,9 +20,11 @@ module CEPH
 
 
     def user_create(uid)
-Net::SSH.start( @ipaddress, @username, :password => @user_password ) do|ssh| 
-	ceph_user_json = ssh.exec!('sudo radosgw-admin user create --uid="#{uid}"  --display-name="radosgw demo user from s3 gem"')
-end
+	ceph_user_json = ""
+	Net::SSH.start( @ipaddress, @username, :password => @user_password ) do|ssh| 
+		ceph_user_json = ssh.exec!("sudo radosgw-admin user create --uid='#{uid}'  --display-name='radosgw demo user from s3 gem'")
+	end
+
 
     ceph_user_hash = JSON.parse(ceph_user_json)
     secret_hash = {"access_key" => "#{ceph_user_hash['keys'][0]['access_key']}", "secret_key" => "#{ceph_user_hash['keys'][0]['secret_key']}" }
