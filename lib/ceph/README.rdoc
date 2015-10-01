@@ -1,10 +1,8 @@
-= S3
+= Ceph-radosgw user
 
-{<img src="https://travis-ci.org/qoobaa/s3.svg?branch=master" alt="Build Status" />}[https://travis-ci.org/qoobaa/s3]
 
-S3 library provides access to {Amazon's Simple Storage Service}[http://aws.amazon.com/s3/].
+radosgw-admin guide to {create radosgw user}[http://docs.ceph.com/docs/master/radosgw/admin/].
 
-It supports *all* S3 regions through the {REST API}[http://docs.amazonwebservices.com/AmazonS3/latest/API/APIRest.html].
 
 == Installation
 
@@ -18,7 +16,7 @@ It supports *all* S3 regions through the {REST API}[http://docs.amazonwebservice
     service = CEPH::Radosgw.new(:ipaddress => "RADOSGW_HOST_IP",
                               :username => "RADOSGW_HOST_USERNAME",
                               :user_password => "RADOSGW_HOST_USER_PASSWORD",
-)
+    )
 
 
 === create user
