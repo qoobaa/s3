@@ -3,7 +3,7 @@ module S3
     include Parser
     include Proxies
 
-    attr_reader :access_key_id, :secret_access_key, :use_ssl, :use_vhost, :proxy
+    attr_reader :access_key_id, :secret_access_key, :use_ssl, :use_vhost, :proxy, :host
 
     # Compares service to other, by <tt>access_key_id</tt> and
     # <tt>secret_access_key</tt>
@@ -33,6 +33,7 @@ module S3
 
       @access_key_id = options.fetch(:access_key_id)
       @secret_access_key = options.fetch(:secret_access_key)
+      @host = options.fetch(:host)
       @use_ssl = options.fetch(:use_ssl, false)
       @use_vhost = options.fetch(:use_vhost, true)
       @timeout = options.fetch(:timeout, 60)
@@ -87,6 +88,7 @@ module S3
       return @connection if defined?(@connection)
       @connection = Connection.new(:access_key_id => @access_key_id,
                                :secret_access_key => @secret_access_key,
+                               :host => @host,
                                :use_ssl => @use_ssl,
                                :timeout => @timeout,
                                :debug => @debug,

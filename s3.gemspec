@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency "proxies", "~> 0.2.0"
   s.add_development_dependency "rake"
+  s.add_development_dependency "json"
   s.add_development_dependency "test-unit"
   s.add_development_dependency "mocha"
   s.add_development_dependency "bundler"
