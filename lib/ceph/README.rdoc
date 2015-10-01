@@ -1,0 +1,34 @@
+= S3
+
+{<img src="https://travis-ci.org/qoobaa/s3.svg?branch=master" alt="Build Status" />}[https://travis-ci.org/qoobaa/s3]
+
+S3 library provides access to {Amazon's Simple Storage Service}[http://aws.amazon.com/s3/].
+
+It supports *all* S3 regions through the {REST API}[http://docs.amazonwebservices.com/AmazonS3/latest/API/APIRest.html].
+
+== Installation
+
+    gem install s3
+
+== Usage
+
+=== Initialize the service
+
+    require "s3"
+    service = CEPH::Radosgw.new(:ipaddress => "RADOSGW_HOST_IP",
+                              :username => "RADOSGW_HOST_USERNAME",
+                              :user_password => "RADOSGW_HOST_USER_PASSWORD",
+)
+
+
+=== create user
+
+    service.user_create("UID_NAME")
+
+== See also
+
+* radosgw-admin[http://docs.ceph.com/docs/master/radosgw/admin/]
+
+== Copyright
+
+Copyright (c) 2009 Jakub Kuźma, Mirosław Boruta. See LICENSE[http://github.com/qoobaa/s3/raw/master/LICENSE] for details.

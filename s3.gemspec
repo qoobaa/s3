@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Kuba Kuźma"]
   s.email       = ["kuba@jah.pl"]
-  s.homepage    = "http://github.com/qoobaa/s3"
+  s.homepage    = "http://github.com/thomasalrin/s3"
   s.summary     = "Library for accessing S3 objects and buckets"
   s.description = "S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API."
   s.license     = "MIT"
@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project         = "s3"
 
   s.add_dependency "proxies", "~> 0.2.0"
+  s.add_dependency "net/ssh"
   s.add_development_dependency "rake"
   s.add_development_dependency "test-unit"
   s.add_development_dependency "mocha"
