@@ -90,7 +90,7 @@ module S3
       resource = options[:resource]
       access_key = options[:access_key]
       expires = options[:expires_at].to_i
-      host = S3::HOST
+      host = S3.host
 
       if options[:add_bucket_to_host]
         host = bucket + '.' + host
@@ -227,7 +227,7 @@ module S3
       # requests that don't address a bucket, do nothing. For more
       # information on virtual hosted-style requests, see Virtual
       # Hosting of Buckets.
-      bucket_name = host.sub(/\.?#{S3::HOST}\Z/, "")
+      bucket_name = host.sub(/\.?#{S3.host}\Z/, "")
       string << "/#{bucket_name}" unless bucket_name.empty?
 
       # 3. Append the path part of the un-decoded HTTP Request-URI,

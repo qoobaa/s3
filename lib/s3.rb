@@ -22,6 +22,11 @@ require "s3/signature"
 require "s3/version"
 
 module S3
-  # Default (and only) host serving S3 stuff
-  HOST = "s3.amazonaws.com"
+
+  class << self
+    attr_accessor :host # Default host serving S3 stuff
+    def host
+     @host ||= "s3.amazonaws.com"
+    end
+  end
 end
