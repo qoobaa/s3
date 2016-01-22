@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    s3 (0.3.23)
+    s3 (0.3.24)
       proxies (~> 0.2.0)
 
 GEM
@@ -23,3 +23,6 @@ DEPENDENCIES
   rake
   s3!
   test-unit
+
+BUNDLED WITH
+   1.10.6
