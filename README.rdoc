@@ -72,6 +72,8 @@ Please refer to: http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictio
 
     new_object.content = open("bender.png")
 
+    new_object.acl = :public_read
+
     new_object.save
     #=> true
 
