@@ -30,6 +30,13 @@ It supports *all* S3 regions through the {REST API}[http://docs.amazonwebservice
     first_bucket = service.buckets.find("first-bucket")
     #=> #<S3::Bucket:first-bucket>
 
+or
+
+    first_bucket = service.bucket("first-bucket")
+    #=> #<S3::Bucket:first-bucket>
+
+<tt>service.bucket("first-bucket")</tt> does not check whether a bucket with the name <tt>"first-bucket"</tt> exists, but it also does not issue any HTTP requests. Thus, the second example is much faster than <tt>buckets.find</tt>. You can use <tt>first_bucket.exists?</tt> to check whether the bucket exists after calling <tt>service.bucket</tt>.
+
 === Create bucket
 
     new_bucket = service.buckets.build("newbucketname")
