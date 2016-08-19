@@ -87,6 +87,12 @@ Please refer to: http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictio
 Please note that new objects are created with "private" ACL by
 default.
 
+=== Request access to a private object
+
+Returns a temporary url to the object that expires on the timestamp given. Defaults to one hour expire time.
+
+    new_object.temporary_url(Time.now + 1800)
+
 === Fetch ACL
 
    object = bucket.objects.find('lenna.png')
