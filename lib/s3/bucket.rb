@@ -124,6 +124,13 @@ module S3
       Object.send(:new, self, :key => key)
     end
 
+    # Returns the object with the given key. Does not check whether the
+    # object exists. But also does not issue any HTTP requests, so it's
+    # much faster than objects.find
+    def object(key)
+      Object.send(:new, self, :key => key)
+    end
+
     def inspect #:nodoc:
       "#<#{self.class}:#{name}>"
     end
