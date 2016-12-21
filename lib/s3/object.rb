@@ -83,9 +83,9 @@ module S3
 
     # Downloads the content of the object, and caches it. Pass true to
     # clear the cache and download the object again.
-    def content(reload = false)
-      return @content if defined?(@content) and not reload
-      get_object
+    def content(options = {})
+      return @content if defined?(@content) and not options[:reload]
+      get_object(options)
       @content
     end
 
@@ -215,7 +215,13 @@ module S3
     end
 
     def object_request(method, options = {})
-      bucket_request(method, options.merge(:path => key))
+      options = options.dup
+      options.merge!(:path => key)
+
+      options[:headers] ||= {}
+      options[:headers].merge!(default_headers)
+
+      bucket_request(method, options)
     end
 
     def last_modified=(last_modified)
@@ -228,6 +234,10 @@ module S3
 
     def key_valid?(key)
       !(key.nil? or key.empty?)
+    end
+
+    def default_headers
+      {:x_amz_request_payer => 'requester'}
     end
 
     def dump_headers
