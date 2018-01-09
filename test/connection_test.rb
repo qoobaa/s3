@@ -40,7 +40,7 @@ class ConnectionTest < Test::Unit::TestCase
     @response_not_found.stubs(:body).returns(response_body)
 
     assert_raise S3::Error::NoSuchBucket do
-      response = @connection.request(
+      @connection.request(
         :get,
         :host => "data.example.com.s3.amazonaws.com",
         :path => "/"
@@ -52,7 +52,7 @@ class ConnectionTest < Test::Unit::TestCase
     @http_request.stubs(:start).returns(@response_error)
     @response_error.stubs(:body)
     assert_raise S3::Error::ResponseError do
-      response = @connection.request(
+      @connection.request(
         :get,
         :host => "data.example.com.s3.amazonaws.com",
         :path => "/"
@@ -61,7 +61,7 @@ class ConnectionTest < Test::Unit::TestCase
 
     @response_error.stubs(:body).returns("")
     assert_raise S3::Error::ResponseError do
-      response = @connection.request(
+      @connection.request(
         :get,
         :host => "data.example.com.s3.amazonaws.com",
         :path => "/"

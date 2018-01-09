@@ -206,7 +206,7 @@ class BucketTest < Test::Unit::TestCase
       S3::Object.any_instance.stubs(:retrieve).returns(S3::Object.send(:new, nil, :key => "obj2"))
       expected = "obj2"
       actual = @bucket.objects.find_first("obj2")
-      assert_equal "obj2", actual.key
+      assert_equal expected, actual.key
     end
   end
 

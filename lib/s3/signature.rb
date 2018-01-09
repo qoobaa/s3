@@ -52,7 +52,6 @@ module S3
     def self.generate_temporary_url_signature(options)
       bucket = options[:bucket]
       resource = options[:resource]
-      secret_access_key = options[:secret_access_key]
       expires = options[:expires_at]
 
       headers = options[:headers] || {}
@@ -113,7 +112,6 @@ module S3
       headers = options[:headers] || {}
       host = options[:host] || ""
       resource = options[:resource]
-      access_key_id = options[:access_key_id]
       secret_access_key = options[:secret_access_key]
 
       http_verb = options[:method].to_s.upcase

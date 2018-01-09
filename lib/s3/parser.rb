@@ -61,30 +61,30 @@ module S3
 
     private
 
-     def convert_uri_to_group_name(uri)
-        case uri
-        when "http://acs.amazonaws.com/groups/global/AllUsers"
-          return "Everyone"
-        when "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
-          return "Authenticated Users"
-        when "http://acs.amazonaws.com/groups/s3/LogDelivery"
-          return "Log Delivery"
-        else
-          return uri
-        end
+    def convert_uri_to_group_name(uri)
+      case uri
+      when "http://acs.amazonaws.com/groups/global/AllUsers"
+        return "Everyone"
+      when "http://acs.amazonaws.com/groups/global/AuthenticatedUsers"
+        return "Authenticated Users"
+      when "http://acs.amazonaws.com/groups/s3/LogDelivery"
+        return "Log Delivery"
+      else
+        return uri
       end
+    end
 
-     def extract_grantee(grant)
-        grants  = {}
-        grant.each_element_with_attribute("xsi:type", "Group") do |grantee|
-          group_name = convert_uri_to_group_name(grantee.get_text("URI").value)
-          grants[group_name] = grant.get_text("Permission").value
-        end
-        grant.each_element_with_attribute("xsi:type", "CanonicalUser") do |grantee|
-          user_name = grantee.get_text("DisplayName").value
-          grants[user_name] = grant.get_text("Permission").value
-        end
-        grants
-     end
+    def extract_grantee(grant)
+      grants  = {}
+      grant.each_element_with_attribute("xsi:type", "Group") do |grantee|
+        group_name = convert_uri_to_group_name(grantee.get_text("URI").value)
+        grants[group_name] = grant.get_text("Permission").value
+      end
+      grant.each_element_with_attribute("xsi:type", "CanonicalUser") do |grantee|
+        user_name = grantee.get_text("DisplayName").value
+        grants[user_name] = grant.get_text("Permission").value
+      end
+      grants
+    end
   end
 end

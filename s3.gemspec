@@ -1,31 +1,29 @@
-# -*- encoding: utf-8 -*-
+# coding: utf-8
 
-# Load version requiring the canonical "s3/version", otherwise Ruby will think
-# is a different file and complaint about a double declaration of S3::VERSION.
-$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
+lib = File.expand_path("../lib", __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "s3/version"
 
-Gem::Specification.new do |s|
-  s.name        = "s3"
-  s.version     = S3::VERSION
-  s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Kuba Kuźma"]
-  s.email       = ["kuba@jah.pl"]
-  s.homepage    = "http://github.com/qoobaa/s3"
-  s.summary     = "Library for accessing S3 objects and buckets"
-  s.description = "S3 library provides access to Amazon's Simple Storage Service. It supports both: European and US buckets through REST API."
-  s.license     = "MIT"
+Gem::Specification.new do |spec|
+  spec.name          = "s3"
+  spec.version       = S3::VERSION
+  spec.authors       = ["Kuba Kuźma"]
+  spec.email         = ["kuba@jah.pl"]
 
-  s.required_rubygems_version = ">= 1.3.6"
-  s.rubyforge_project         = "s3"
+  spec.summary       = "Library for accessing S3 objects and buckets"
+  spec.description   = "S3 library provides access to Amazon's Simple Storage Service."
+  spec.homepage      = "http://github.com/qoobaa/s3"
+  spec.license       = "MIT"
 
-  s.add_dependency "proxies", "~> 0.2.0"
-  s.add_development_dependency "rake"
-  s.add_development_dependency "test-unit"
-  s.add_development_dependency "mocha"
-  s.add_development_dependency "bundler"
+  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
+    f.match(%r{^(test|spec|features)/})
+  end
+  spec.bindir        = "exe"
+  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.require_paths = ["lib"]
 
-  s.files        = `git ls-files`.split("\n")
-  s.executables  = `git ls-files`.split("\n").map{|f| f =~ /^bin\/(.*)/ ? $1 : nil}.compact
-  s.require_path = "lib"
+  spec.add_development_dependency "bundler", "~> 1.16"
+  spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "test-unit"
+  spec.add_development_dependency "mocha"
 end

@@ -1,21 +1,10 @@
-require "bundler"
-Bundler::GemHelper.install_tasks
-Bundler.setup
-
+require "bundler/gem_tasks"
 require "rake/testtask"
-require "rdoc/task"
 
-Rake::TestTask.new(:test) do |test|
-  test.libs << "lib" << "test"
-  test.pattern = "test/**/*_test.rb"
-  test.verbose = true
-end
-
-Rake::RDocTask.new do |rdoc|
-  rdoc.rdoc_dir = "rdoc"
-  rdoc.title = "s3 #{S3::VERSION}"
-  rdoc.rdoc_files.include("README.rdoc")
-  rdoc.rdoc_files.include("lib/**/*.rb")
+Rake::TestTask.new(:test) do |t|
+  t.libs << "test"
+  t.libs << "lib"
+  t.test_files = FileList["test/**/*_test.rb"]
 end
 
 task :default => :test

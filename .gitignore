@@ -1,7 +1,8 @@
-*.sw?
-.DS_Store
-coverage
-rdoc
-pkg
-*.gem
-.bundle
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/

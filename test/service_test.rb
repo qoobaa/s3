@@ -14,6 +14,11 @@ class ServiceTest < Test::Unit::TestCase
     <?xml version="1.0" encoding="UTF-8"?>\n<ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Name>data.synergypeople.net</Name> <Prefix></Prefix> <Marker></Marker> <MaxKeys>1000</MaxKeys> <IsTruncated>false</IsTruncated> </ListBucketResult>
     EOBucketexists
 
+    @buckets_empty_list = []
+    @buckets_empty_list_body = <<-EOEmptyBuckets
+    <?xml version="1.0" encoding="UTF-8"?>\n<ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Owner> <ID>123u1odhkhfoadf</ID> <DisplayName>JohnDoe</DisplayName> </Owner> <Buckets> </Buckets> </ListAllMyBucketsResult>
+    EOEmptyBuckets
+
     @service_empty_buckets_list = S3::Service.new(
       :access_key_id =>  "12345678901234567890",
       :secret_access_key =>  "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDF"
@@ -46,10 +51,6 @@ class ServiceTest < Test::Unit::TestCase
     @service_bucket_not_exists.stubs(:service_request).raises(S3::Error::NoSuchBucket.new(404, @response_bucket_not_exists))
     @response_bucket_not_exists.stubs(:body).returns(@bucket_not_exists)
 
-    @buckets_empty_list = []
-    @buckets_empty_list_body = <<-EOEmptyBuckets
-    <?xml version="1.0" encoding="UTF-8"?>\n<ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"> <Owner> <ID>123u1odhkhfoadf</ID> <DisplayName>JohnDoe</DisplayName> </Owner> <Buckets> </Buckets> </ListAllMyBucketsResult>
-    EOEmptyBuckets
 
     @buckets_list = [
       S3::Bucket.send(:new, @service_buckets_list, "data.example.com"),

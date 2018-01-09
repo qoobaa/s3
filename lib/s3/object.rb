@@ -147,7 +147,7 @@ module S3
 
     private
 
-    attr_writer :last_modified, :etag, :size, :original_key, :bucket
+    attr_writer :size, :original_key, :bucket
 
     def copy_object(options = {})
       key = options[:key] or raise ArgumentError, "No key given"
@@ -206,6 +206,21 @@ module S3
     end
 
     def initialize(bucket, options = {})
+      @content_type = nil
+      @content_encoding = nil
+      @content_disposition = nil
+      @cache_control = nil
+      @acl = nil
+      @last_modified = nil
+      @etag = nil
+      @size = nil
+      @bucket = nil
+      @key = nil
+      @acl = nil
+      @storage_class = nil
+      @metadata = nil
+      @content = nil
+
       self.bucket = bucket
       self.key = options[:key]
       self.last_modified = options[:last_modified]
