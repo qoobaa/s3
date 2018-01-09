@@ -118,7 +118,7 @@ module S3
     # Returns Object's URL using protocol specified in service,
     # e.g. <tt>http://domain.com.s3.amazonaws.com/key/with/path.extension</tt>
     def url
-      "#{protocol}#{host}/#{path_prefix}#{URI.escape(key, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)}"
+      "#{protocol}#{host}/#{path_prefix}#{Addressable::URI.escape(key)}"
     end
 
     # Returns a temporary url to the object that expires on the
@@ -138,7 +138,7 @@ module S3
     # have to set the CNAME in your DNS before using the CNAME URL
     # schema).
     def cname_url
-      URI.escape("#{protocol}#{name}/#{key}") if bucket.vhost?
+      Addressable::URI.escape("#{protocol}#{name}/#{key}") if bucket.vhost?
     end
 
     def inspect #:nodoc:

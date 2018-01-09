@@ -62,7 +62,7 @@ module S3
 
       # Must be done before adding params
       # Encodes all characters except forward-slash (/) and explicitly legal URL characters
-      path = URI.escape(path, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)
+      path = Addressable::URI.escape(path)
 
       if params
         params = params.is_a?(String) ? params : self.class.parse_params(params)

@@ -1,3 +1,4 @@
+require "addressable/uri"
 require "base64"
 require "cgi"
 require "digest/md5"

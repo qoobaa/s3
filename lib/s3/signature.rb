@@ -57,7 +57,7 @@ module S3
       headers = options[:headers] || {}
       headers.merge!("date" => expires.to_i.to_s)
 
-      resource = "/#{URI.escape(resource, /[^#{URI::REGEXP::PATTERN::UNRESERVED}\/]/)}"
+      resource = "/#{Addressable::URI.escape(resource)}"
       resource = "/#{bucket}" + resource unless options[:add_bucket_to_host]
 
       options.merge!(:resource => resource,
