@@ -2,11 +2,9 @@ module S3
   class Bucket
     include Parser
     include Proxies
-    extend Forwardable
 
     attr_reader :name, :service, :acl
 
-    def_instance_delegators :service, :service_request
     private_class_method :new
 
     # Retrieves the bucket information from the server. Raises an
@@ -206,12 +204,11 @@ module S3
 
     def bucket_request(method, options = {})
       path = "#{path_prefix}#{options[:path]}"
-      service_request(method, options.merge(:host => host, :path => path))
+      service.send(:service_request, method, options.merge(:host => host, :path => path))
     end
 
     def name_valid?(name)
       name =~ /\A[a-z0-9][a-z0-9\._-]{2,254}\Z/i and name !~ /\A#{URI::REGEXP::PATTERN::IPV4ADDR}\Z/
     end
-
   end
 end
