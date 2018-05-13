@@ -146,7 +146,9 @@ class ObjectTest < Test::Unit::TestCase
   end
 
   test "retrieve dont set content" do
-    @object_lena.send(:remove_instance_variable, :@content)
+    # Simulates S3::Object#new's initilization of @content, eg
+    # as called by ObjectsExtension#build or BucketsExtension#build
+    @object_lena.content = nil
 
     @response_binary.stubs(:body).returns(nil)
     @object_lena.expects(:object_request).with(:head, {}).returns(@response_binary)
