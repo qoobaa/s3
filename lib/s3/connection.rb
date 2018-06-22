@@ -157,7 +157,7 @@ module S3
     private
 
     def port
-      use_ssl ? 443 : 80
+      S3.port ? S3.port : (use_ssl ? 443 : 80)
     end
 
     def proxy_settings
