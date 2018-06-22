@@ -28,5 +28,9 @@ module S3
     def host
       @host ||= "s3.amazonaws.com"
     end
+    attr_writer :port
+    def port
+      @port
+    end
   end
 end

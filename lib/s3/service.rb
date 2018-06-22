@@ -61,10 +61,10 @@ module S3
       use_ssl ? "https://" : "http://"
     end
 
-    # Returns 443 or 80, depends on <tt>:use_ssl</tt> value from
+    # Returns a custom port, 443 or 80, depends on <tt>:use_ssl</tt> value from
     # initializer
     def port
-      use_ssl ? 443 : 80
+      S3.port ? S3.port : (use_ssl ? 443 : 80)
     end
 
     def inspect #:nodoc:
