@@ -63,6 +63,7 @@ module S3
     class InvalidBucketName < ResponseError; end
     class InvalidDigest < ResponseError; end
     class InvalidLocationConstraint < ResponseError; end
+    class InvalidObjectState < ResponseError; end
     class InvalidPayer < ResponseError; end
     class InvalidPolicyDocument < ResponseError; end
     class InvalidRange < ResponseError; end
