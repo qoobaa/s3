@@ -9,7 +9,7 @@ module S3
     attr_reader :last_modified, :etag, :size, :bucket, :key, :acl, :storage_class, :metadata
     attr_writer :content
 
-    def_instance_delegators :bucket, :name, :service, :bucket_request, :vhost?, :host, :path_prefix
+    def_instance_delegators :bucket, :name, :service, :vhost?, :host, :path_prefix
     def_instance_delegators :service, :protocol, :port, :secret_access_key
     private_class_method :new
 
@@ -230,7 +230,7 @@ module S3
     end
 
     def object_request(method, options = {})
-      bucket_request(method, options.merge(:path => key))
+      bucket.send(:bucket_request, method, options.merge(:path => key))
     end
 
     def last_modified=(last_modified)
