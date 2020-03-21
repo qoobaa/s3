@@ -16,7 +16,7 @@ GEM
     power_assert (1.1.2)
     proxies (0.2.3)
     public_suffix (4.0.3)
-    rake (10.5.0)
+    rake (13.0.1)
     test-unit (3.2.8)
       power_assert
 
@@ -26,7 +26,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.16)
   mocha
-  rake (~> 10.0)
+  rake (~> 13.0)
   s3!
   test-unit
 
