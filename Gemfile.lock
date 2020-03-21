@@ -1,21 +1,21 @@
 PATH
   remote: .
   specs:
-    s3 (0.3.28)
+    s3 (0.3.29)
       addressable
       proxies
 
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.5.2)
-      public_suffix (>= 2.0.2, < 4.0)
+    addressable (2.7.0)
+      public_suffix (>= 2.0.2, < 5.0)
     metaclass (0.0.4)
     mocha (1.5.0)
       metaclass (~> 0.0.1)
     power_assert (1.1.2)
     proxies (0.2.3)
-    public_suffix (3.0.2)
+    public_suffix (4.0.3)
     rake (10.5.0)
     test-unit (3.2.8)
       power_assert
@@ -31,4 +31,4 @@ DEPENDENCIES
   test-unit
 
 BUNDLED WITH
-   1.16.1
+   1.17.2
