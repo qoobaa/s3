@@ -84,18 +84,21 @@ module S3
     #   to use when requesting the resource
     # * <tt>:add_bucket_to_host</tt> - Use in case of virtual-host style,
     #   defaults to false
+    # * <tt>:use_ssl</tt> - If true generates the temporary url with 'https'
+    #   as opposed to 'http'
     def self.generate_temporary_url(options)
       bucket = options[:bucket]
       resource = options[:resource]
       access_key = options[:access_key]
       expires = options[:expires_at].to_i
+      protocol = (options[:use_ssl] ? 'https://' : 'http://')
       host = S3.host
 
       if options[:add_bucket_to_host]
         host = bucket + '.' + host
-        url  = "http://#{host}/#{resource}"
+        url  = "#{protocol}#{host}/#{resource}"
       else
-        url = "http://#{host}/#{bucket}/#{resource}"
+        url = "#{protocol}#{host}/#{bucket}/#{resource}"
       end
 
       options[:host] = host
