@@ -8,14 +8,14 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    addressable (2.7.0)
-      public_suffix (>= 2.0.2, < 5.0)
+    addressable (2.8.1)
+      public_suffix (>= 2.0.2, < 6.0)
     metaclass (0.0.4)
     mocha (1.5.0)
       metaclass (~> 0.0.1)
     power_assert (1.1.2)
     proxies (0.2.3)
-    public_suffix (4.0.3)
+    public_suffix (5.0.0)
     rake (10.5.0)
     test-unit (3.2.8)
       power_assert
